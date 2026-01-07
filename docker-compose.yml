@@ -1,0 +1,21 @@
+services:
+  postgres:
+    build:
+      context: ./docker/database/.
+    container_name: postgres
+    networks:
+      - transcendence
+    volumes:
+      - ./srcs/database/postgres-data:/var/lib/postgresql/data
+
+    restart: unless-stopped
+    expose:
+      - "5432"
+    ports:
+      - "5432:5432"  
+volumes:
+  postgres-data:
+    driver: local
+networks:
+  transcendence:
+    driver: bridge

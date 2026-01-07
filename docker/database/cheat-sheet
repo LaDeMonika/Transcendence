@@ -1,0 +1,5 @@
+docker exec -it "container name" psql -U "user" -d "database"
+/l : list dbs
+\c "database" : go to "database"
+\dt : list db contents
+SELECT * FROM "table" : show table contents
