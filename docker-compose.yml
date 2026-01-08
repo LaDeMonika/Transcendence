@@ -5,8 +5,9 @@ services:
     container_name: postgres
     networks:
       - transcendence
+#no data folder yet, to be changed later
     volumes:
-      - ./srcs/database/postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
 
     restart: unless-stopped
     expose:
