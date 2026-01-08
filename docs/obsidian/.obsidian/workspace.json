@@ -9,17 +9,20 @@
         "dimension": 80.4904051172708,
         "children": [
           {
-            "id": "a9901f0fc0e5d029",
+            "id": "9632c5b3d403c6ae",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "canvas",
               "state": {
-                "file": "Trivia - Specifics/🏠 CORE USER PAGES.md",
-                "mode": "source",
-                "source": false
+                "file": "Pages.canvas",
+                "viewState": {
+                  "x": -175.296875,
+                  "y": -51.79999999999998,
+                  "zoom": -0.4
+                }
               },
-              "icon": "lucide-file",
-              "title": "🏠 CORE USER PAGES"
+              "icon": "lucide-layout-dashboard",
+              "title": "Pages"
             }
           }
         ]
@@ -205,64 +208,23 @@
       "bases:Create new base": false
     }
   },
-  "floating": {
-    "id": "6e1d2f5c1f4b6c06",
-    "type": "floating",
-    "children": [
-      {
-        "id": "1468c2c6a099afb2",
-        "type": "window",
-        "children": [
-          {
-            "id": "b6ded88ae39b6b72",
-            "type": "tabs",
-            "children": [
-              {
-                "id": "9632c5b3d403c6ae",
-                "type": "leaf",
-                "state": {
-                  "type": "canvas",
-                  "state": {
-                    "file": "Trivia Overview.canvas",
-                    "viewState": {
-                      "x": -61921.6854103657,
-                      "y": -6514.9735525141095,
-                      "zoom": -0.3040324323487995
-                    }
-                  },
-                  "icon": "lucide-layout-dashboard",
-                  "title": "Trivia Overview"
-                }
-              }
-            ]
-          }
-        ],
-        "direction": "vertical",
-        "x": 126,
-        "y": 212,
-        "width": 1024,
-        "height": 800,
-        "maximize": true,
-        "zoom": 0
-      }
-    ]
-  },
   "active": "9632c5b3d403c6ae",
   "lastOpenFiles": [
-    "Trivia - Specifics/🏠 CORE USER PAGES.md",
-    "Trivia - Specifics/🏆 TOURNAMENT PAGES.md",
     "Trivia Overview.canvas",
+    "Pages.canvas",
+    "res/Resarch.md",
+    "Trivia - Specifics/🔐 AUTH PAGES.md",
+    "Trivia - Specifics/📊 ANALYTICS - STATS (admin or user-based).md",
+    "Trivia - Specifics/🏠 CORE USER PAGES.md",
     "Trivia - Specifics/🎮 GAME FLOW PAGES.md",
     "Trivia - Specifics/⚙️ SYSTEM PAGES.md",
-    "Trivia - Specifics/🔐 AUTH PAGES.md",
-    "ui/Trivia - Quiz Web App/Untitled.md",
-    "Next STEP - Meeting Discussion.md",
-    "Trivia - Specifics/📊 ANALYTICS - STATS (admin or user-based).md",
-    "Trivia - Specifics",
     "ui/Wireframe.md",
-    "res/Resarch.md",
-    "app/frontend/Frontend.md",
+    "Next STEP - Meeting Discussion.md",
     "app/backend/Backend.md",
+    "Trivia - Specifics/🏆 TOURNAMENT PAGES.md",
+    "ui/Trivia - Quiz Web App/Untitled.md",
+    "Trivia - Specifics",
+    "app/frontend/Frontend.md",
     "app",
     "app/backend",
     "app/frontend",

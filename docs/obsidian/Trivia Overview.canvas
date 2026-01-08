@@ -27,7 +27,7 @@
 		{"id":"6c7a4249b140d07b","type":"text","text":"### Settings","x":-62219,"y":-5964,"width":140,"height":60},
 		{"id":"05d5cab077eef4d9","type":"text","text":"## ⚙️ SYSTEM PAGES","x":-61984,"y":-6112,"width":283,"height":60},
 		{"id":"01edf320a35cd233","type":"text","text":"### Privacy Policy","x":-61951,"y":-5855,"width":190,"height":60},
-		{"id":"e006389042acec09","type":"text","text":"Login/Register\n      ↓\n    Home\n      ↓\n   Lobby\n      ↓\n    Game\n      ↓\n   Results\n      ↓\n Dashboard / Profile\n","x":-61629,"y":-6966,"width":198,"height":325},
+		{"id":"e006389042acec09","type":"text","text":"Login/Register\n      ↓\n   Lobby\n      ↓\n    Game\n      ↓\n   Results\n      ↓\n Dashboard / Profile\n","x":-61629,"y":-6966,"width":198,"height":325},
 		{"id":"364e2e105369f450","type":"text","text":"# Trivia/Quiz Platform","x":-61915,"y":-6863,"width":214,"height":119},
 		{"id":"bd22221d955ef929","type":"text","text":"**Mandatory:**\n\n- Login\n    \n- Register\n    \n- Home / Explore\n    \n- Lobby\n    \n- Game\n    \n- Result\n    \n- Profile\n    \n- Privacy + ToS\n    \n\n**Recommended:**\n\n- Dashboard\n    \n- Tournament\n    \n- Analytics","x":-62210,"y":-7014,"width":223,"height":420}
 	],

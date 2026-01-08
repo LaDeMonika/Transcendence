@@ -1,0 +1,23 @@
+{
+	"nodes":[
+		{"id":"28175e36d84ad4ec","type":"text","text":"LOBBY\n-search Players\n-add Players\n-join different Lobby\n-set Game\n-view Stats","x":-240,"y":-180,"width":250,"height":180,"color":"5"},
+		{"id":"8ed3c7f14a8b7086","type":"text","text":"SOCIALS\n-view Profile\n-view Stats\n-add Friends\n-remove Friends","x":-652,"y":-256,"width":250,"height":156,"color":"1"},
+		{"id":"ca827020dadf9c70","type":"text","text":"LOGIN\n-email\n-password","x":-240,"y":-420,"width":250,"height":120,"color":"6"},
+		{"id":"068f0fe96a8ade28","type":"text","text":"/HOME","x":-240,"y":-480,"width":250,"height":60,"color":"#b400f5"},
+		{"id":"5ea2601b51d4621b","x":-240,"y":-238,"width":250,"height":60,"color":"#00fbff","type":"text","text":"/USER/LOBBY"},
+		{"id":"f560b0d1a0b583f6","x":-652,"y":-316,"width":250,"height":60,"type":"text","text":"/USER"},
+		{"id":"3d757c594efd7676","x":-240,"y":140,"width":250,"height":60,"type":"text","text":"/GAME/QUESTION/?"},
+		{"id":"89d5e94e0b14b470","type":"text","text":"QUESTION\n-4 possible Answers\n-Timer","x":-240,"y":200,"width":250,"height":100,"color":"3"},
+		{"id":"49a0f20d50190a2f","type":"text","text":"LEADERBOARD\n-show Players\n-show Points","x":220,"y":200,"width":250,"height":100,"color":"3"},
+		{"id":"f54237f4f4e9d5a8","x":220,"y":140,"width":250,"height":60,"type":"text","text":"/GAME/BOARD"}
+	],
+	"edges":[
+		{"id":"3ba0ebeddcac0b52","fromNode":"ca827020dadf9c70","fromSide":"bottom","toNode":"28175e36d84ad4ec","toSide":"top"},
+		{"id":"42a758f90f6d153a","fromNode":"89d5e94e0b14b470","fromSide":"bottom","toNode":"49a0f20d50190a2f","toSide":"bottom"},
+		{"id":"5846723232a93acc","fromNode":"28175e36d84ad4ec","fromSide":"left","toNode":"8ed3c7f14a8b7086","toSide":"right"},
+		{"id":"63a185b68ce6982e","fromNode":"ca827020dadf9c70","fromSide":"bottom","toNode":"5ea2601b51d4621b","toSide":"top"},
+		{"id":"c5319734a24c8441","fromNode":"28175e36d84ad4ec","fromSide":"bottom","toNode":"3d757c594efd7676","toSide":"top"},
+		{"id":"3b9a904aab190766","fromNode":"f54237f4f4e9d5a8","fromSide":"top","toNode":"3d757c594efd7676","toSide":"top"},
+		{"id":"624ab3d48f26eec1","fromNode":"f54237f4f4e9d5a8","fromSide":"top","toNode":"28175e36d84ad4ec","toSide":"right"}
+	]
+}
