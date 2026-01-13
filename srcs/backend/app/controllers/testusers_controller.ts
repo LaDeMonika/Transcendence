@@ -1,4 +1,5 @@
 import Testuser from '#models/testuser'
+import { testuserValidator } from '#validators/testuser'
 import type { HttpContext } from '@adonisjs/core/http'
 
 export default class TestusersController {
@@ -10,10 +11,12 @@ export default class TestusersController {
   }
 
   /**
-   * Handle form submission for the create action
+   * @requestFormDataBody {"name":{"type":"string"},"picture":{"type":"string"}}
    */
   async store({ request }: HttpContext) {
-    return Testuser.create(request.body())
+    const data = request.only(['email', 'password'])
+    const validatedData = await testuserValidator.validate(data)
+    return Testuser.create(validatedData)
   }
 
   /**
