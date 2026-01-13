@@ -1,3 +1,4 @@
 .env
 srcs/database/postgres-data
 .vscode
+.editorconfig
