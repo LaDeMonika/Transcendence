@@ -8,7 +8,7 @@ export default {
   path: path.dirname(url.fileURLToPath(import.meta.url)) + '/../', // for AdonisJS v6
   title: 'API list', // use info instead
   version: '1.0.0', // use info instead
-  description: '', // use info instead
+  description: 'List all endpoints used in API', // use info instead
   tagIndex: 2,
   productionEnv: 'production', // optional
   info: {

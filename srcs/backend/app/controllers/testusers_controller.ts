@@ -11,7 +11,8 @@ export default class TestusersController {
   }
 
   /**
-   * @requestFormDataBody {"name":{"type":"string"},"picture":{"type":"string"}}
+   * @store
+   * @requestBody <testuserValidator>
    */
   async store({ request }: HttpContext) {
     const data = request.only(['email', 'password'])
