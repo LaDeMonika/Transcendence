@@ -17,12 +17,12 @@ router.get('/', async () => {
 router
   .group(() => {
     router.get('/', [TestusersController, 'index'])
-    router.post('/register', [TestusersController, 'store'])
-    router.post('/update', [TestusersController, 'update'])
+    router.post('/', [TestusersController, 'store'])
+    router.put('/', [TestusersController, 'update'])
     router.get('/:id', [TestusersController, 'show'])
     router.delete('/:id', [TestusersController, 'destroy'])
   })
-  .prefix('/auth')
+  .prefix('/testuser')
 
 // SWAGGER CONFIGURATION
 import AutoSwagger from 'adonis-autoswagger'

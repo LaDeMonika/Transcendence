@@ -5,7 +5,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 export default class TestusersController {
   /**
    * @index
-   * @tag auth
+   * @tag testuser
    * @description Display a list of resource
    */
   async index({}: HttpContext) {
@@ -14,7 +14,7 @@ export default class TestusersController {
 
   /**
    * @store
-   * @tag auth
+   * @tag testuser
    * @description Store a record
    * @requestBody <testuserValidator>
    */
@@ -26,7 +26,7 @@ export default class TestusersController {
 
   /**
    * @show
-   * @tag auth
+   * @tag testuser
    * @description Show individual record
    * @param recordId
    */
@@ -36,7 +36,7 @@ export default class TestusersController {
 
   /**
    * @update
-   * @tag auth
+   * @tag testuser
    * @description Handle form submission for the edit action
    * @requestBody <testuserUpdateValidator>
    */
@@ -61,7 +61,7 @@ export default class TestusersController {
 
   /**
    * @destroy
-   * @tag auth
+   * @tag testuser
    * @description Delete record
    * @param recordId
    */
