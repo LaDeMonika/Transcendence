@@ -10,16 +10,15 @@
 const TestusersController = () => import('#controllers/testusers_controller')
 import router from '@adonisjs/core/services/router'
 
-// router.get('/', async () => {
-//   return {
-//     hello: 'world',
-//   }
-// })
+router.get('/', async () => {
+  return 'Welcome to ft_trancenders secret vault :D'
+})
 
 router
   .group(() => {
     router.get('/', [TestusersController, 'index'])
     router.post('/register', [TestusersController, 'store'])
+    router.post('/update', [TestusersController, 'update'])
     router.get('/:id', [TestusersController, 'show'])
     router.delete('/:id', [TestusersController, 'destroy'])
   })

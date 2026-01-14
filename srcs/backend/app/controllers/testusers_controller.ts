@@ -1,10 +1,12 @@
 import Testuser from '#models/testuser'
-import { testuserValidator } from '#validators/testuser'
+import { testuserUpdateValidator, testuserValidator } from '#validators/testuser'
 import type { HttpContext } from '@adonisjs/core/http'
 
 export default class TestusersController {
   /**
-   * Display a list of resource
+   * @index
+   * @tag auth
+   * @description Display a list of resource
    */
   async index({}: HttpContext) {
     return Testuser.all()
@@ -12,6 +14,8 @@ export default class TestusersController {
 
   /**
    * @store
+   * @tag auth
+   * @description Store a record
    * @requestBody <testuserValidator>
    */
   async store({ request }: HttpContext) {
@@ -21,19 +25,45 @@ export default class TestusersController {
   }
 
   /**
-   * Show individual record
+   * @show
+   * @tag auth
+   * @description Show individual record
+   * @param recordId
    */
   async show({ params }: HttpContext) {
     return Testuser.query().where({ id: params.id })
   }
 
   /**
-   * Handle form submission for the edit action
+   * @update
+   * @tag auth
+   * @description Handle form submission for the edit action
+   * @requestBody <testuserUpdateValidator>
    */
-  async update({ params, request }: HttpContext) {}
+  async update({ request }: HttpContext) {
+    // extract body
+    const data = request.only(['id', 'email', 'password'])
+
+    // validate form
+    const validatedData = await testuserUpdateValidator.validate(data)
+
+    // find current testuser
+    const user = await Testuser.findOrFail(validatedData.id)
+
+    // update data
+    user.id = validatedData.id
+    user.email = validatedData.email
+    user.password = validatedData.password
+
+    // save updated user
+    return await user.save()
+  }
 
   /**
-   * Delete record
+   * @destroy
+   * @tag auth
+   * @description Delete record
+   * @param recordId
    */
   async destroy({ params }: HttpContext) {
     const user = await Testuser.findOrFail(params.id)
