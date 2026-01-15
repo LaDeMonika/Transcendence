@@ -4,33 +4,8 @@
     "type": "split",
     "children": [
       {
-        "id": "28d454bf2fdd7201",
-        "type": "tabs",
-        "dimension": 80.4904051172708,
-        "children": [
-          {
-            "id": "9632c5b3d403c6ae",
-            "type": "leaf",
-            "state": {
-              "type": "canvas",
-              "state": {
-                "file": "Pages.canvas",
-                "viewState": {
-                  "x": -175.296875,
-                  "y": -51.79999999999998,
-                  "zoom": -0.4
-                }
-              },
-              "icon": "lucide-layout-dashboard",
-              "title": "Pages"
-            }
-          }
-        ]
-      },
-      {
         "id": "eacad33f107e6d87",
         "type": "tabs",
-        "dimension": 19.50959488272921,
         "children": [
           {
             "id": "fed97d16dcb51980",
@@ -38,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Trivia - Specifics/🔐 AUTH PAGES.md",
+                "file": "app/backend/ABOUT ADONIS.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "🔐 AUTH PAGES"
+              "title": "ABOUT ADONIS"
             }
           }
         ]
@@ -208,22 +183,24 @@
       "bases:Create new base": false
     }
   },
-  "active": "9632c5b3d403c6ae",
+  "active": "fed97d16dcb51980",
   "lastOpenFiles": [
-    "Trivia Overview.canvas",
-    "Pages.canvas",
-    "res/Resarch.md",
+    "app/backend/START SERVER.md",
+    "app/backend/ADD A FEATURE.md",
+    "app/backend/ABOUT ADONIS.md",
+    "app/backend/Backend.md",
     "Trivia - Specifics/🔐 AUTH PAGES.md",
-    "Trivia - Specifics/📊 ANALYTICS - STATS (admin or user-based).md",
     "Trivia - Specifics/🏠 CORE USER PAGES.md",
+    "Trivia Overview.canvas",
+    "Trivia - Specifics/🏆 TOURNAMENT PAGES.md",
     "Trivia - Specifics/🎮 GAME FLOW PAGES.md",
     "Trivia - Specifics/⚙️ SYSTEM PAGES.md",
-    "ui/Wireframe.md",
-    "Next STEP - Meeting Discussion.md",
-    "app/backend/Backend.md",
-    "Trivia - Specifics/🏆 TOURNAMENT PAGES.md",
     "ui/Trivia - Quiz Web App/Untitled.md",
+    "Next STEP - Meeting Discussion.md",
+    "Trivia - Specifics/📊 ANALYTICS - STATS (admin or user-based).md",
     "Trivia - Specifics",
+    "ui/Wireframe.md",
+    "res/Resarch.md",
     "app/frontend/Frontend.md",
     "app",
     "app/backend",
