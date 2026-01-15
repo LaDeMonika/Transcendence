@@ -34,7 +34,7 @@ export const testuserUpdateValidator = vine.compile(
       .normalizeEmail()
       .unique(async (db, value, _field) => {
         const result = await db.from('testusers').select('id').where('email', value)
-        return result.length ? false : true
+        return result.length < 2 ? true : false
       }),
     password: vine.string().minLength(7),
   })
