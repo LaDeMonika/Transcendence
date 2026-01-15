@@ -6,3 +6,4 @@
 	- Run `node ace migration:run`. This command creates database tables. Ignores migration if database tables are already created. If you want to remove old tables run `node ace migration:fresh`. This command drops all tables and creates brand new tables.
 	- Run `node ace serve` command to start backend service (*localhost:3333* ). 
 3. **Check if server started:** Open your favorite browser and go to *localhost:3333*. If you see a welcome message, means it works fine.
+4. **See API list:** Go to *localhost:3333/docs*

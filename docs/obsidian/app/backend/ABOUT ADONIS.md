@@ -11,6 +11,8 @@
 This folder contains project logic. 
 ##### app/controller/
 Handler functions for models. Those functions are mostly used to refer logic we apply in _start/routes.ts_.
+##### app/exceptions
+Exception handlers are defined in this folder.
 ##### app/middleware/
 Middleware functions defined in this folder.
 ##### app/models/
