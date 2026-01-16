@@ -11,14 +11,17 @@
             "id": "fed97d16dcb51980",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "canvas",
               "state": {
-                "file": "app/backend/ABOUT ADONIS.md",
-                "mode": "source",
-                "source": false
+                "file": "Trivia Architecture.canvas",
+                "viewState": {
+                  "x": 130.70663651383086,
+                  "y": 197.71788640332545,
+                  "zoom": -0.40000000000000013
+                }
               },
-              "icon": "lucide-file",
-              "title": "ABOUT ADONIS"
+              "icon": "lucide-layout-dashboard",
+              "title": "Trivia Architecture"
             }
           }
         ]
@@ -185,9 +188,10 @@
   },
   "active": "fed97d16dcb51980",
   "lastOpenFiles": [
+    "app/backend/ABOUT ADONIS.md",
+    "Trivia Architecture.canvas",
     "app/backend/START SERVER.md",
     "app/backend/ADD A FEATURE.md",
-    "app/backend/ABOUT ADONIS.md",
     "app/backend/Backend.md",
     "Trivia - Specifics/🔐 AUTH PAGES.md",
     "Trivia - Specifics/🏠 CORE USER PAGES.md",
