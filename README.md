@@ -1,7 +1,7 @@
 *This project has been created as part
 of the 42 curriculum by [**Monika Simic** - PO & Full-stack](https://profile.intra.42.fr/users/msimic), [**Moritz Karl Resch** - SM & Backend](https://profile.intra.42.fr/users/mresch), [**Oksana Hnatiuk** - Frontend](https://profile.intra.42.fr/users/ohnatiuk), [**Christoph Thaler** - Backend](https://profile.intra.42.fr/users/cthaler) and [**Hüsrev Akbas** - Database](https://profile.intra.42.fr/users/huakbas).*
 # Transcendence
-test
+
 ### Description
 A real-time multiplayer trivia platform where players pick categories, battle through quick rounds, and advance across tournaments. We are building a web-first experience for 3+ players with matchmaking, gamified rewards, and progression. Live leaderboards, achievements, and an analytics dashboard will keep competition lively and help us tune questions and balance over time.
 
