@@ -1,5 +1,5 @@
 <template>
-  <BCard title="Sign In" style="max-width: 40rem">
+  <BCard title="Sign In" class="signin-card">
     <BForm @submit="onSubmit">
       <BFormFloatingLabel label="Email address" label-for="floatingEmail" class="my-2">
         <BFormInput id="floatingEmail" type="email"  v-model="form.email" placeholder="Email address" />
@@ -13,6 +13,7 @@
 </template>
 
 <script setup>
+  import { signin } from '@/services/auth.js'
   import {reactive} from 'vue'
   const form = reactive({
   email: '',
@@ -21,7 +22,15 @@
 
 const onSubmit = (event) => {
   event.preventDefault()
-  // eslint-disable-next-line no-alert
-  alert(JSON.stringify(form))
+  signin(form.email, form.password)
 }
 </script>
+
+<style scoped>
+.signin-card {
+  max-width: 30rem;
+  flex: 1 1 auto;
+  margin: 1rem;
+}
+
+</style>
