@@ -4,43 +4,24 @@
     "type": "split",
     "children": [
       {
-        "id": "28d454bf2fdd7201",
-        "type": "tabs",
-        "dimension": 80.4904051172708,
-        "children": [
-          {
-            "id": "a9901f0fc0e5d029",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Trivia - Specifics/🏠 CORE USER PAGES.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "🏠 CORE USER PAGES"
-            }
-          }
-        ]
-      },
-      {
         "id": "eacad33f107e6d87",
         "type": "tabs",
-        "dimension": 19.50959488272921,
         "children": [
           {
             "id": "fed97d16dcb51980",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "canvas",
               "state": {
-                "file": "Trivia - Specifics/🔐 AUTH PAGES.md",
-                "mode": "source",
-                "source": false
+                "file": "Trivia Architecture.canvas",
+                "viewState": {
+                  "x": 130.70663651383086,
+                  "y": 197.71788640332545,
+                  "zoom": -0.40000000000000013
+                }
               },
-              "icon": "lucide-file",
-              "title": "🔐 AUTH PAGES"
+              "icon": "lucide-layout-dashboard",
+              "title": "Trivia Architecture"
             }
           }
         ]
@@ -205,56 +186,19 @@
       "bases:Create new base": false
     }
   },
-  "floating": {
-    "id": "6e1d2f5c1f4b6c06",
-    "type": "floating",
-    "children": [
-      {
-        "id": "1468c2c6a099afb2",
-        "type": "window",
-        "children": [
-          {
-            "id": "b6ded88ae39b6b72",
-            "type": "tabs",
-            "children": [
-              {
-                "id": "9632c5b3d403c6ae",
-                "type": "leaf",
-                "state": {
-                  "type": "canvas",
-                  "state": {
-                    "file": "Trivia Overview.canvas",
-                    "viewState": {
-                      "x": -61921.6854103657,
-                      "y": -6514.9735525141095,
-                      "zoom": -0.3040324323487995
-                    }
-                  },
-                  "icon": "lucide-layout-dashboard",
-                  "title": "Trivia Overview"
-                }
-              }
-            ]
-          }
-        ],
-        "direction": "vertical",
-        "x": 126,
-        "y": 212,
-        "width": 1024,
-        "height": 800,
-        "maximize": true,
-        "zoom": 0
-      }
-    ]
-  },
-  "active": "9632c5b3d403c6ae",
+  "active": "fed97d16dcb51980",
   "lastOpenFiles": [
+    "app/backend/ABOUT ADONIS.md",
+    "Trivia Architecture.canvas",
+    "app/backend/START SERVER.md",
+    "app/backend/ADD A FEATURE.md",
+    "app/backend/Backend.md",
+    "Trivia - Specifics/🔐 AUTH PAGES.md",
     "Trivia - Specifics/🏠 CORE USER PAGES.md",
-    "Trivia - Specifics/🏆 TOURNAMENT PAGES.md",
     "Trivia Overview.canvas",
+    "Trivia - Specifics/🏆 TOURNAMENT PAGES.md",
     "Trivia - Specifics/🎮 GAME FLOW PAGES.md",
     "Trivia - Specifics/⚙️ SYSTEM PAGES.md",
-    "Trivia - Specifics/🔐 AUTH PAGES.md",
     "ui/Trivia - Quiz Web App/Untitled.md",
     "Next STEP - Meeting Discussion.md",
     "Trivia - Specifics/📊 ANALYTICS - STATS (admin or user-based).md",
@@ -262,7 +206,6 @@
     "ui/Wireframe.md",
     "res/Resarch.md",
     "app/frontend/Frontend.md",
-    "app/backend/Backend.md",
     "app",
     "app/backend",
     "app/frontend",

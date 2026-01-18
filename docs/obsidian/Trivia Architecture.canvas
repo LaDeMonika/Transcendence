@@ -1,0 +1,19 @@
+{
+	"nodes":[
+		{"id":"18ce7c1830e4c62a","type":"group","x":-380,"y":-40,"width":913,"height":600,"label":"Host PC"},
+		{"id":"64b8cdf572a0753f","type":"group","x":-323,"y":40,"width":800,"height":180,"label":"Docker Network"},
+		{"id":"2eb75ebe723207f1","type":"text","text":"Database Volume","x":-300,"y":420,"width":160,"height":80,"color":"2"},
+		{"id":"299f71918cc6f267","type":"text","text":"NGINX\n(Web Server)\n\n\n443","x":300,"y":60,"width":160,"height":140},
+		{"id":"20d39f7ba1e8abd5","type":"text","text":"AdonisJS\n(dackend - Server)\n3333","x":0,"y":60,"width":160,"height":140},
+		{"id":"078c8b11775b54e7","type":"text","text":"Postrgres SQL\n(database)\n\n5432","x":-300,"y":60,"width":160,"height":140},
+		{"id":"5605cdc4c8a97483","type":"text","text":"https","x":520,"y":-340,"width":105,"height":60},
+		{"id":"72e46c73d100ea7a","type":"text","text":"Frontend Volume\n(Vue.js, Bootstrap)","x":300,"y":390,"width":160,"height":140,"color":"2"}
+	],
+	"edges":[
+		{"id":"7a45bb81d88c4437","fromNode":"078c8b11775b54e7","fromSide":"bottom","toNode":"2eb75ebe723207f1","toSide":"top","fromEnd":"arrow"},
+		{"id":"4a738906d4c1eaff","fromNode":"20d39f7ba1e8abd5","fromSide":"right","toNode":"299f71918cc6f267","toSide":"left","fromEnd":"arrow","label":"JWT"},
+		{"id":"da1b3cc6a53dae83","fromNode":"299f71918cc6f267","fromSide":"bottom","toNode":"72e46c73d100ea7a","toSide":"top","fromEnd":"arrow"},
+		{"id":"f9348dadddeb2fc2","fromNode":"078c8b11775b54e7","fromSide":"right","toNode":"20d39f7ba1e8abd5","toSide":"left","fromEnd":"arrow","label":"ORM"},
+		{"id":"7690a13eeea6449d","fromNode":"5605cdc4c8a97483","fromSide":"bottom","toNode":"299f71918cc6f267","toSide":"top","fromEnd":"arrow","label":"JWT"}
+	]
+}
