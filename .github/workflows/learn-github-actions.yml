@@ -1,0 +1,10 @@
+name: Simple Test
+
+on: push
+
+jobs:
+    print-msg:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Printing anything
+              run: echo "Hellooo!! What's uppp??"
