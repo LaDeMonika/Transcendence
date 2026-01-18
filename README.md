@@ -9,7 +9,7 @@ A real-time multiplayer trivia platform where players pick categories, battle th
 
 ### Instructions
 //TO-DO- ADD:
-
+test
 - section containing any relevant information about compilation, installation, and/or execution
 - MUST ALSO: mention all the needed prerequisites (software,
 tools, versions, configuration like .env setup, etc.), and step-by-step instructions to
