@@ -25,19 +25,27 @@ export default class AuthController {
   async login({ request }: HttpContext) {
     const body = request.only(['email', 'password'])
     const validatedData = await userLoginValidator.validate(body)
-    // generate token and send it to user
-    const user = await User.query()
-      .where('email', validatedData.email)
-      .where('password', validatedData.password)
-      .first()
-    if (!user) return { message: 'user not found' }
+
+    const user = await User.verifyCredentials(validatedData.email, validatedData.password)
+
     const token = await User.accessTokens.create(user)
-    console.log(token)
     return token
-    // return {
-    //   type: 'Bearer',
-    //   value: token.value!.release(),
-    // }
+
+    // const body = request.only(['email', 'password'])
+    // const validatedData = await userLoginValidator.validate(body)
+    // // generate token and send it to user
+    // const user = await User.query()
+    //   .where('email', validatedData.email)
+    //   .where('password', validatedData.password)
+    //   .first()
+    // if (!user) return { message: 'user not found' }
+    // const token = await User.accessTokens.create(user)
+    // console.log(token)
+    // return token
+    // // return {
+    // //   type: 'Bearer',
+    // //   value: token.value!.release(),
+    // // }
   }
   /**
    * @index

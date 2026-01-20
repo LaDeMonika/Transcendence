@@ -10,6 +10,7 @@
 const TestusersController = () => import('#controllers/testusers_controller')
 const AuthController = () => import('#controllers/auth_controller')
 import router from '@adonisjs/core/services/router'
+import { middleware } from './kernel.js'
 
 router.get('/', async () => {
   return 'Welcome to ft_trancenders secret vault :D'
@@ -30,6 +31,7 @@ router
     router.delete('/:id', [TestusersController, 'destroy'])
   })
   .prefix('/testuser')
+  .use(middleware.auth())
 
 // SWAGGER CONFIGURATION
 import AutoSwagger from 'adonis-autoswagger'
