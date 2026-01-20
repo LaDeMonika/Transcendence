@@ -1,20 +1,19 @@
 services:
 ##DATABASE##
-  postgres:
-    build:
-      context: ./docker/database/.
-    container_name: postgres
-    networks:
-      - transcendence
-#no data folder yet, to be changed later
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-
-    restart: unless-stopped
-    expose:
-      - "5432"
-    ports:
-      - "5432:5432"  
+   postgres:
+     build:
+       context: ./docker/database/.
+     container_name: postgres
+     networks:
+       - transcendence
+####no data folder yet, to be changed later###
+     volumes:
+       - postgres-data:/var/lib/postgresql/data
+     restart: unless-stopped
+     expose:
+       - "5432"
+     ports:
+       - "5432:5432"
 ##BACKEND##
    adonis:
      build:
@@ -23,6 +22,8 @@ services:
      container_name: adonis
      networks:
        - transcendence
+     environment:
+       HOST: 0.0.0.0
      expose:
        - 3333
      ports:

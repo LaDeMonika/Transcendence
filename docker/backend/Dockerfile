@@ -21,19 +21,17 @@ ARG IMAGE=node:24.13.0-trixie
 
 
 FROM $IMAGE
-ENV PORT=3333
-ENV HOST=0.0.0.0
-EXPOSE $PORT
 RUN mkdir -p tmp
 RUN mkdir -p /home/node/app && chown 777 /home/node/app
 WORKDIR /home/node/app
-COPY srcs/backend/my-adonisjs-app/package*.json ./
+COPY srcs/backend/package*.json ./
 RUN npm ci
-COPY srcs/backend/my-adonisjs-app/ /home/node/app/
+COPY srcs/backend/ .
 RUN node ace build --ignore-ts-errors
 
-COPY docker/backend/entrypoint.sh /home/node/app
-CMD ["sh", "/home/node/app/entrypoint.sh"]
+COPY docker/backend/entrypoint.sh .
+RUN chmod 777 entrypoint.sh
+ENTRYPOINT ["sh", "/home/node/app/entrypoint.sh"]
 
 #WORKDIR /backend
 #COPY srcs/backend/adonisjs/* /backend
