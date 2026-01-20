@@ -13,7 +13,8 @@ export default class AuthController {
     const body = request.only(['email', 'password', 'userName'])
     const validatedData = await userRegisterValidator.validate(body)
     if (!validatedData.userName) validatedData.userName = 'Guest'
-    return User.create(body)
+    const user = await User.create(validatedData)
+    return user.serializeAttributes(['id', 'email', 'userName'])
   }
 
   /**
@@ -30,29 +31,14 @@ export default class AuthController {
 
     const token = await User.accessTokens.create(user)
     return token
-
-    // const body = request.only(['email', 'password'])
-    // const validatedData = await userLoginValidator.validate(body)
-    // // generate token and send it to user
-    // const user = await User.query()
-    //   .where('email', validatedData.email)
-    //   .where('password', validatedData.password)
-    //   .first()
-    // if (!user) return { message: 'user not found' }
-    // const token = await User.accessTokens.create(user)
-    // console.log(token)
-    // return token
-    // // return {
-    // //   type: 'Bearer',
-    // //   value: token.value!.release(),
-    // // }
   }
+
   /**
    * @index
    * @tag auth
    * @description List all users
    */
   async index() {
-    return User.query()
+    return User.query().select(['id', 'email', 'user_name'])
   }
 }
