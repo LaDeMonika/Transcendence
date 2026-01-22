@@ -1,5 +1,5 @@
-#ARG IMAGE=node:22.22.0-bullseye-slim
-ARG IMAGE=node:24.13.0-trixie
+ARG IMAGE=node:22.22.0-bullseye-slim
+#ARG IMAGE=node:24.13.0-trixie
 
 #ARG IMAGE=node:16.13.1-alpine
 
