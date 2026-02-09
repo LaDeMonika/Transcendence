@@ -2,3 +2,5 @@
 srcs/database/postgres-data
 .vscode
 .editorconfig
+.crt
+.key
