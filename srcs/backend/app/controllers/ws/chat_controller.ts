@@ -8,7 +8,6 @@ export default class WsChatController {
     ws.send(JSON.stringify({ type: 'system', text: `Joined room ${roomId}`, at: Date.now() }))
     ws.send('Hello! Your id is ' + ws.id)
 
-
     ws.on('message', async (raw) => {
     let payload: any
     try {

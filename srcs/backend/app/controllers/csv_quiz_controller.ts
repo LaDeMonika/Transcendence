@@ -56,7 +56,7 @@ export default class CsvQuizController {
             if (!row.question) {
                 throw new Error(`Missing question text at row ${rowNum}`)
             }
-
+            
             return {
                 quizId: 0, // placeholder, will be set after quiz creation
                 question: row.question,
