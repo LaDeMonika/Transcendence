@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node bin/server.js",
     "build": "node ace build",
-    "dev": "node ace serve --hmr",
+    "dev": "node ace serve --watch",
     "test": "node ace test",
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -40,7 +40,7 @@
     "@japa/api-client": "^3.1.0",
     "@japa/assert": "^4.0.1",
     "@japa/plugin-adonisjs": "^4.0.0",
-    "@japa/runner": "^4.2.0",
+    "@japa/runner": "^3.1.4",
     "@swc/core": "1.11.24",
     "@types/luxon": "^3.7.1",
     "@types/node": "^22.15.18",
