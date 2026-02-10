@@ -10,6 +10,7 @@ export default class extends BaseSchema {
       table.integer('user_id').references('users.id')
       table.integer('friend_id').references('users.id')
       table.unique(['user_id', 'friend_id'])
+      table.enum('status', ['pending', 'accepted']).defaultTo('pending').notNullable()
 
       table.timestamp('created_at')
       table.timestamp('updated_at')
