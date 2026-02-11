@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WS Chat</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #log { border: 1px solid #ccc; padding: 10px; height: 350px; overflow: auto; }
+    .row { margin: 6px 0; }
+    .sys { color: #666; }
+    .name { font-weight: bold; }
+    form { margin-top: 10px; display: flex; gap: 8px; }
+    input { padding: 8px; }
+    #text { flex: 1; }
+  </style>
+</head>
+<body>
+  <h2>WebSocket Chat</h2>
+  <div>
+    Room: <span id="room"></span>
+  </div>
+
+  <div id="log"></div>
+
+  <form id="form">
+    <input id="name" placeholder="Your name" />
+    <input id="text" placeholder="Message..." autocomplete="off" />
+    <button type="submit">Send</button>
+  </form>
+
+  <script>
+    const parts = location.pathname.split('/').filter(Boolean)
+    // pathname is "/chat/1" -> parts [0:"chat",1:"1"]
+    const roomId = parts[1] || '1'
+    document.getElementById('room').textContent = roomId;
+
+    const log = document.getElementById('log');
+    function addLine(html) {
+      const div = document.createElement('div');
+      div.className = 'row';
+      div.innerHTML = html;
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    // Use ws:// for local dev. If you have HTTPS, use wss://
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+
+    // If you serve this page from the same host/port as Adonis:
+    // const wsUrl = `${proto}://${location.host}/chat/${roomId}`;
+
+    // If frontend is on a different port (e.g. nginx on 8080 and api on 3333):
+    const wsUrl = `${proto}://${location.host}/chat/${roomId}`
+    const ws = new WebSocket(wsUrl)
+
+
+    ws.onopen = () => addLine(`<span class="sys">Connected to ${wsUrl}</span>`);
+    ws.onclose = () => addLine(`<span class="sys">Disconnected</span>`);
+    ws.onerror = () => addLine(`<span class="sys">WebSocket error</span>`);
+
+    ws.onmessage = (ev) => {
+      let msg;
+      try { msg = JSON.parse(ev.data); } catch { return; }
+
+      if (msg.type === 'system') {
+        addLine(`<span class="sys">${msg.text}</span>`);
+      } else if (msg.type === 'chat') {
+        const time = new Date(msg.at).toLocaleTimeString();
+        addLine(`[${time}] <span class="name">${escapeHtml(msg.name)}:</span> ${escapeHtml(msg.text)}`);
+      }
+    };
+
+    document.getElementById('form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value || 'Anon';
+      const text = document.getElementById('text').value;
+
+      ws.send(JSON.stringify({ name, text }));
+      document.getElementById('text').value = '';
+    });
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+    }
+  </script>
+</body>
+</html>
