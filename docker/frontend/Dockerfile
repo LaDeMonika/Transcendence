@@ -2,19 +2,8 @@
 FROM node:22-alpine AS build
 
 WORKDIR /app
-
-# Copy package files
 COPY srcs/frontend/package*.json ./
-
-# Install dependencies
-RUN npm ci
-
-# Copy source code
+RUN npm install
 COPY srcs/frontend/ .
-
-# Build Vue app for production
-RUN npm run build
-
-# Production stage - just copy build output
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 5173
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

@@ -20,4 +20,21 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  
+  server: {
+    host: '0.0.0.0',  // Listen on all interfaces (for Docker)
+    port: 5173,
+    strictPort: true,  // Fail if port is already in use
+    
+    // HMR configuration
+    hmr: {
+      host: 'localhost',
+      protocol: 'wss',  // Secure WebSocket (since we use HTTPS)
+      port: 443,
+    },
+    
+    // No proxy needed - Nginx handles it
+  }
+  
+  
 })
