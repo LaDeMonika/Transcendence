@@ -1,6 +1,7 @@
 import User from '#models/user'
 import type { HttpContext } from '@adonisjs/core/http'
-
+import FriendStatus from '../../enums/friend_status.js'
+// import FriendStatus from '../../enums/friend_status.js'
 /*
     await user.related('friends').attach({
         [friendId]: {
@@ -13,12 +14,6 @@ export default class FriendsController {
   async index({ auth }: HttpContext) {
     const user = auth.user as User
     const friends = await user.related('friends').query()
-    // const userWithFriends = await User.query()
-    //   .preload('friends')
-    //   .where('id', user.id)
-    //   .where('friends.status', 'pending')
-    //   .first()
-    // return userWithFriends?.serialize().friends
     return friends
   }
 
@@ -26,29 +21,45 @@ export default class FriendsController {
    * @addFriend
    * @tag friends
    * @description Add a friend
-   * @requestBody <{ "friendId": "1" }>
    */
   async addFriend({ request, response, auth }: HttpContext) {
-    const data = request.only(['friendId'])
-    console.log(data, typeof data.friendId)
+    // will be new implemented
+    // check current user
     const authenticatedUser = auth.user as User
     const user = await User.find(authenticatedUser.id)
-    const friendCheck = await user
-      ?.related('friends')
-      .query()
-      .where('friend_id', data.friendId)
-      .first()
-    if (!user) return response.status(318).send({ errors: [{ messages: 'User not found' }] })
-    if (friendCheck) return response.status(333).send({ errors: [{ messages: 'Already friends' }] })
+    if (!user) return response.status(400).send({ error: [{ messages: 'User not found' }] })
+
+    // parameter validation
+    const data = request.params()
+    data.friendId = Number(data.friendId)
+    if (Number.isNaN(data.friendId))
+      return response.status(400).send({ error: [{ messages: 'Invalid friendId' }] })
+    if (data.friendId === user.id)
+      return response
+        .status(400)
+        .send({ error: [{ messages: 'You can not be friend with yourself' }] })
+
+    // check friend status
+    const isFriend = await user.related('friends').query().where('friend_id', data.friendId).first()
+    if (isFriend)
+      return response.status(400).send({ error: [{ messages: 'Can not add to friends list' }] })
+
     const friend = await User.find(data.friendId)
-    if (!friend) return response.status(333).send({ errors: [{ messages: 'Friend not found' }] })
+    if (!friend)
+      return response.status(400).send({ error: [{ messages: 'Target user not found' }] })
+
+    // ready to proceed
     user.related('friends').attach({
-      [Number(data.friendId)]: {
-        status: 'pending',
+      [friend.id]: {
+        status: FriendStatus.REQUESTED,
       },
     })
-    friend.related('friends').attach([user.id])
-    return user.related('friends').query()
+    friend.related('friends').attach({
+      [user.id]: {
+        status: FriendStatus.PENDING,
+      },
+    })
+    return friend.serialize()
   }
 
   /**
@@ -57,19 +68,53 @@ export default class FriendsController {
    * @description Remove a user from friends list
    * @requestBody <{ "friendId": "1" }>
    */
-  async removeFriend({ request, response, auth }: HttpContext) {
-    const data = request.params()
+  async removeFriend() {
+    // will be implemented
+  }
+
+  /**
+   * @acceptFriend
+   * @tag friends
+   * @description Accept a friend request
+   * @requestBody <{ "friendId": "1" }>
+   */
+  async acceptFriend({ request, response, auth }: HttpContext) {
     const authenticatedUser = auth.user as User
     const user = await User.find(authenticatedUser.id)
+    if (!user) return response.status(400).send({ error: [{ messages: 'User not found' }] })
+
+    const data = request.params()
+    data.friendId = Number(data.friendId)
+    if (Number.isNaN(data.friendId))
+      return response.status(400).send({ error: [{ messages: 'Invalid friendId' }] })
+
     const friend = await user
-      ?.related('friends')
+      .related('friends')
       .query()
-      .where('friend_id', Number(data.friendId))
+      .where('friend_id', data.friendId)
+      .andWhere('status', 'pending')
       .first()
-    if (!user || !friend)
-      return response.status(318).send({ errors: [{ messages: 'Users are not friends' }] })
-    await user.related('friends').detach([Number(data.friendId)])
-    await friend.related('friends').detach([user.id])
+    if (!friend)
+      return response.status(400).send({ error: [{ messages: 'Friend request not found' }] })
+    await user
+      .related('friends')
+      .pivotQuery()
+      .where('friend_id', friend.id)
+      .update({ status: FriendStatus.ACCEPTED })
+    await friend
+      .related('friends')
+      .pivotQuery()
+      .where('friend_id', user.id)
+      .update({ status: FriendStatus.ACCEPTED })
+    await friend.load('friends')
     return friend.serialize()
+  }
+
+  async indexPivot({ auth }: HttpContext) {
+    const authenticatedUser = auth.user as User
+    const user = await User.find(authenticatedUser.id)
+
+    const friendsTable = await user?.related('friends').pivotQuery()
+    return friendsTable
   }
 }
