@@ -2,5 +2,5 @@
 srcs/database/postgres-data
 .vscode
 .editorconfig
-.crt
-.key
+docker/nginx/ssl/*.crt
+docker/nginx/ssl/*.key
