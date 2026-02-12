@@ -10,11 +10,19 @@ import FriendStatus from '../../enums/friend_status.js'
     })
 */
 
+const columnsToSerialize = ['id', 'userName']
+
 export default class FriendsController {
   async index({ auth }: HttpContext) {
     const user = auth.user as User
     const friends = await user.related('friends').query()
-    return friends
+    return friends.map((f) =>
+      f.serialize({
+        fields: {
+          pick: columnsToSerialize,
+        },
+      })
+    )
   }
 
   /**
@@ -49,17 +57,23 @@ export default class FriendsController {
       return response.status(400).send({ error: [{ messages: 'Target user not found' }] })
 
     // ready to proceed
-    user.related('friends').attach({
+    await user.related('friends').attach({
       [friend.id]: {
         status: FriendStatus.REQUESTED,
       },
     })
-    friend.related('friends').attach({
+    await friend.related('friends').attach({
       [user.id]: {
         status: FriendStatus.PENDING,
       },
     })
-    return friend.serialize()
+    await friend.refresh()
+    return friend.serialize({
+      fields: {
+        pick: columnsToSerialize,
+        omit: ['status'],
+      },
+    })
   }
 
   /**
@@ -68,8 +82,28 @@ export default class FriendsController {
    * @description Remove a user from friends list
    * @requestBody <{ "friendId": "1" }>
    */
-  async removeFriend() {
-    // will be implemented
+  async removeFriend({ request, response, auth }: HttpContext) {
+    const authenticatedUser = auth.user as User
+    const user = await User.find(authenticatedUser.id)
+    if (!user) return response.status(400).send({ error: [{ messages: 'User not found' }] })
+
+    const data = request.params()
+    data.friendId = Number(data.friendId)
+    if (Number.isNaN(data.friendId))
+      return response.status(400).send({ error: [{ messages: 'Invalid friendId' }] })
+
+    const friend = await user.related('friends').query().where('friend_id', data.friendId).first()
+    if (!friend) return response.status(400).send({ error: [{ messages: 'Friend not found' }] })
+
+    await user.related('friends').detach([friend.id])
+    await friend.related('friends').detach([user.id])
+    await friend.refresh()
+    return friend.serialize({
+      fields: {
+        pick: columnsToSerialize,
+        omit: ['status'],
+      },
+    })
   }
 
   /**
@@ -106,10 +140,15 @@ export default class FriendsController {
       .pivotQuery()
       .where('friend_id', user.id)
       .update({ status: FriendStatus.ACCEPTED })
-    await friend.load('friends')
-    return friend.serialize()
+    return friend.serialize({
+      fields: {
+        pick: columnsToSerialize,
+        omit: ['status'],
+      },
+    })
   }
 
+  // for testing
   async indexPivot({ auth }: HttpContext) {
     const authenticatedUser = auth.user as User
     const user = await User.find(authenticatedUser.id)
