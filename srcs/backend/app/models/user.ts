@@ -1,9 +1,11 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
 import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
+import ConversationParticipant from '#models/chatsystem/ConversationParticipant'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -37,4 +39,10 @@ export default class User extends compose(BaseModel, AuthFinder) {
     type: 'auth_token',
     tokenSecretLength: 42,
   })
+
+  //for Conversations 
+  @hasMany(() => ConversationParticipant, {
+    foreignKey: 'userId'
+  })
+  public conversations!: HasMany<typeof ConversationParticipant>
 }
