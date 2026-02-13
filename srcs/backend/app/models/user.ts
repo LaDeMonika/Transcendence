@@ -1,9 +1,10 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, manyToMany } from '@adonisjs/lucid/orm'
 import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
+import type { ManyToMany } from '@adonisjs/lucid/types/relations'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -11,17 +12,33 @@ const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
 })
 
 export default class User extends compose(BaseModel, AuthFinder) {
+  // serialize other related columns of related tables
+  serializeExtras() {
+    return {
+      status: this.$extras.pivot_status,
+    }
+  }
+
   @column({ isPrimary: true })
   declare id: number
 
   @column()
   declare email: string
 
-  @column()
+  @column({ serializeAs: null })
   declare password: string
 
   @column()
   declare userName: string
+
+  @manyToMany(() => User, {
+    pivotTable: 'friends',
+    pivotForeignKey: 'user_id',
+    pivotRelatedForeignKey: 'friend_id',
+    pivotTimestamps: true,
+    pivotColumns: ['status'],
+  })
+  declare friends: ManyToMany<typeof User>
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
