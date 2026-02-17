@@ -25,6 +25,11 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('users')
         .onDelete('CASCADE')
+
+
+      // Quicker
+      table.index(['conversation_id'])
+      table.index(['sender_id'])
     })
   }
 

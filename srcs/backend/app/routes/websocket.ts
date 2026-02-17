@@ -3,7 +3,7 @@
 /**************************************************/
 
 import router from '@adonisjs/core/services/router'
-import WsChatController from '#controllers/ws/chat_controller'
+import WsChatController from '#controllers/ws/ws_chat_controller'
 import fs from 'node:fs'
 import path from 'node:path'
 

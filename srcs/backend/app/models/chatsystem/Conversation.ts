@@ -21,7 +21,7 @@ export default class Conversation extends BaseModel {
 
   // Relations
   @hasMany(() => ConversationParticipant, { foreignKey: 'conversationId' })
-  public users!: HasMany<typeof ConversationParticipant>
+  public participants!: HasMany<typeof ConversationParticipant>
 
   @hasMany(() => Message, { foreignKey: 'conversationId' })
   public messages!: HasMany<typeof Message>
