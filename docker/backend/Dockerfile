@@ -27,6 +27,7 @@ WORKDIR /home/node/app
 COPY srcs/backend/package*.json ./
 RUN npm ci
 COPY srcs/backend/ .
+COPY .env .
 RUN node ace build --ignore-ts-errors
 
 COPY docker/backend/entrypoint.sh .

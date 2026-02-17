@@ -11,9 +11,10 @@ import router from '@adonisjs/core/services/router'
 import '../app/routes/swagger.js'
 import '../app/routes/auth.js'
 import '../app/routes/testuser.js'
-import QuestionsController from '#controllers/api/questions_controller'
-import QuizzesController from '#controllers/api/quizzes_controller'
-import CsvQuizController from '#controllers/csv_quiz_controller'
+import '../app/routes/friend.js'
+const QuestionsController = () => import('#controllers/api/questions_controller')
+const QuizzesController = () => import('#controllers/api/quizzes_controller')
+const CsvQuizController = () => import('#controllers/csv_quiz_controller')
 import WsChatController from '#controllers/ws/chat_controller'
 import fs from 'node:fs'
 import path from 'node:path'
