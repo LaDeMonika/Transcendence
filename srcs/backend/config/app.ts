@@ -16,6 +16,7 @@ export const appKey = new Secret(env.get('APP_KEY'))
  * The configuration settings used by the HTTP server
  */
 export const http = defineConfig({
+  trustProxy: true,
   generateRequestId: true,
   allowMethodSpoofing: false,
 
