@@ -14,6 +14,10 @@ export default class AuthController {
     const validatedData = await userRegisterValidator.validate(body)
     if (!validatedData.userName) validatedData.userName = 'Guest'
     const user = await User.create(validatedData)
+    const profile = await user.related('profile').create({
+      avatarUrl: 'default.png'
+    })
+    console.log(profile.userId === user.id)
     return user.serializeAttributes(['id', 'email', 'userName'])
   }
 

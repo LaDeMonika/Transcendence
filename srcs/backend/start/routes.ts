@@ -12,6 +12,7 @@ import '../app/routes/swagger.js'
 import '../app/routes/auth.js'
 import '../app/routes/testuser.js'
 import '../app/routes/friend.js'
+import '../app/routes/profile.js'
 const QuestionsController = () => import('#controllers/api/questions_controller')
 const QuizzesController = () => import('#controllers/api/quizzes_controller')
 const CsvQuizController = () => import('#controllers/csv_quiz_controller')
