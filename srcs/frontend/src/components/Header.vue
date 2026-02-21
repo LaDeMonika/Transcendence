@@ -1,3 +1,3 @@
 <template>
-  Quiz
+  PROJECT
 </template>
