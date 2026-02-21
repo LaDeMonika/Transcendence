@@ -36,3 +36,14 @@ export const userLoginValidator = vine.compile(
     password: vine.string().minLength(7),
   })
 )
+
+/**
+ * Validator to change password the payload when
+ * user wants to change password.
+ */
+export const userChangePasswordValidator = vine.compile(
+  vine.object({
+    oldPassword: vine.string().minLength(7),
+    newPassword: vine.string().minLength(7),
+  })
+)
