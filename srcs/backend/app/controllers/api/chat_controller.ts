@@ -3,6 +3,8 @@ import Conversation from '#models/chatsystem/Conversation'
 import Message from '#models/chatsystem/Message'
 import User from '#models/user'
 import ConversationParticipant from '#models/chatsystem/ConversationParticipant'
+import { createConversationValidator } from '#validators/conversation'
+import '#validators/conversation' // Ensure the validator is registered
 
 export default class ChatController {
     // GET /api/chat/me
@@ -37,7 +39,6 @@ export default class ChatController {
                         email: p.user.email,
                     }))
 
-                
                 return {
                     id: conversation.id,
                     otherParticipants: otherParticipants,
@@ -52,12 +53,18 @@ export default class ChatController {
             })
     }
 
-    // POST /api/chat/conversations
+    /**
+    * @createOrGetConversation
+    * @tag chat
+    * @description fucking create or get conversation between two users
+    * @requestBody <createConversationValidator>
+    */
     public async createOrGetConversation({ auth, request }: HttpContext) {
-        // Placeholder for creating or getting a conversation
+        const payload = await request.validateUsing(createConversationValidator)
         const user = auth.user! as User
         const userId = user.id
-        const otherUserId = Number(request.only(['otherUserId']))
+        const otherUserId = payload.otherUserId
+
 
         if (!otherUserId || Number(otherUserId) === userId) {
         return { error: 'Invalid otherUserId' }
@@ -66,11 +73,9 @@ export default class ChatController {
 
 
         const conversations = await Conversation.query()
-            .whereHas('participants', (q) => {
-                q.where('userId', userId), 
-                q.where('userId', otherUserId)
-            })
-            .preload('participants')
+        .whereHas('participants', (q) => q.where('userId', userId))
+        .whereHas('participants', (q) => q.where('userId', otherUserId))
+        .preload('participants')
 
         // If a conversation with exactly these two participants exists, return it
         for (const conversation of conversations) {

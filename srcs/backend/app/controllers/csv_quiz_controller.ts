@@ -17,6 +17,10 @@ type CsvRow = {
 
 export default class CsvQuizController {
     public async importCsv({ request, response }: HttpContext) {
+        // Validate and process the uploaded CSV file
+        // Expecting a file input named 'csv'
+        // the csv must have header row with columns: 
+        // "question;answerA;answerB;answerC;answerD;correctAnswer" (where correctAnswer is one of A/B/C/D)
         const file = request.file('csv', {
             extnames: ['csv'],
             size: '5mb',
@@ -46,11 +50,12 @@ export default class CsvQuizController {
 
         const questions = records.map((row, index) => {
             const rowNum = index + 2 // considering header is row 1 (for error messages)
-            const correct = String(row.correctAnswer).toUpperCase()
+            const correct = String(row.correctAnswer).toUpperCase().trim() 
 
             // Validate correctAnswer
             if (!['A', 'B', 'C', 'D'].includes(correct)) {
-                throw new Error(`Invalid correctAnswer value at row ${rowNum}`)
+                console.error(`\nInvalid correctAnswer value at row ${rowNum}: ${row.correctAnswer} (normalized to: ${correct})`)
+                throw new Error(`Invalid correctAnswer value at row ${rowNum}: ${correct}`)
             }
             // Validate question text
             if (!row.question) {
