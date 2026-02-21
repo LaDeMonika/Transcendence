@@ -33,6 +33,7 @@
         <span v-else>Create account</span>
       </BButton>
     </BForm>
+    <span>By logging in, you agree to our <BLink to="/privacy_policy">Privacy Policy</BLink></span>
   </BCard>
 </template>
 
