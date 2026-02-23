@@ -172,7 +172,7 @@ export default class ChatController {
     * @description fucking create or get conversation between two users
     * @requestBody <createConversationValidator>
     */
-    public async createOrGetConversation({ auth, request }: HttpContext) {
+    public async createOrGetConversation({ auth, request, response }: HttpContext) {
         const user = (await auth.authenticate()) as User
         const userId = user.id
 
@@ -185,6 +185,14 @@ export default class ChatController {
         // const otherUserId = payload.otherUserId
         if (!otherUserId || Number(otherUserId) === userId) {
             return { error: 'Invalid otherUserId' }
+        }
+
+        //check if the other user exists
+        const otherUser = await User.find(otherUserId)
+        if (!otherUser) {
+            return response.notFound({
+            message: 'User not found',
+            })
         }
 
         const conversations = await Conversation.query()
