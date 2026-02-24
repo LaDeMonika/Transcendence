@@ -1,7 +1,9 @@
 import axios from 'axios'
 
+const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3333'
+
 export const client = axios.create({
-  baseURL: 'http://localhost:3333',
+  baseURL,
 })
 
 export function setAuthToken(token) {
