@@ -35,37 +35,47 @@ function confirmInvite() {
 </script>
 
 <template>
-  <main class="container">
-    <div class="row">
-      <div class="col-sm d-flex justify-content-center col-up">
-        <Player
-          :user="leftPlayer"
-          :role="leftPlayer ? 'player' : 'empty'"
-          @invite="openInvite('left')"
-        />
+  <main class="lobby-main">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm d-flex justify-content-center col-up">
+          <Player
+            :user="leftPlayer"
+            :role="leftPlayer ? 'player' : 'empty'"
+            @invite="openInvite('left')"
+          />
+        </div>
+        <div class="col-sm d-flex justify-content-center col-down">
+          <Player :user="host" role="host" />
+        </div>
+        <div class="col-sm d-flex justify-content-center col-up">
+          <Player
+            :user="rightPlayer"
+            :role="rightPlayer ? 'player' : 'empty'"
+            @invite="openInvite('right')"
+          />
+        </div>
       </div>
-      <div class="col-sm d-flex justify-content-center col-down">
-        <Player :user="host" role="host" />
+      <!-- Invite Input Modal (simple version) -->
+      <div v-if="showInviteInput" class="invite-box">
+        <input v-model="usernameInput" placeholder="Enter username" />
+        <button @click="confirmInvite">Confirm</button>
       </div>
-      <div class="col-sm d-flex justify-content-center col-up">
-        <Player
-          :user="rightPlayer"
-          :role="rightPlayer ? 'player' : 'empty'"
-          @invite="openInvite('right')"
-        />
-      </div>
-    </div>
-    <!-- Invite Input Modal (simple version) -->
-    <div v-if="showInviteInput" class="invite-box">
-      <input v-model="usernameInput" placeholder="Enter username" />
-      <button @click="confirmInvite">Confirm</button>
     </div>
   </main>
 </template>
 
 <style scoped>
+/* .lobby-main {
+  height: ; not working properly, need to fix somehow
+} */
+
 .container {
-    position: relative;
+  position: relative;
+}
+
+.col-sm {
+    margin: 0px 80px 0px 80px
 }
 
 .col-up {
@@ -86,7 +96,7 @@ function confirmInvite() {
   background: white;
   padding: 15px;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 
   z-index: 1000;
 }
