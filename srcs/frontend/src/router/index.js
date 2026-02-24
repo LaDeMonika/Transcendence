@@ -1,7 +1,8 @@
+import Home from '@/pages/Home.vue'
 import SignIn from '@/pages/SignIn.vue'
 import SignUp from '@/pages/SignUp.vue'
 import PrivacyPolicy from '@/pages/PrivacyPolicy.vue'
-import Home from '@/pages/Home.vue'
+import Lobby from '@/pages/Lobby.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -11,6 +12,7 @@ const router = createRouter({
     { path: '/login', component: SignIn },
     { path: '/sign_up', component: SignUp },
     { path: '/privacy_policy', component: PrivacyPolicy },
+    { path: '/Lobby', component: Lobby },
   ],
 })
 
