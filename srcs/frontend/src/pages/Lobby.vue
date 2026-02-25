@@ -1,5 +1,5 @@
 <script setup>
-import Player from '@/components/PlayerLobby.vue'
+import PlayerLobby from '@/components/PlayerLobby.vue'
 import { ref } from 'vue'
 
 const host = ref({
@@ -39,17 +39,17 @@ function confirmInvite() {
     <div class="container">
       <div class="row">
         <div class="col-sm d-flex justify-content-center col-up">
-          <Player
+          <PlayerLobby
             :user="leftPlayer"
             :role="leftPlayer ? 'player' : 'empty'"
             @invite="openInvite('left')"
           />
         </div>
         <div class="col-sm d-flex justify-content-center col-down">
-          <Player :user="host" role="host" />
+          <PlayerLobby :user="host" role="host" />
         </div>
         <div class="col-sm d-flex justify-content-center col-up">
-          <Player
+          <PlayerLobby
             :user="rightPlayer"
             :role="rightPlayer ? 'player' : 'empty'"
             @invite="openInvite('right')"
@@ -75,7 +75,7 @@ function confirmInvite() {
 }
 
 .col-sm {
-    margin: 0px 80px 0px 80px
+    margin: 0px 80px 0px 80px;
 }
 
 .col-up {

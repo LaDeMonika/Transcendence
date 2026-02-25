@@ -48,13 +48,13 @@ const emit = defineEmits(['invite'])
 .player-img {
   width: 10rem;
   height: 10rem;
-  object-fit: cover; /* important */
+  object-fit: cover;
   position: relative;
-  left: 13px; /* Bewegt das Bild 15px von seiner normalen Position nach links */
+  left: 13px;
 }
 
 .under-img-txt {
-    padding: 20px
+    padding: 20px;
 }
 
 .invite-btn {
@@ -62,7 +62,7 @@ const emit = defineEmits(['invite'])
   outline: none;
 
   padding: 10px;
-  border-radius: 999px; /* oval pill shape */
+  border-radius: 999px;
 
   background: linear-gradient(
     135deg,
