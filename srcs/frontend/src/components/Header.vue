@@ -6,7 +6,10 @@
         <a class="navbar-brand" href="#">Logo here</a>
       </div>
 
-      <div class="col-sm d-flex justify-content-center collapse navbar-collapse" id="navbarSupportedContent">
+      <div
+        class="col-sm d-flex justify-content-center collapse navbar-collapse"
+        id="navbarSupportedContent"
+      >
         <ul class="navbar-nav mr-auto">
           <li class="nav-item">
             <a class="nav-link" href="#">About</a>

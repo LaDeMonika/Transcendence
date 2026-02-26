@@ -12,7 +12,7 @@ const router = createRouter({
     { path: '/login', component: SignIn },
     { path: '/sign_up', component: SignUp },
     { path: '/privacy_policy', component: PrivacyPolicy },
-    { path: '/Lobby', component: Lobby },
+    { path: '/Lobby', component: Lobby, meta: { bodyClass: 'bg-lobby' } },
   ],
 })
 
