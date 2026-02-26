@@ -89,11 +89,11 @@ const emit = defineEmits(['invite'])
   height: 150%;
   background: radial-gradient(
     ellipse at center,
-    rgba(200, 120, 255, 0.95) 0%,
-    rgba(129, 23, 242, 0.9) 30%,
-    rgba(90, 0, 200, 0.85) 55%,
-    rgba(60, 0, 150, 0.6) 75%,
-    rgba(253, 3, 3, 0) 0%
+    rgba(29, 157, 232, 0.95) 0%,
+    rgba(23, 176, 242, 0.9) 30%,
+    rgba(0, 43, 200, 0.85) 55%,
+    rgba(1, 54, 112, 0.6) 75%,
+    rgba(5, 2, 66, 0.525) 50%
   );
   filter: blur(8px);
   border-radius: 50%;

@@ -9,7 +9,8 @@
 </template>
 
 <style>
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -28,5 +29,30 @@ html, body {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+
+  /* background: #232526;
+  background: -webkit-linear-gradient(to right, #414345, #232526);
+  background: linear-gradient(
+    to right,
+    #414345,
+    #232526
+  ); */
+
+  /* background: #5c258d;
+  background: -webkit-linear-gradient(to right, #4389a2, #5c258d);
+  background: linear-gradient(
+    to right,
+    #4389a2,
+    #5c258d
+  ); */
+
+  /* background: #16222a;
+  background: -webkit-linear-gradient(to bottom, #6fbee6, #16222a);
+  background: linear-gradient(
+    to bottom,
+    #7dd1fb,
+    #72b5e1,
+    #152129
+  ); */
 }
 </style>

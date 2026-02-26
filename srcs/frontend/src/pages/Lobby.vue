@@ -58,8 +58,10 @@ function confirmInvite() {
       </div>
       <!-- Invite Input Modal (simple version) -->
       <div v-if="showInviteInput" class="invite-box">
-        <input v-model="usernameInput" placeholder="Enter username" />
-        <button @click="confirmInvite">Confirm</button>
+        <input v-model="usernameInput" placeholder="Enter username" @keyup.enter="confirmInvite" />
+      </div>
+      <div class="ready-btn">
+        <button class="btn btn-game btn-purple">START GAME</button>
       </div>
     </div>
   </main>
@@ -69,13 +71,17 @@ function confirmInvite() {
 /* .lobby-main {
   height: ; not working properly, need to fix somehow
 } */
- 
+
+.row {
+  margin-top: 180px;
+}
+
 .container {
   position: relative;
 }
 
 .col-sm {
-    margin: 0px 80px 0px 80px;
+  margin: 0px 80px 0px 80px;
 }
 
 .col-up {
@@ -88,16 +94,63 @@ function confirmInvite() {
 
 .invite-box {
   position: absolute;
-  top: 0;
+  top: -270px;
   left: 50%;
   transform: translateX(-50%);
 
-  width: 300px;
-  background: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 800px;
   padding: 15px;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 30px;
+  border: 2px solid #2c3e50;
+  box-shadow: 5px 5px 50px rgba(44, 62, 80, 0.4);
+
+  background-color: rgba(13, 2, 49, 0.235); /* Crna pozadina s 50% prozirnosti */
+  backdrop-filter: blur(5px);           /* Opcionalno: zamućuje ono što je iza (stakleni efekt) */
 
   z-index: 1000;
+}
+
+.invite-box input {
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 8px;
+  color: inherit;
+  text-align: center;
+}
+
+.invite-box input::placeholder {
+  color: rgba(255, 255, 255, 0.826);
+}
+
+.ready-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  margin-top: 100px;
+}
+
+.btn-purple {
+  background: linear-gradient(45deg, #1117cb 0%, #257bfc 100%);
+  border: none;
+  color: white;
+  padding: 12px 30px;
+  font-weight: bold;
+  text-transform: uppercase;
+  box-shadow: 0 4px 15px rgba(8, 25, 56, 0.677);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.btn-purple:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 117, 252, 0.6);
+  color: white;
 }
 </style>
