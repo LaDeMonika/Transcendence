@@ -1,3 +1,5 @@
+<!-- *** THIS FILE USELESS FOR NOW *** -->
+
 <script setup>
 defineProps({
   user: {
@@ -73,7 +75,7 @@ const emit = defineEmits(['invite'])
   font-size: 1.2rem;
   font-weight: 600;
   color: white;
-  /* Neon text glow */
+
   text-shadow:
     0 0 5px rgba(129, 23, 242, 0.9),
     0 0 10px rgba(129, 23, 242, 0.8);

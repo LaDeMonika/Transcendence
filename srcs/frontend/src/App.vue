@@ -18,41 +18,15 @@ body {
 
 .main-wrapper {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  flex: 1;
+  justify-content: flex-start;
+  min-height: 100%;
   width: 100%;
+  padding-top: 2rem;
 }
 
 .bg-lobby {
-  background-image: url('../public/Lobby-background.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-
-  /* background: #232526;
-  background: -webkit-linear-gradient(to right, #414345, #232526);
-  background: linear-gradient(
-    to right,
-    #414345,
-    #232526
-  ); */
-
-  /* background: #5c258d;
-  background: -webkit-linear-gradient(to right, #4389a2, #5c258d);
-  background: linear-gradient(
-    to right,
-    #4389a2,
-    #5c258d
-  ); */
-
-  /* background: #16222a;
-  background: -webkit-linear-gradient(to bottom, #6fbee6, #16222a);
-  background: linear-gradient(
-    to bottom,
-    #7dd1fb,
-    #72b5e1,
-    #152129
-  ); */
+  background-color: azure;
 }
 </style>
