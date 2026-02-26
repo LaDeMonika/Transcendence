@@ -23,7 +23,7 @@ const emit = defineEmits(['invite'])
   <div v-if="role === 'host'">
     <BAvatar size="10rem" src="../../public/host.jpg" />
     <div class="under-img-txt text-center">
-      <p>{{ user?.name }} <small>(Host)</small></p>
+      <p class="txt-shadow host">{{ user?.name }} <small>(Host)</small></p>
     </div>
   </div>
 
@@ -31,7 +31,9 @@ const emit = defineEmits(['invite'])
   <div v-else-if="role === 'empty'">
     <img src="../../public/invite2.png" class="player-img" @click="emit('invite')" />
     <div class="under-img-txt text-center">
-      <button class="invite-btn" @click="emit('invite')">Invite Player</button>
+      <button class="btn btn-transparent" @click="emit('invite')">
+        <span class="txt-shadow">Invite Player</span>
+      </button>
     </div>
   </div>
 
@@ -54,43 +56,49 @@ const emit = defineEmits(['invite'])
 }
 
 .under-img-txt {
-    padding: 20px;
+  padding: 20px;
 }
 
-.invite-btn {
-  border: none;
-  outline: none;
+.btn-transparent {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 0;
+}
 
-  padding: 10px;
-  border-radius: 999px;
-
-  background: linear-gradient(
-    135deg,
-    #0f0f0f,
-    #2a0a3d
-  );
-
+.txt-shadow {
+  position: relative;
+  display: inline-block;
+  font-size: 1.2rem;
+  font-weight: 600;
   color: white;
-  font-weight: 500;
-
-  cursor: pointer;
-
-  box-shadow:
-    0 0 8px rgba(120, 40, 180, 0.4),
-    0 0 18px rgba(60, 0, 90, 0.3);
-
-  transition: all 0.25s ease;
+  /* Neon text glow */
+  text-shadow:
+    0 0 5px rgba(129, 23, 242, 0.9),
+    0 0 10px rgba(129, 23, 242, 0.8);
 }
 
-.invite-btn:hover {
-  transform: translateY(-5px);
-
-  box-shadow:
-    0 0 12px rgba(140, 60, 220, 0.6),
-    0 0 25px rgba(80, 20, 120, 0.5);
+.txt-shadow::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  transform: translate(-50%, -50%);
+  width: 180%;
+  height: 150%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(200, 120, 255, 0.95) 0%,
+    rgba(129, 23, 242, 0.9) 30%,
+    rgba(90, 0, 200, 0.85) 55%,
+    rgba(60, 0, 150, 0.6) 75%,
+    rgba(253, 3, 3, 0) 0%
+  );
+  filter: blur(8px);
+  border-radius: 50%;
+  z-index: -1;
+  opacity: 0.5;
 }
 
-.invite-btn:active {
-  transform: scale(0.96);
-}
 </style>

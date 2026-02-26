@@ -69,7 +69,7 @@ function confirmInvite() {
 /* .lobby-main {
   height: ; not working properly, need to fix somehow
 } */
-
+ 
 .container {
   position: relative;
 }
