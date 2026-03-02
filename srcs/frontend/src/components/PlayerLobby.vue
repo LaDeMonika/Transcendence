@@ -1,26 +1,10 @@
 <!-- *** THIS FILE USELESS FOR NOW *** -->
-
-<script setup>
-defineProps({
-  user: {
-    type: Object,
-    default: null,
-  },
-  role: {
-    type: String,
-    required: true, // "host" | "player" | "empty"
-  },
-})
-
-const emit = defineEmits(['invite'])
-</script>
-
 <template>
   <!--
     if host then show host data, 
     else if no user then invite,
     else if user accept invite then show user data
-  -->
+    -->
   <!-- HOST -->
   <div v-if="role === 'host'">
     <BAvatar size="10rem" src="../../public/host.jpg" />
@@ -47,6 +31,21 @@ const emit = defineEmits(['invite'])
     </div>
   </div>
 </template>
+
+<script setup>
+defineProps({
+  user: {
+    type: Object,
+    default: null,
+  },
+  role: {
+    type: String,
+    required: true, // "host" | "player" | "empty"
+  },
+})
+
+const emit = defineEmits(['invite'])
+</script>
 
 <style scoped>
 .player-img {

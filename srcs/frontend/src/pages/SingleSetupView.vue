@@ -1,28 +1,3 @@
-<script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
-
-const step = ref(1)
-const selectedCategory = ref(null)
-const selectedDifficulty = ref(null)
-
-const nextStep = () => {
-  step.value++
-}
-
-const prevStep = () => {
-  step.value--
-}
-
-const startGame = () => {
-  if (!selectedCategory.value || !selectedDifficulty.value) return
-
-  router.push('/game')
-}
-</script>
-
 <template>
   <div class="container d-flex flex-column" style="min-height: 100%">
     <div v-if="step === 1">
@@ -78,3 +53,28 @@ const startGame = () => {
     </div>
   </div>
 </template>
+
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const step = ref(1)
+const selectedCategory = ref(null)
+const selectedDifficulty = ref(null)
+
+const nextStep = () => {
+  step.value++
+}
+
+const prevStep = () => {
+  step.value--
+}
+
+const startGame = () => {
+  if (!selectedCategory.value || !selectedDifficulty.value) return
+
+  router.push('/game')
+}
+</script>

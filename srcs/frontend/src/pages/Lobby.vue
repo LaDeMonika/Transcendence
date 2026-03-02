@@ -1,5 +1,3 @@
-<script setup></script>
-
 <template>
   <div class="container d-flex flex-column" style="min-height: 100%">
     <div class="row border">
@@ -38,5 +36,7 @@
     </div>
   </div>
 </template>
+
+<script setup></script>
 
 <style scoped></style>

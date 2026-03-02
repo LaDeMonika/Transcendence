@@ -1,5 +1,3 @@
-<script setup></script>
-
 <template>
   <div class="container d-flex flex-column" style="min-height: 100%">
     <div class="row border">
@@ -12,7 +10,7 @@
         <div class="d-flex flex-column align-items-center justify-content-center">
           <h2>Create Room</h2>
           <!-- <router-link to="/"> -->
-          <button class="btn btn-primary">ENTER</button>
+            <button class="btn btn-primary">ENTER</button>
           <!-- </router-link> -->
         </div>
       </div>
@@ -20,12 +18,14 @@
         <div class="d-flex flex-column align-items-center justify-content-center">
           <h2>Join Room</h2>
           <!-- <router-link to="/"> -->
-          <button class="btn btn-primary">ENTER</button>
+            <button class="btn btn-primary">ENTER</button>
           <!-- </router-link> -->
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<script setup></script>
 
 <style scoped></style>
