@@ -12,4 +12,6 @@ export default class QuizzesController {
 
     return quiz
   }
+
+  // GET /api/start-quiz/:id
 }
