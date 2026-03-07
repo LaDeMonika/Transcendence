@@ -1,23 +1,32 @@
 <template>
-  <BApp>
+  <BApp class="app-root">
     <Layout>
-      <div class="app-content">
+      <div :class="$route.meta.bodyClass" class="main-wrapper">
         <router-view />
       </div>
     </Layout>
   </BApp>
 </template>
 
-<script setup>
-import { BApp } from 'bootstrap-vue-next'
-import Layout from './components/Layout.vue';
-</script>
-
 <style>
-.app-content {
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.main-wrapper {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  min-height: 100vh;
+  justify-content: flex-start;
+  min-height: 100%;
+  width: 100%;
+  padding-top: 2rem;
+}
+
+.bg-lobby {
+  background-color: azure;
 }
 </style>
