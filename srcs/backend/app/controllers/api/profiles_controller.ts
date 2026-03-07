@@ -12,8 +12,14 @@ export default class ProfilesController {
         return user!.profile.serialize()
     }
 
-    userProfile(ctx: HttpContext) {
-        return ctx.response.ok({ message: "request got public profile" })
+    async publicProfile({ request, response }: HttpContext) {
+        const data = request.params()
+        data.userId = Number(data.userId)
+        if (Number.isNaN(data.userId)) return response.status(400).send({ errors: [{ messages: 'Invalid userId' }] })
+        const user = await User.find(data.userId)
+        if (!user) return response.status(400).send({ error: [{ messages: 'User not found' }] })
+        user.load('profile')
+        return user.profile.serialize()
     }
     
     update(ctx: HttpContext) {

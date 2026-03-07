@@ -8,7 +8,7 @@ router
     router.post('/uploadAvatar', [ProfilesController, 'uploadAvatar'])
     router.get('/', [ProfilesController, 'privateProfile'])
     router.put('/', [ProfilesController, 'update'])
-    router.get('/:id', [ProfilesController, 'userProfile'])
+    router.get('/:userId', [ProfilesController, 'publicProfile'])
   })
   .prefix('/api/profile')
   .use(middleware.auth())
