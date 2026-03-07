@@ -2,6 +2,7 @@ import User from '#models/user'
 import { cuid } from '@adonisjs/core/helpers'
 import type { HttpContext } from '@adonisjs/core/http'
 import app from '@adonisjs/core/services/app'
+import env from '#start/env'
 
 export default class ProfilesController {
     async privateProfile({ auth }: HttpContext) {
@@ -40,7 +41,7 @@ export default class ProfilesController {
         if (!file.isValid) return response.badRequest({
             error: file.errors
         })
-        await file.move(app.makePath('public/avatars'), {
+        await file.move(app.makePath(env.get('IMAGES_PATH')), {
             name: `${cuid()}.${file.extname}`
         })
 
@@ -58,7 +59,7 @@ export default class ProfilesController {
         if (!user) return response.badRequest({ message: 'User not found' })
         await user.load('profile')
         console.log(user.profile.avatarUrl)
-        const absolutePath = app.makePath('public/avatars', user.profile.avatarUrl)
+        const absolutePath = app.makePath(env.get('IMAGES_PATH'), user.profile.avatarUrl)
         console.log(absolutePath)
         return response.download(absolutePath)
     }
