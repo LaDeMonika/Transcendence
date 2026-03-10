@@ -18,7 +18,7 @@ export default class ProfilesController {
         if (Number.isNaN(data.userId)) return response.status(400).send({ errors: [{ messages: 'Invalid userId' }] })
         const user = await User.find(data.userId)
         if (!user) return response.status(400).send({ error: [{ messages: 'User not found' }] })
-        user.load('profile')
+        await user.load('profile')
         return user.profile.serialize()
     }
     
