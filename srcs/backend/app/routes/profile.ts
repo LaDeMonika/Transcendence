@@ -7,7 +7,7 @@ router
     router.get('/getAvatar', [ProfilesController, 'getAvatar'])
     router.post('/uploadAvatar', [ProfilesController, 'uploadAvatar'])
     router.get('/', [ProfilesController, 'privateProfile'])
-    router.put('/', [ProfilesController, 'update'])
+    // router.put('/', [ProfilesController, 'update'])
     router.get('/:userId', [ProfilesController, 'publicProfile'])
   })
   .prefix('/api/profile')

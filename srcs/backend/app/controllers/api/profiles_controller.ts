@@ -22,9 +22,10 @@ export default class ProfilesController {
         return user.profile.serialize()
     }
     
-    update(ctx: HttpContext) {
-        return ctx.response.ok({ message: "request got update profile" })
-    }
+    // update methods will be added for different parts
+    // update(ctx: HttpContext) {
+    //     return ctx.response.ok({ message: "request got update profile" })
+    // }
 
   /**
    * @uploadAvatar
