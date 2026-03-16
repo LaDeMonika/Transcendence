@@ -26,15 +26,8 @@ export default defineConfig({
     port: 5173,
     strictPort: true,  // Fail if port is already in use
     
-    // HMR configuration
-    hmr: {
-      host: 'localhost',
-      protocol: 'wss',  // Secure WebSocket (since we use HTTPS)
-      port: 443,
-    },
-    
-    // No proxy needed - Nginx handles it
-  }
-  
-  
+    hmr: true,
+  },
+
+  cacheDir: '.vite',  // Use .vite in the project root for caching
 })
