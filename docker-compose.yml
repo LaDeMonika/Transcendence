@@ -31,8 +31,8 @@ services:
        - transcendence
      environment:
        - PORT=3333
-       - DB_HOST=postgres  
-       #HOST: 0.0.0.0
+       - HOST=0.0.0.0
+       - DB_HOST=postgres
      expose:
        - 3333
      ports:
@@ -47,11 +47,21 @@ services:
      expose:
        - "5173"
      volumes:
-       - ./srcs/frontend:/app
-       - /app/node_modules
+      # bind source files from host to container for hot reloading
+       - ./srcs/frontend/src:/app/src
+       - ./srcs/frontend/public:/app/public
+       - ./srcs/frontend/index.html:/app/index.html
+       - ./srcs/frontend/package.json:/app/package.json
+       - ./srcs/frontend/package-lock.json:/app/package-lock.json
+       - ./srcs/frontend/vite.config.js:/app/vite.config.js
+       - ./srcs/frontend/jsconfig.json:/app/jsconfig.json
+       - ./srcs/frontend/eslint.config.js:/app/eslint.config.js
+       - ./srcs/frontend/.env:/app/.env
+       - ./srcs/frontend/.vite:/app/.vite
      networks:
        - transcendence
-     command: npm run dev
+     environment:
+       - VITE_BACKEND_URL=/api
 ##NGINX##
    nginx:
      image: nginx:alpine
