@@ -25,6 +25,7 @@ RUN mkdir -p tmp
 RUN mkdir -p /home/node/app && chown 777 /home/node/app
 WORKDIR /home/node/app
 COPY srcs/backend/package*.json ./
+RUN npm install
 RUN npm ci
 COPY srcs/backend/ .
 COPY .env .
