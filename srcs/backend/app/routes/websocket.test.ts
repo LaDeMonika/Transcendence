@@ -29,3 +29,10 @@ router.get('/chat/:roomId', async ({ response }) => {
   return html
 })
 
+router.get('/quiztest', async ({ response }) => {
+  const filePath = path.join(process.cwd(), 'public', 'quizandchattest.html')
+  const html = fs.readFileSync(filePath, 'utf8')
+
+  response.header('Content-Type', 'text/html; charset=utf-8')
+  return html
+})

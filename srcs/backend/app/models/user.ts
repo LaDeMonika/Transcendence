@@ -7,6 +7,7 @@ import { compose } from '@adonisjs/core/helpers'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import ConversationParticipant from '#models/chatsystem/ConversationParticipant'
 import type { ManyToMany } from '@adonisjs/lucid/types/relations'
+import QuizPlayer from './quizsession/quiz_player.js'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -62,4 +63,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
     foreignKey: 'userId'
   })
   public conversations!: HasMany<typeof ConversationParticipant>
+
+  @hasMany(() => QuizPlayer, {
+    foreignKey: 'userId'
+  })
+  public quizPlayers!: HasMany<typeof QuizPlayer>
 }
