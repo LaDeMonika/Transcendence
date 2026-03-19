@@ -8,20 +8,9 @@
       <div v-for="(error, index) in errors" :key="index">{{ error.message }}</div>
     </BAlert>
     <BForm @submit="onSubmit">
-      <BFormGroup>
-        <div class="row">
-          <div class="col">
-            <BFormFloatingLabel label="First name" label-for="floatingFirstName" class="my-2">
-              <BFormInput id="floatingFirstName" type="text" required v-model="form.firstName" placeholder="First name" />
-            </BFormFloatingLabel>
-            </div>
-          <div class="col">
-            <BFormFloatingLabel label="Last name" label-for="floatingLastName" class="my-2">
-              <BFormInput id="floatingLastName" type="text" required v-model="form.lastName" placeholder="Last name" />
-            </BFormFloatingLabel>
-          </div>
-        </div>
-      </BFormGroup>
+      <BFormFloatingLabel label="Nickname" label-for="floatingNickname" class="my-2">
+        <BFormInput id="floatingNickname" type="text" required v-model="form.userName" placeholder="Nickname" />
+      </BFormFloatingLabel>
       <BFormFloatingLabel label="Email address" label-for="floatingEmail" class="my-2">
         <BFormInput id="floatingEmail" type="email" required v-model="form.email" placeholder="Email address" />
       </BFormFloatingLabel>
@@ -46,8 +35,7 @@
   const form = reactive({
   email: '',
   password: '',
-  firstName: '',
-  lastName: ''
+  userName: ''
 })
 
 const errors = ref([])
@@ -59,7 +47,7 @@ const onSubmit = async (event) => {
   errors.value = []
   loading.value = true
   try {
-    const response = await register(form.email, form.password, form.firstName, form.lastName)
+    const response = await register(form.email, form.password, form.userName)
     if (response?.value?.errors) {
       errors.value = response.value.errors
     } else {
