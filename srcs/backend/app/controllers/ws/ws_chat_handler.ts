@@ -8,14 +8,16 @@ export async function handleWsChatMessage(ws: any, user: User, payload: any){
     if (payload.type === 'chat:leave') {
         const conversationId = Number(payload.conversationId)
         chatRooms.leave(conversationId, ws)
-        return ws.send(JSON.stringify({ type: 'leave:ok', conversationId }))
+        ws.send(JSON.stringify({ type: 'leave:ok', conversationId }))
+        return true
     }
 
     // Join a conversation room (client can also auto-join on connect, but this allows joining others)
     if (payload.type === 'chat:join') {
         const conversationId = Number(payload.conversationId)
         chatRooms.join(conversationId, ws)
-        return ws.send(JSON.stringify({ type: 'join:ok', conversationId }))
+        ws.send(JSON.stringify({ type: 'join:ok', conversationId }))
+        return true
     }
 
     // CREATE a new message (persist then broadcast)
@@ -24,9 +26,13 @@ export async function handleWsChatMessage(ws: any, user: User, payload: any){
         const body = String(payload.body ?? '').trim()
 
         // Check basic validity
-        if (!body) return ws.send(JSON.stringify({ type: 'error', error: 'Empty message' }))
+        if (!body) {
+            ws.send(JSON.stringify({ type: 'error', error: 'Empty message' }))
+            return true
+        }
         if (!chatRooms.isInConversation(conversationId, ws)) {
-            return ws.send(JSON.stringify({ type: 'error', error: 'Not joined to conversation' }))
+            ws.send(JSON.stringify({ type: 'error', error: 'Not joined to conversation' }))
+            return true
         }
 
         // Check with DB if user is part of the conversation
@@ -35,7 +41,8 @@ export async function handleWsChatMessage(ws: any, user: User, payload: any){
             .where('userId', user.id)
             .first()
         if (!allowed) {
-            return ws.send(JSON.stringify({ type: 'error', error: 'Not a participant' }))
+            ws.send(JSON.stringify({ type: 'error', error: 'Not a participant' }))
+            return true
         }
 
         // Create the message in DB
@@ -45,7 +52,8 @@ export async function handleWsChatMessage(ws: any, user: User, payload: any){
             text: body,
         })
         if (!msg) {
-            return ws.send(JSON.stringify({ type: 'error', error: 'Failed to create message' }))
+            ws.send(JSON.stringify({ type: 'error', error: 'Failed to create message' }))
+            return true
         }
 
         // Broadcast the new message to everyone in the conversation room
@@ -56,15 +64,16 @@ export async function handleWsChatMessage(ws: any, user: User, payload: any){
         })
 
         // Acknowledge to sender with the new message ID
-        return ws.send(
+        ws.send(
             JSON.stringify({
                 type: 'chat:message:ack',
                 conversationId,
                 messageId: msg.id,
             })
         )
+        return true
     }
 
       // Unknown event
-      return ws.send(JSON.stringify({ type: 'error', error: 'Unknown event type' }))
+      return false
     }
