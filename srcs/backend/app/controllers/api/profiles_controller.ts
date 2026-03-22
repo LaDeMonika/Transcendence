@@ -5,13 +5,20 @@ import app from '@adonisjs/core/services/app'
 import env from '#start/env'
 
 export default class ProfilesController {
+    /**
+     *  Use privateProfile method to retrieve all information of current user
+     */
     async privateProfile({ auth }: HttpContext) {
         const authenticatedUser = auth.user as User
         const user = await User.find(authenticatedUser.id)
         await user!.load('profile')
         return user!.profile.serialize()
     }
-
+    /**
+     *  Use publicProfile method to retrieve information that what other users can see
+     *  Can be used to see what other people see in your profile
+     *  @params userId of target user
+     */
     async publicProfile({ request, response }: HttpContext) {
         const data = request.params()
         data.userId = Number(data.userId)
