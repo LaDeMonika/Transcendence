@@ -5,7 +5,7 @@ export const signin = async (email, password) => {
   return { value: res.data }
 }
 
-export const register = async (email, password, firstName, lastName) => {
-  const res = await client.post('/register', { email, password, firstName, lastName })
+export const register = async (email, password, userName) => {
+  const res = await client.post('/register', { email, password, userName })
   return { value: res.data }
 }
