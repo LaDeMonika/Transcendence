@@ -18,5 +18,6 @@ router.group(() => {
 
   // get a quiz by id
   router.get('/quiz/:id', [QuizzesController, 'show'])
+  router.get('/admin/quiz/:id', [QuizzesController, 'showAdmin'])
   
 }).prefix('/api')

@@ -4,8 +4,11 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { middleware } from '#start/kernel'
 import ConversationParticipant from '#models/chatsystem/ConversationParticipant'
-import Message from '#models/chatsystem/Message'
+//import Message from '#models/chatsystem/Message'
 import { chatRooms } from '#services/chatroom'
+import { quizRooms } from '#services/quizroom'
+import { handleWsChatMessage } from '#controllers/ws/ws_chat_handler'
+import { handleWsQuizMessage } from '#controllers/ws/ws_quiz_handler'
 import User from '#models/user'
 
 router.group(() => {
@@ -23,7 +26,7 @@ router.group(() => {
 }).prefix('/api')
 
 router.get('/chattest', async ({ response }) => {
-  const filePath = path.join(process.cwd(), 'public', 'chat_test2.html')
+  const filePath = path.join(process.cwd(), 'public', 'chat_test.html')
   const html = fs.readFileSync(filePath, 'utf8')
 
   response.header('Content-Type', 'text/html; charset=utf-8')
@@ -71,73 +74,22 @@ router.ws(
         return ws.send(JSON.stringify({ type: 'error', error: 'Invalid JSON' }))
       }
 
-      // LEAVE a conversation room
-      if (payload.type === 'leave') {
-        const conversationId = Number(payload.conversationId)
-        chatRooms.leave(conversationId, ws)
-        return ws.send(JSON.stringify({ type: 'leave:ok', conversationId }))
+      if (!payload.type) {
+        return ws.send(JSON.stringify({ type: 'error', error: 'Missing event type' }))
       }
-
-      //Join a conversation room (client can also auto-join on connect, but this allows joining others)
-      if (payload.type === 'join') {
-        const conversationId = Number(payload.conversationId)
-        chatRooms.join(conversationId, ws)
-        return ws.send(JSON.stringify({ type: 'join:ok', conversationId }))
+      try {
+        const handled = (await handleWsQuizMessage(ws, user, payload)) || (await handleWsChatMessage(ws, user, payload))
+        if (!handled) {
+          return ws.send(JSON.stringify({ type: 'error', error: 'Unknown event type' }))
+        }
+      } catch {
+        return ws.send(JSON.stringify({ type: 'error', error: 'Internal server error' }))
       }
-
-      // CREATE a new message (persist then broadcast)
-      if (payload.type === 'message:new') {
-        const conversationId = Number(payload.conversationId)
-        const body = String(payload.body ?? '').trim()
-
-        // Check basic validity
-        if (!body) return ws.send(JSON.stringify({ type: 'error', error: 'Empty message' }))
-        if (!chatRooms.isInConversation(conversationId, ws)) {
-          return ws.send(JSON.stringify({ type: 'error', error: 'Not joined to conversation' }))
-        }
-
-        // Check with DB if user is part of the conversation
-        const allowed = await ConversationParticipant.query()
-          .where('conversationId', conversationId)
-          .where('userId', user.id)
-          .first()
-        if (!allowed) {
-          return ws.send(JSON.stringify({ type: 'error', error: 'Not a participant' }))
-        }
-
-        // Create the message in DB
-        const msg = await Message.create({
-          conversationId,
-          senderId: user.id,
-          text: body,
-        })
-        if (!msg) {
-          return ws.send(JSON.stringify({ type: 'error', error: 'Failed to create message' }))
-        }
-
-        // Broadcast the new message to everyone in the conversation room
-        chatRooms.broadcastToConversation(conversationId, {
-          type: 'message:created',
-          conversationId,
-          message: msg,
-        })
-
-        // Acknowledge to sender with the new message ID
-        return ws.send(
-          JSON.stringify({
-            type: 'message:ack',
-            conversationId,
-            messageId: msg.id,
-          })
-        )
-      }
-
-      // Unknown event
-      return ws.send(JSON.stringify({ type: 'error', error: 'Unknown event type' }))
     })
 
     ws.on('close', () => {
       chatRooms.leaveAll(ws)
+      quizRooms.leaveAll(ws)
     })
   },
 [
