@@ -5,27 +5,72 @@
         <BButton class="mb-3" @click="showCreateModal = true">
           New Chat
         </BButton>
-        <ChatList />
+        <ChatList ref="chatListRef" :selected-id="activeConversation?.id" @select="openConversation" />
       </div>
     </div>
-    <div class="col-9">
-      <MessageList />
-      <MessageForm />
+    <div class="col-9 d-flex flex-column">
+      <div v-if="activeConversation" class="px-3 pt-2 d-flex justify-content-end gap-2">
+        <BButton size="sm" variant="outline-secondary" @click="showMembersModal = true">
+          Manage Users
+        </BButton>
+        <BButton size="sm" variant="outline-danger" :disabled="leaving" @click="leaveConversation">
+          Leave
+        </BButton>
+      </div>
+      <MessageList :conversation-id="activeConversation?.id" :conversation="activeConversation" :key="activeConversation?.id" />
+      <MessageForm :conversation-id="activeConversation?.id" />
     </div>
   </div>
 
-  <ChatCreateModal v-if="showCreateModal" @close="showCreateModal = false" />
+  <ChatCreateModal v-model="showCreateModal" @close="showCreateModal = false" />
+  <ChatMembersModal v-model="showMembersModal" :conversation="activeConversation" />
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import ChatCreateModal from "@/components/chat/ChatCreateModal.vue";
-import ChatEditModal from "@/components/chat/ChatEditModal.vue";
+import ChatMembersModal from "@/components/chat/ChatMembersModal.vue";
 import ChatList from "@/components/chat/ChatList.vue";
 import MessageForm from "@/components/chat/MessageForm.vue";
 import MessageList from "@/components/chat/MessageList.vue";
+import { connectSocket, disconnectSocket, sendWs } from '@/services/chatSocket.js'
+import { chatService } from '@/services/chat.js'
 
 const showCreateModal = ref(false)
+const showMembersModal = ref(false)
+const leaving = ref(false)
+const chatListRef = ref(null)
+
+onMounted(() => connectSocket())
+onUnmounted(() => disconnectSocket())
+
+const activeConversation = ref(null)
+
+const openConversation = (conv) => {
+  if (activeConversation.value?.id) {
+    sendWs({ type: 'chat:leave', conversationId: activeConversation.value.id })
+  }
+  activeConversation.value = conv
+  if (conv?.id) {
+    sendWs({ type: 'chat:join', conversationId: conv.id })
+  }
+}
+
+const leaveConversation = async () => {
+  const conv = activeConversation.value
+  if (!conv) return
+  leaving.value = true
+  try {
+    const me = await chatService.getMe()
+    await chatService.removeUserFromConversation(conv.id, me.id)
+    sendWs({ type: 'chat:leave', conversationId: conv.id })
+    activeConversation.value = null
+    chatListRef.value?.loadConversations()
+  } finally {
+    leaving.value = false
+  }
+}
+
 </script>
 <style scoped>
 
