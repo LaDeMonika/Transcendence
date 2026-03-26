@@ -150,6 +150,7 @@ export default class ChatController {
                     .map((p) => ({
                         id: p.user.id,
                         email: p.user.email,
+                        userName: p.user.userName,
                     }))
 
                 return {
