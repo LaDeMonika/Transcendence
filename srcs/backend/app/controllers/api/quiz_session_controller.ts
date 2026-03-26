@@ -4,6 +4,7 @@ import Quiz from '#models/Quiz'
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import type User from '#models/user'
+import Question from '#models/Question'
 
 export default class QuizSessionController {
   public async create({ request, response, auth }: HttpContext) {
@@ -30,7 +31,7 @@ export default class QuizSessionController {
       state: 'lobby',
     })
 
-    const firstQuestion = await Quiz.query().where('quiz_id', quizId).orderBy('id').first()
+    const firstQuestion = await Question.query().where('quiz_id', quizId).orderBy('id').first()
     if (firstQuestion) {
       quizSession.currentQuestionId = firstQuestion.id
       await quizSession.save()

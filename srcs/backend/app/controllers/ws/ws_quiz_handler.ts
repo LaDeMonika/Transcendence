@@ -54,6 +54,18 @@ export async function handleWsQuizMessage(ws: any, user: User, payload: any) {
       return true
     }
 
+    // check validity of sessionId and questionId
+    const quizSession = await Session.query().where('id', sessionId).first()
+    if (!quizSession) {
+      ws.send(JSON.stringify({ type: 'error', error: 'Invalid sessionId' }))
+      return true
+    }
+    if (quizSession.currentQuestionId !== questionId) {
+      ws.send(JSON.stringify({ type: 'error', error: 'questionId does not match current question for session' }))
+      return true
+    }
+
+    // check if the user has already answered this question
     try {
       const existingAnswer = await db.from('quiz_answers')
         .where('session_id', sessionId)
@@ -70,7 +82,7 @@ export async function handleWsQuizMessage(ws: any, user: User, payload: any) {
       const isCorrect = correctanswer?.correctAnswer === answer
 
       const now = DateTime.now()
-      await db.table('quiz_answers').insert({
+      const created_answer = await db.table('quiz_answers').insert({
         session_id: sessionId,
         question_id: questionId,
         user_id: user.id,
@@ -82,6 +94,7 @@ export async function handleWsQuizMessage(ws: any, user: User, payload: any) {
       })
 
       if (isCorrect) {
+        // Increment score by 1 for correct answer
         await db
           .from('quiz_players')
           .where('session_id', sessionId)

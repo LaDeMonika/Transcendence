@@ -15,7 +15,7 @@ export default class Session extends BaseModel {
   @column()
   public state!: string
 
-  @column({ columnName: 'current_question_index' })
+  @column({ columnName: 'current_question_id' })
   declare currentQuestionId: number
 
   @column({ columnName: 'host_user_id' })
@@ -32,9 +32,22 @@ export default class Session extends BaseModel {
 
   @column.dateTime({ autoCreate: true, columnName: 'created_at' })
   public createdAt!: DateTime
-
+  
   @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
   public updatedAt!: DateTime
+
+    //QUIZ TIMING
+  @column.dateTime({ columnName: 'question_started_at' })
+  declare questionStartedAt: DateTime | null
+
+  @column.dateTime({ columnName: 'question_ends_at' })
+  declare questionEndsAt: DateTime | null
+
+  @column.dateTime({ columnName: 'reveal_ends_at' })
+  declare revealEndsAt: DateTime | null
+
+  @column({columnName: 'timer_duration_seconds'})
+  declare timerDurationSeconds: number | null   
 
   @hasMany(() => QuizPlayer, {
     foreignKey: 'sessionId',

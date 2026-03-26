@@ -36,7 +36,11 @@ export default class extends BaseSchema {
         .notNullable()
         .defaultTo('lobby')
 
-      table.integer('current_question_index').defaultTo(0)
+      table.integer('current_question_id').defaultTo(0)
+
+      table.timestamp('question_started_at', { useTz: true }).nullable()
+      table.timestamp('question_ends_at', { useTz: true }).nullable()
+      table.timestamp('reveal_ends_at', { useTz: true }).nullable()
 
       table.timestamp('started_at', { useTz: true }).nullable()
       table.timestamp('finished_at', { useTz: true }).nullable()
