@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WS Chat Tester</title>
+  <style>
+    :root {
+      --bg: #f3efe8;
+      --panel: #fffdf8;
+      --ink: #1f2933;
+      --muted: #6b7280;
+      --line: #d8cfc2;
+      --accent: #0f766e;
+      --accent-2: #b45309;
+      --danger: #b91c1c;
+      --code: #172033;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, #fff5da 0, transparent 30%),
+        linear-gradient(135deg, #f7f1e8, #efe7db);
+    }
+
+    .shell {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 28px 18px 40px;
+    }
+
+    h1, h2 {
+      margin: 0 0 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+    }
+
+    p, small, label {
+      font-family: "Segoe UI", Tahoma, sans-serif;
+    }
+
+    .intro {
+      margin-bottom: 22px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255, 253, 248, 0.88);
+      backdrop-filter: blur(8px);
+    }
+
+    .intro p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 14px 30px rgba(67, 56, 32, 0.06);
+    }
+
+    .wide {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    input, textarea, button {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      padding: 10px 12px;
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      font-family: Consolas, "Courier New", monospace;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      font-weight: 700;
+      background: var(--accent);
+      color: white;
+      transition: transform 120ms ease, opacity 120ms ease;
+    }
+
+    button.secondary {
+      background: var(--accent-2);
+    }
+
+    button.ghost {
+      background: #475569;
+    }
+
+    button.danger {
+      background: var(--danger);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      opacity: 0.96;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .row > button,
+    .row > input {
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .status {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .status.ok {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .hint {
+      margin-top: 10px;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 13px;
+    }
+
+    .log, .response {
+      margin: 0;
+      min-height: 260px;
+      max-height: 520px;
+      overflow: auto;
+      border-radius: 14px;
+      padding: 14px;
+      background: var(--code);
+      color: #e5eef7;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .feed {
+      border: 1px dashed #cbd5e1;
+      border-radius: 14px;
+      padding: 12px;
+      background: #fff;
+      min-height: 180px;
+      max-height: 400px;
+      overflow: auto;
+    }
+
+    .msg {
+      padding: 10px;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 10px;
+    }
+
+    .msg strong {
+      display: block;
+      margin-bottom: 4px;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      font-size: 12px;
+      color: #475569;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="intro">
+      <h1>WS Chat Tester</h1>
+      <p>Dedicated test page for the token-auth websocket chat flow. It connects to <code>/ws?token=...</code>, lets you join or leave a conversation, send chat events, inspect raw socket frames, and hit the related REST endpoints with the same bearer token.</p>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h2>Connection</h2>
+        <label for="httpBase">HTTP Base URL</label>
+        <input id="httpBase" value="http://localhost:3333" />
+
+        <label for="wsBase">WS Base URL</label>
+        <input id="wsBase" value="ws://localhost:3333/ws" />
+
+        <label for="token">Access Token</label>
+        <input id="token" placeholder="Paste access token" />
+
+        <div id="wsStatus" class="status">Disconnected</div>
+
+        <div class="row">
+          <button id="connectBtn">Connect</button>
+          <button id="disconnectBtn" class="danger">Disconnect</button>
+        </div>
+
+        <p class="hint">The websocket is opened with <code>?token=YOUR_TOKEN</code>. REST calls use <code>Authorization: Bearer YOUR_TOKEN</code>.</p>
+      </div>
+
+      <div class="card">
+        <h2>Conversation</h2>
+        <label for="conversationId">Conversation ID</label>
+        <input id="conversationId" type="number" placeholder="e.g. 17" />
+
+        <label for="messageBody">Message Body</label>
+        <input id="messageBody" value="hello from ws tester" />
+
+        <div class="row">
+          <button id="joinBtn">chat:join</button>
+          <button id="leaveBtn" class="secondary">chat:leave</button>
+        </div>
+
+        <div class="row">
+          <button id="sendBtn">chat:message:new</button>
+          <button id="listBtn" class="ghost">GET messages</button>
+        </div>
+
+        <p class="hint">If the socket is not in the room you should now only receive <code>Not joined to conversation</code>, not the extra unknown-event error.</p>
+      </div>
+
+      <div class="card">
+        <h2>REST Assist</h2>
+        <label for="otherUserId">Other User ID</label>
+        <input id="otherUserId" type="number" value="2" />
+
+        <div class="row">
+          <button id="meBtn" class="ghost">GET /api/me</button>
+          <button id="conversationsBtn" class="ghost">GET /api/conversations</button>
+        </div>
+
+        <div class="row">
+          <button id="createConversationBtn" class="secondary">POST /api/conversations</button>
+          <button id="sendRestBtn" class="secondary">POST message</button>
+        </div>
+
+        <p class="hint">Use this block to create a conversation or inspect existing ones without leaving the page.</p>
+      </div>
+
+      <div class="card">
+        <h2>Raw JSON</h2>
+        <label for="rawPayload">Custom WS Payload</label>
+        <textarea id="rawPayload">{
+  "type": "chat:join",
+  "conversationId": 1
+}</textarea>
+
+        <div class="row">
+          <button id="sendRawBtn">Send Raw Payload</button>
+          <button id="clearLogBtn" class="danger">Clear Logs</button>
+        </div>
+      </div>
+
+      <div class="card wide">
+        <h2>Live Feed</h2>
+        <div id="feed" class="feed"></div>
+      </div>
+
+      <div class="card">
+        <h2>Socket Log</h2>
+        <pre id="socketLog" class="log">(no websocket activity yet)</pre>
+      </div>
+
+      <div class="card">
+        <h2>REST Log</h2>
+        <pre id="restLog" class="response">(no REST requests yet)</pre>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id)
+
+    let ws = null
+
+    function getToken() {
+      return $('token').value.trim()
+    }
+
+    function getHttpBase() {
+      return $('httpBase').value.trim().replace(/\/+$/, '')
+    }
+
+    function getWsBase() {
+      return $('wsBase').value.trim().replace(/\/+$/, '')
+    }
+
+    function setWsStatus(text, ok) {
+      const el = $('wsStatus')
+      el.textContent = text
+      el.className = ok ? 'status ok' : 'status'
+    }
+
+    function appendLog(id, label, data) {
+      const node = $(id)
+      const prefix = node.textContent === '(no websocket activity yet)' || node.textContent === '(no REST requests yet)'
+        ? ''
+        : '\n\n'
+      node.textContent += `${prefix}[${new Date().toLocaleTimeString()}] ${label}\n${data}`
+      node.scrollTop = node.scrollHeight
+    }
+
+    function replaceEmptyLog(id) {
+      const node = $(id)
+      if (node.textContent === '(no websocket activity yet)' || node.textContent === '(no REST requests yet)') {
+        node.textContent = ''
+      }
+    }
+
+    function renderFeedMessage(payload) {
+      const feed = $('feed')
+      if (feed.children.length === 0) {
+        feed.textContent = ''
+      }
+
+      const item = document.createElement('div')
+      item.className = 'msg'
+
+      const meta = document.createElement('strong')
+      const type = payload?.type || 'event'
+      const sender = payload?.message?.senderId ?? payload?.userId ?? '-'
+      meta.textContent = `${type} | sender/user ${sender}`
+      item.appendChild(meta)
+
+      const body = document.createElement('div')
+      body.textContent = payload?.message?.text || payload?.error || JSON.stringify(payload)
+      item.appendChild(body)
+
+      feed.prepend(item)
+    }
+
+    function sendWsPayload(payload) {
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        appendLog('socketLog', 'WS ERROR', 'Socket is not open')
+        return
+      }
+
+      const pretty = JSON.stringify(payload, null, 2)
+      replaceEmptyLog('socketLog')
+      appendLog('socketLog', 'WS SEND', pretty)
+      ws.send(JSON.stringify(payload))
+    }
+
+    async function request(method, path, body) {
+      const token = getToken()
+      const headers = { Accept: 'application/json' }
+      if (body !== undefined) headers['Content-Type'] = 'application/json'
+      if (token) headers.Authorization = `Bearer ${token}`
+
+      const url = `${getHttpBase()}${path}`
+      replaceEmptyLog('restLog')
+      appendLog('restLog', `${method} ${url}`, body ? JSON.stringify(body, null, 2) : '(no body)')
+
+      const response = await fetch(url, {
+        method,
+        headers,
+        body: body === undefined ? undefined : JSON.stringify(body),
+      })
+
+      const text = await response.text()
+      let parsed = null
+      try { parsed = JSON.parse(text) } catch {}
+
+      appendLog(
+        'restLog',
+        `RECV ${response.status} ${response.statusText}`,
+        parsed ? JSON.stringify(parsed, null, 2) : text
+      )
+
+      return parsed
+    }
+
+    $('connectBtn').addEventListener('click', () => {
+      const token = getToken()
+      if (!token) {
+        appendLog('socketLog', 'WS ERROR', 'Missing access token')
+        return
+      }
+
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.close()
+      }
+
+      const url = `${getWsBase()}?token=${encodeURIComponent(token)}`
+      replaceEmptyLog('socketLog')
+      appendLog('socketLog', 'WS CONNECT', url)
+
+      ws = new WebSocket(url)
+      setWsStatus('Connecting', false)
+
+      ws.addEventListener('open', () => {
+        setWsStatus('Connected', true)
+        appendLog('socketLog', 'WS OPEN', 'Connection established')
+      })
+
+      ws.addEventListener('message', (event) => {
+        replaceEmptyLog('socketLog')
+        appendLog('socketLog', 'WS RECV', event.data)
+        try {
+          renderFeedMessage(JSON.parse(event.data))
+        } catch {}
+      })
+
+      ws.addEventListener('close', () => {
+        setWsStatus('Disconnected', false)
+        appendLog('socketLog', 'WS CLOSE', 'Socket closed')
+      })
+
+      ws.addEventListener('error', () => {
+        setWsStatus('Error', false)
+        appendLog('socketLog', 'WS ERROR', 'WebSocket error event')
+      })
+    })
+
+    $('disconnectBtn').addEventListener('click', () => {
+      if (ws) ws.close()
+    })
+
+    $('joinBtn').addEventListener('click', () => {
+      const conversationId = Number($('conversationId').value)
+      sendWsPayload({ type: 'chat:join', conversationId })
+    })
+
+    $('leaveBtn').addEventListener('click', () => {
+      const conversationId = Number($('conversationId').value)
+      sendWsPayload({ type: 'chat:leave', conversationId })
+    })
+
+    $('sendBtn').addEventListener('click', () => {
+      const conversationId = Number($('conversationId').value)
+      const body = $('messageBody').value
+      sendWsPayload({ type: 'chat:message:new', conversationId, body })
+    })
+
+    $('sendRawBtn').addEventListener('click', () => {
+      try {
+        const payload = JSON.parse($('rawPayload').value)
+        sendWsPayload(payload)
+      } catch (error) {
+        appendLog('socketLog', 'WS ERROR', `Invalid JSON: ${error.message}`)
+      }
+    })
+
+    $('clearLogBtn').addEventListener('click', () => {
+      $('socketLog').textContent = '(no websocket activity yet)'
+      $('restLog').textContent = '(no REST requests yet)'
+      $('feed').textContent = ''
+    })
+
+    $('meBtn').addEventListener('click', async () => {
+      await request('GET', '/api/me')
+    })
+
+    $('conversationsBtn').addEventListener('click', async () => {
+      const data = await request('GET', '/api/conversations')
+      if (Array.isArray(data) && data[0]?.id) {
+        $('conversationId').value = data[0].id
+      }
+    })
+
+    $('createConversationBtn').addEventListener('click', async () => {
+      const otherUserId = Number($('otherUserId').value)
+      const data = await request('POST', '/api/conversations', { otherUserId })
+      if (data?.id) {
+        $('conversationId').value = data.id
+      }
+    })
+
+    $('sendRestBtn').addEventListener('click', async () => {
+      const conversationId = Number($('conversationId').value)
+      const text = $('messageBody').value
+      await request('POST', `/api/conversations/${conversationId}/messages`, { text })
+    })
+
+    $('listBtn').addEventListener('click', async () => {
+      const conversationId = Number($('conversationId').value)
+      await request('GET', `/api/conversations/${conversationId}/messages`)
+    })
+  </script>
+</body>
+</html>
