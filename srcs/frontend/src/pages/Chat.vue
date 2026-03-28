@@ -17,8 +17,11 @@
           Leave
         </BButton>
       </div>
-      <MessageList :conversation-id="activeConversation?.id" :conversation="activeConversation" :key="activeConversation?.id" />
-      <MessageForm :conversation-id="activeConversation?.id" />
+
+      <div v-if="activeConversation">
+        <MessageList :conversation-id="activeConversation?.id" :conversation="activeConversation" :key="activeConversation?.id" />
+        <MessageForm :conversation-id="activeConversation?.id" />
+      </div>
     </div>
   </div>
 

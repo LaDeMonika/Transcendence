@@ -14,7 +14,7 @@
         :key="member.id"
         class="d-flex justify-content-between align-items-center"
       >
-        {{ member.username }} ({{ member.email }})
+        {{ member.userName }}
         <BButton
           size="sm"
           variant="outline-danger"
@@ -50,7 +50,7 @@
         :key="user.id"
         class="d-flex justify-content-between align-items-center"
       >
-        {{ user.username }}
+        {{ user.userName }}
         <BButton
           size="sm"
           variant="outline-success"

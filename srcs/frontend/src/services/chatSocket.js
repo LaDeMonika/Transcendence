@@ -1,4 +1,4 @@
-let wsUrl = import.meta.env.VITE_BACKEND_URL
+let wsUrl = import.meta.env.VITE_BACKEND_URL.replace('/api', '')
 
 if (wsUrl.startsWith('https://')) {
   wsUrl = 'wss://' + wsUrl.slice('https://'.length)
@@ -11,6 +11,11 @@ if (wsUrl.endsWith('/')) {
 }
 
 wsUrl += '/ws'
+
+const token = localStorage.getItem('token')
+if (token) {
+  wsUrl += '?token=' + encodeURIComponent(token)
+}
 
 let socket = null
 let intentionalClose = false

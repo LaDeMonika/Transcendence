@@ -7,7 +7,7 @@ export const chatService = {
   },
 
   async searchUsers(query) {
-    const res = await client.get('/users/search', { params: { q: query } })
+    const res = await client.get('/search-users', { params: { query } })
     return res.data
   },
 

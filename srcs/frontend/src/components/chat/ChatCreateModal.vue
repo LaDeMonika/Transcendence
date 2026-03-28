@@ -28,7 +28,7 @@
         :active="selectedUser?.id === user.id"
         @click="selectedUser = user"
       >
-        {{ user.username }}
+        {{ user.userName }}
       </BListGroupItem>
     </BListGroup>
 
