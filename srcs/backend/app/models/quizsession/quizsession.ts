@@ -46,9 +46,6 @@ export default class Session extends BaseModel {
   @column.dateTime({ columnName: 'reveal_ends_at' })
   declare revealEndsAt: DateTime | null
 
-  @column({columnName: 'timer_duration_seconds'})
-  declare timerDurationSeconds: number | null   
-
   @hasMany(() => QuizPlayer, {
     foreignKey: 'sessionId',
   })

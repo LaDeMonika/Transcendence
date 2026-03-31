@@ -5,6 +5,7 @@ import QuizPlayer from '#models/quizsession/quiz_player'
 import Session from '#models/quizsession/quizsession'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
+import { quizEngine } from '#services/quiz_engine'
 
 export async function handleWsQuizMessage(ws: any, user: User, payload: any) {
   if (payload.type === 'quiz:join') {
@@ -28,8 +29,11 @@ export async function handleWsQuizMessage(ws: any, user: User, payload: any) {
       })
     }
 
+    // Joining the socket room enables all future quiz broadcasts for this session.
     quizRooms.join(String(sessionId), ws)
     ws.send(JSON.stringify({ type: 'quiz:join:ok', sessionId }))
+    // Send the current quiz state right away so late joiners and reconnects can render the active round.
+    await quizEngine.syncSocket(ws, quizSession, user.id)
     return true
   }
 
@@ -41,6 +45,34 @@ export async function handleWsQuizMessage(ws: any, user: User, payload: any) {
     }
     quizRooms.leave(String(sessionId), ws)
     ws.send(JSON.stringify({ type: 'quiz:leave:ok', sessionId }))
+    return true
+  }
+
+  if (payload.type === 'quiz:start') {
+    const sessionId = Number(payload.sessionId)
+    if (!sessionId) {
+      ws.send(JSON.stringify({ type: 'error', error: 'Missing sessionId' }))
+      return true
+    }
+
+    const quizSession = await Session.find(sessionId)
+    if (!quizSession) {
+      ws.send(JSON.stringify({ type: 'error', error: 'Invalid sessionId' }))
+      return true
+    }
+
+    if (quizSession.hostId !== user.id) {
+      ws.send(JSON.stringify({ type: 'error', error: 'Only the host can start the quiz' }))
+      return true
+    }
+
+    if (quizSession.state !== 'lobby') {
+      ws.send(JSON.stringify({ type: 'error', error: 'Quiz has already started' }))
+      return true
+    }
+
+    // Starting flows through the shared engine so REST and WS start actions behave identically.
+    await quizEngine.startSession(quizSession)
     return true
   }
 
@@ -60,8 +92,19 @@ export async function handleWsQuizMessage(ws: any, user: User, payload: any) {
       ws.send(JSON.stringify({ type: 'error', error: 'Invalid sessionId' }))
       return true
     }
+    // Answers are only valid while the session is in the active question phase.
+    if (quizSession.state !== 'question') {
+      ws.send(JSON.stringify({ type: 'error', error: 'Question is not currently accepting answers' }))
+      return true
+    }
+    // This prevents clients from answering a stale or future question id.
     if (quizSession.currentQuestionId !== questionId) {
       ws.send(JSON.stringify({ type: 'error', error: 'questionId does not match current question for session' }))
+      return true
+    }
+    // The timer is enforced on the server so late answers cannot sneak in after the UI countdown hits zero.
+    if (quizSession.questionEndsAt && DateTime.now() > quizSession.questionEndsAt) {
+      ws.send(JSON.stringify({ type: 'error', error: 'Question timer has already expired' }))
       return true
     }
 
@@ -82,27 +125,39 @@ export async function handleWsQuizMessage(ws: any, user: User, payload: any) {
       const isCorrect = correctanswer?.correctAnswer === answer
 
       const now = DateTime.now()
-      const created_answer = await db.table('quiz_answers').insert({
+      // Kahoot-style scoring rewards correct answers that arrive earlier in the question window.
+      const totalMillis = quizSession.questionStartedAt && quizSession.questionEndsAt
+        ? Math.max(quizSession.questionEndsAt.diff(quizSession.questionStartedAt).milliseconds, 1)
+        : 1
+      const remainingMillis = quizSession.questionEndsAt
+        ? Math.max(quizSession.questionEndsAt.diff(now).milliseconds, 0)
+        : 0
+      const speedRatio = remainingMillis / totalMillis
+      const points = isCorrect ? Math.round(500 + 500 * speedRatio) : 0
+
+      await db.table('quiz_answers').insert({
         session_id: sessionId,
         question_id: questionId,
         user_id: user.id,
         selected_option: answer,
         is_correct: isCorrect,
+        points,
         answered_at: now.toSQL(),
         created_at: now.toSQL(),
         updated_at: now.toSQL(),
       })
 
-      if (isCorrect) {
-        // Increment score by 1 for correct answer
+      // Player score stores accumulated points, not just correct-answer count.
+      if (points > 0) {
         await db
           .from('quiz_players')
           .where('session_id', sessionId)
           .where('user_id', user.id)
-          .increment('score', 1)
+          .increment('score', points)
       }
 
-      ws.send(JSON.stringify({ type: 'quiz:answer:ack' }))
+      // The ack returns scoring metadata so the client can confirm the submission result immediately.
+      ws.send(JSON.stringify({ type: 'quiz:answer:ack', points, isCorrect }))
       return true
     } catch (error: any) {
       // Unique violation from concurrent duplicate submits.

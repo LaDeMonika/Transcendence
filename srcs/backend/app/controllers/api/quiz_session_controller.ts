@@ -1,10 +1,9 @@
 import Session from '#models/quizsession/quizsession'
 import QuizPlayer from '#models/quizsession/quiz_player'
-import Quiz from '#models/Quiz'
 import type { HttpContext } from '@adonisjs/core/http'
-import { DateTime } from 'luxon'
 import type User from '#models/user'
 import Question from '#models/Question'
+import { quizEngine } from '#services/quiz_engine'
 
 export default class QuizSessionController {
   public async create({ request, response, auth }: HttpContext) {
@@ -76,10 +75,8 @@ export default class QuizSessionController {
       return { error: 'Only the host can start the quiz' }
     }
 
-    quizSession.state = 'question'
-    quizSession.startedAt = DateTime.now()
-    await quizSession.save()
-    return quizSession
+    // Reuse the websocket engine here so there is only one implementation of the live quiz state machine.
+    return quizEngine.startSession(quizSession)
   }
 
   public async standings({ params }: HttpContext) {
