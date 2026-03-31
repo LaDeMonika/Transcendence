@@ -1,32 +1,39 @@
 <template>
   <div class="container d-flex flex-column" style="min-height: 100%">
+
+    <!-- TITLE -->
     <div class="row align-items-center justify-content-center border">
       <div class="col-sm d-flex justify-content-center">
         <h1>Choose Quiz!</h1>
       </div>
     </div>
+
+    <!-- SCROLL-BOX - SELECT QUIZZES -->
     <div class="row align-items-center justify-content-center border">
       <div class="scroll-box">
         <div class="grid">
-          <div v-for="item in items" :key="item" class="card">
+          <div
+            v-for="item in items"
+            :key="item"
+            class="card"
+            :class="{ selected: selectedItems.includes(item) }"
+            @click="toggleCard(item)"
+          >
             {{ item }}
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="row align-items-center justify-content-center">
-        <div class="back-start-buttons d-flex justify-content-center">
-          <button class="btn btn-primary mx-3" @click="prevStep">Back</button>
-          <button
-            class="btn btn-primary mx-3"
-            @click="startGame"
-            :disabled="!selectedDifficulty"
-          >
-            Start
-          </button>
-        </div>
+    <!-- BUTTONS -> BACK (LOBBY) & START -->
+    <div class="row align-items-center justify-content-center border">
+      <div class="back-start-buttons d-flex justify-content-center">
+        <button class="btn btn-primary mx-3" @click="goBack('lobby')">Lobby</button>
+        <button class="btn btn-primary mx-3" @click="startGame('game')">Start</button>
       </div>
     </div>
+
+
   </div>
 </template>
 
@@ -35,7 +42,24 @@ export default {
   data() {
     return {
       items: Array.from({ length: 30 }, (_, i) => `Box ${i + 1}`),
+      selectedItems: [],
+      path: "/",
     };
+  },
+  methods: {
+    toggleCard(item) {
+      if (this.selectedItems.includes(item)) {
+        this.selectedItems = this.selectedItems.filter((i) => i !== item);
+      } else {
+        this.selectedItems.push(item);
+      }
+    },
+    goBack(path) {
+      this.$router.push(path);
+    },
+    startGame(path) {
+      this.$router.push(path);
+    },
   },
 };
 </script>
@@ -50,7 +74,7 @@ export default {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 per row */
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
 
@@ -60,6 +84,11 @@ export default {
   padding: 20px;
   text-align: center;
   border-radius: 6px;
+}
+
+.card.selected {
+  border-color: blue;
+  background-color: #e6f0ff;
 }
 
 .back-start-buttons {
