@@ -26,7 +26,7 @@ export default class Question extends BaseModel {
   public answerD!: string
 
   @column()
-  public correctAnswer!: string //"A" | "B" | "C" | "D"
+  public correctAnswer!: string //"A" | "B" | "C" | "D" 
 
   // @column()
   // public points!: number

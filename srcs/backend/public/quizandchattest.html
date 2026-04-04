@@ -1,0 +1,709 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Adonis Chat + Quiz Tester</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 20px;
+      background: #f6f7fb;
+      color: #111827;
+    }
+
+    h1 {
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin-top: 0;
+      color: #4b5563;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 4px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    input, textarea, button {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      font: inherit;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    button {
+      margin-top: 10px;
+      border: none;
+      background: #111827;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: #4b5563;
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .row > * {
+      flex: 1;
+    }
+
+    pre {
+      background: #0f172a;
+      color: #e5e7eb;
+      padding: 12px;
+      border-radius: 12px;
+      min-height: 250px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .status {
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .ok {
+      color: #15803d;
+    }
+
+    .bad {
+      color: #b91c1c;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    th, td {
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      padding: 8px 6px;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f9fafb;
+    }
+
+    .muted {
+      color: #6b7280;
+      font-size: 13px;
+    }
+
+    .chat-feed {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      background: #fafafa;
+      min-height: 280px;
+      max-height: 420px;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .chat-empty {
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .chat-item {
+      padding: 10px;
+      border-radius: 10px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      margin-bottom: 8px;
+    }
+
+    .chat-meta {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+
+    .chat-body {
+      font-size: 14px;
+      color: #111827;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    code {
+      background: #eef2ff;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Adonis Chat + Quiz Tester</h1>
+  <p>Use a Bearer token for REST. For WebSocket, this page appends <code>?token=...</code> to the URL.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Authentication</h2>
+
+      <label for="bearerToken">Bearer Token</label>
+      <input id="bearerToken" placeholder="Paste your API token here" />
+
+      <div class="row">
+        <button id="saveTokenBtn">Save Token</button>
+        <button id="clearTokenBtn" class="secondary">Clear Token</button>
+      </div>
+
+      <div class="muted">REST sends: Authorization: Bearer &lt;token&gt;</div>
+      <div class="muted">WS connects to: /ws?token=&lt;token&gt;</div>
+    </div>
+
+    <div class="card">
+      <h2>WebSocket</h2>
+      <div id="wsStatus" class="status bad">Disconnected</div>
+
+      <label for="wsUrl">WS URL</label>
+      <input id="wsUrl" value="ws://localhost:3333/ws" />
+
+      <div class="row">
+        <button id="connectBtn">Connect</button>
+        <button id="disconnectBtn" class="secondary">Disconnect</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>REST: Create Quiz Session</h2>
+
+      <label for="createQuizId">Quiz ID</label>
+      <input id="createQuizId" type="number" placeholder="e.g. 1" />
+
+      <label for="createConversationId">Conversation ID (optional)</label>
+      <input id="createConversationId" type="number" placeholder="e.g. 12" />
+
+      <label for ="createHostId">Host User ID (optional, for testing host-only routes)</label>
+      <input id="createHostId" type="number" placeholder="e.g. 3" />
+
+      <button id="createSessionBtn">Create Session</button>
+      <div class="muted">Adjust the URL/body in JS if your route names differ.</div>
+    </div>
+
+    <div class="card">
+      <h2>REST: Join Quiz Session</h2>
+
+      <label for="joinSessionId">Session ID</label>
+      <input id="joinSessionId" type="number" placeholder="e.g. 5" />
+
+      <button id="joinSessionBtn">Join Session (REST)</button>
+      <div class="muted">This should create the QuizPlayer record on the backend.</div>
+    </div>
+
+    <div class="card">
+      <h2>REST: Start Quiz Session</h2>
+
+      <label for="startSessionId">Session ID</label>
+      <input id="startSessionId" type="number" placeholder="e.g. 5" />
+
+      <button id="startSessionBtn">Start Session</button>
+      <div class="muted">Host-only if your backend enforces it.</div>
+    </div>
+
+    <div class="card">
+      <h2>Chat WS</h2>
+
+      <label for="conversationId">Conversation ID</label>
+      <input id="conversationId" type="number" placeholder="e.g. 1" />
+
+      <label for="chatMessage">Message</label>
+      <input id="chatMessage" placeholder="Hello chat" />
+
+      <div class="row">
+        <button id="chatJoinBtn">Chat Join</button>
+        <button id="chatLeaveBtn" class="secondary">Chat Leave</button>
+      </div>
+
+      <button id="chatSendBtn">Send Chat Message</button>
+    </div>
+
+    <div class="card">
+      <h2>Live Chat Feed</h2>
+      <div class="row">
+        <button id="clearChatBtn" class="secondary">Clear Chat</button>
+      </div>
+      <div id="chatFeed" class="chat-feed">
+        <div class="chat-empty">No chat messages received yet.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Quiz WS</h2>
+
+      <label for="quizSessionId">Session ID</label>
+      <input id="quizSessionId" type="number" placeholder="e.g. 5" />
+
+      <label for="questionId">Question ID</label>
+      <input id="questionId" type="number" placeholder="e.g. 10" />
+
+      <label for="answer">Answer</label>
+      <input id="answer" placeholder="e.g. A" />
+
+      <div class="row">
+        <button id="quizJoinBtn">Quiz Join (WS)</button>
+        <button id="quizLeaveBtn" class="secondary">Quiz Leave</button>
+      </div>
+
+      <button id="quizAnswerBtn">Submit Answer</button>
+    </div>
+
+    <div class="card">
+      <h2>REST: Standings</h2>
+
+      <label for="standingsSessionId">Session ID</label>
+      <input id="standingsSessionId" type="number" placeholder="e.g. 5" />
+
+      <button id="getStandingsBtn">Fetch Standings</button>
+
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>User ID</th>
+            <th>Username</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody id="standingsBody">
+          <tr><td colspan="4" class="muted">No standings loaded yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Raw WS JSON</h2>
+
+      <label for="rawPayload">Payload</label>
+      <textarea id="rawPayload">{
+  "type": "quiz:join",
+  "sessionId": 1
+}</textarea>
+
+      <button id="sendRawBtn">Send Raw Payload</button>
+    </div>
+
+    <div class="card">
+      <h2>Log</h2>
+      <div class="row">
+        <button id="clearLogBtn" class="secondary">Clear Log</button>
+      </div>
+      <pre id="log"></pre>
+    </div>
+  </div>
+
+  <script>
+    let socket = null
+
+    const wsStatus = document.getElementById('wsStatus')
+    const logEl = document.getElementById('log')
+    const standingsBody = document.getElementById('standingsBody')
+    const chatFeed = document.getElementById('chatFeed')
+
+    const wsUrl = document.getElementById('wsUrl')
+    const bearerToken = document.getElementById('bearerToken')
+
+    const createQuizId = document.getElementById('createQuizId')
+    const createConversationId = document.getElementById('createConversationId')
+    const createHostId = document.getElementById('createHostId')
+
+    const joinSessionId = document.getElementById('joinSessionId')
+    const startSessionId = document.getElementById('startSessionId')
+
+    const conversationId = document.getElementById('conversationId')
+    const chatMessage = document.getElementById('chatMessage')
+
+    const quizSessionId = document.getElementById('quizSessionId')
+    const questionId = document.getElementById('questionId')
+    const answer = document.getElementById('answer')
+
+    const standingsSessionId = document.getElementById('standingsSessionId')
+    const rawPayload = document.getElementById('rawPayload')
+
+    const TOKEN_STORAGE_KEY = 'adonis_quiz_tester_bearer_token'
+
+    function log(...args) {
+      const line = args.map(v => {
+        if (typeof v === 'string') return v
+        try { return JSON.stringify(v, null, 2) } catch { return String(v) }
+      }).join(' ')
+      logEl.textContent += `[${new Date().toLocaleTimeString()}] ${line}\n`
+      logEl.scrollTop = logEl.scrollHeight
+    }
+
+    function setStatus(text, ok) {
+      wsStatus.textContent = text
+      wsStatus.className = 'status ' + (ok ? 'ok' : 'bad')
+    }
+
+    function safeJsonParse(text) {
+      try {
+        return JSON.parse(text)
+      } catch {
+        return text
+      }
+    }
+
+    function getToken() {
+      return (bearerToken.value || '').trim()
+    }
+
+    function saveToken() {
+      localStorage.setItem(TOKEN_STORAGE_KEY, getToken())
+      log('Token saved to localStorage')
+    }
+
+    function loadToken() {
+      const saved = localStorage.getItem(TOKEN_STORAGE_KEY)
+      if (saved) bearerToken.value = saved
+    }
+
+    function clearToken() {
+      bearerToken.value = ''
+      localStorage.removeItem(TOKEN_STORAGE_KEY)
+      log('Token cleared')
+    }
+
+    function getAuthHeaders() {
+      const headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      }
+
+      const token = getToken()
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+
+      return headers
+    }
+
+    function buildWsUrl() {
+      const base = wsUrl.value.trim()
+      const token = getToken()
+      if (!token) return base
+
+      const separator = base.includes('?') ? '&' : '?'
+      return `${base}${separator}token=${encodeURIComponent(token)}`
+    }
+
+    async function rest(method, url, body) {
+      log('REST', method, url, body || '', getToken() ? '(with bearer token)' : '(no bearer token)')
+      const res = await fetch(url, {
+        method,
+        credentials: 'include',
+        headers: getAuthHeaders(),
+        body: body ? JSON.stringify(body) : undefined,
+      })
+
+      const text = await res.text()
+      const parsed = safeJsonParse(text)
+
+      if (!res.ok) {
+        log('REST ERROR', res.status, parsed)
+        throw new Error(typeof parsed === 'string' ? parsed : JSON.stringify(parsed))
+      }
+
+      log('REST OK', parsed)
+      return parsed
+    }
+
+    function renderStandings(data) {
+      let standings = data
+
+      if (data && Array.isArray(data.standings)) {
+        standings = data.standings
+      }
+
+      if (!Array.isArray(standings) || standings.length === 0) {
+        standingsBody.innerHTML = '<tr><td colspan="4" class="muted">No standings found.</td></tr>'
+        return
+      }
+
+      standingsBody.innerHTML = standings.map((row, index) => `
+        <tr>
+          <td>${row.rank ?? (index + 1)}</td>
+          <td>${row.userId ?? row.user_id ?? ''}</td>
+          <td>${row.username ?? row.user?.username ?? '-'}</td>
+          <td>${row.score ?? 0}</td>
+        </tr>
+      `).join('')
+    }
+
+    function formatChatTime(value) {
+      if (!value) return new Date().toLocaleTimeString()
+      const d = new Date(value)
+      if (Number.isNaN(d.getTime())) return String(value)
+      return d.toLocaleTimeString()
+    }
+
+    function appendChatMessage(message, fallbackConversationId = null) {
+      const empty = chatFeed.querySelector('.chat-empty')
+      if (empty) empty.remove()
+
+      const item = document.createElement('div')
+      item.className = 'chat-item'
+
+      const sender =
+        message.senderId ??
+        message.sender_id ??
+        message.userId ??
+        message.user_id ??
+        'unknown'
+
+      const convId =
+        message.conversationId ??
+        message.conversation_id ??
+        fallbackConversationId ??
+        '-'
+
+      const text =
+        message.text ??
+        message.body ??
+        message.message ??
+        ''
+
+      const createdAt =
+        message.createdAt ??
+        message.created_at ??
+        null
+
+      item.innerHTML = `
+        <div class="chat-meta">
+          Conversation ${convId} • Sender ${sender} • ${formatChatTime(createdAt)}
+        </div>
+        <div class="chat-body">${escapeHtml(String(text))}</div>
+      `
+
+      chatFeed.appendChild(item)
+      chatFeed.scrollTop = chatFeed.scrollHeight
+    }
+
+    function escapeHtml(value) {
+      return value
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;')
+    }
+
+    function send(payload) {
+      if (!socket || socket.readyState !== WebSocket.OPEN) {
+        log('WS not connected')
+        return
+      }
+      log('WS SEND', payload)
+      socket.send(JSON.stringify(payload))
+    }
+
+    document.getElementById('saveTokenBtn').addEventListener('click', saveToken)
+    document.getElementById('clearTokenBtn').addEventListener('click', clearToken)
+
+    document.getElementById('connectBtn').addEventListener('click', () => {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        log('WS already connected')
+        return
+      }
+
+      const finalWsUrl = buildWsUrl()
+      log('WS CONNECT', finalWsUrl)
+
+      socket = new WebSocket(finalWsUrl)
+
+      socket.addEventListener('open', () => {
+        setStatus('Connected', true)
+        log('WS connected')
+      })
+
+      socket.addEventListener('message', (event) => {
+        const parsed = safeJsonParse(event.data)
+        log('WS RECV', parsed)
+
+        if (parsed && parsed.type === 'quiz:standings') {
+          renderStandings(parsed.standings ?? parsed)
+        }
+
+        if (parsed && (parsed.type === 'chat:message:created' || parsed.type === 'message:created')) {
+          appendChatMessage(parsed.message ?? {}, parsed.conversationId ?? null)
+        }
+      })
+
+      socket.addEventListener('close', () => {
+        setStatus('Disconnected', false)
+        log('WS closed')
+      })
+
+      socket.addEventListener('error', (err) => {
+        setStatus('Error', false)
+        log('WS error', err)
+      })
+    })
+
+    document.getElementById('disconnectBtn').addEventListener('click', () => {
+      if (socket) socket.close()
+    })
+
+    document.getElementById('createSessionBtn').addEventListener('click', async () => {
+      try {
+        const body = {
+          quizId: Number(createQuizId.value),
+        }
+
+        if (createConversationId.value) {
+          body.conversationId = Number(createConversationId.value)
+        }
+
+        if (createHostId.value) {
+          body.hostId = Number(createHostId.value)
+        }
+
+        const data = await rest('POST', '/api/quiz-sessions', body)
+
+        if (data?.id) {
+          quizSessionId.value = data.id
+          joinSessionId.value = data.id
+          startSessionId.value = data.id
+          standingsSessionId.value = data.id
+        }
+      } catch (err) {
+        log('Create session failed', String(err))
+      }
+    })
+
+    document.getElementById('joinSessionBtn').addEventListener('click', async () => {
+      try {
+        const sessionId = Number(joinSessionId.value)
+        await rest('POST', `/api/quiz-sessions/${sessionId}/join`, {})
+      } catch (err) {
+        log('Join session failed', String(err))
+      }
+    })
+
+    document.getElementById('startSessionBtn').addEventListener('click', async () => {
+      try {
+        const sessionId = Number(startSessionId.value)
+        await rest('POST', `/api/quiz-sessions/${sessionId}/start`, {})
+      } catch (err) {
+        log('Start session failed', String(err))
+      }
+    })
+
+    document.getElementById('chatJoinBtn').addEventListener('click', () => {
+      send({
+        type: 'chat:join',
+        conversationId: Number(conversationId.value),
+      })
+    })
+
+    document.getElementById('chatLeaveBtn').addEventListener('click', () => {
+      send({
+        type: 'chat:leave',
+        conversationId: Number(conversationId.value),
+      })
+    })
+
+    document.getElementById('chatSendBtn').addEventListener('click', () => {
+      send({
+        type: 'chat:message:new',
+        conversationId: Number(conversationId.value),
+        body: chatMessage.value,
+      })
+    })
+
+    document.getElementById('clearChatBtn').addEventListener('click', () => {
+      chatFeed.innerHTML = '<div class="chat-empty">No chat messages received yet.</div>'
+    })
+
+    document.getElementById('quizJoinBtn').addEventListener('click', () => {
+      send({
+        type: 'quiz:join',
+        sessionId: Number(quizSessionId.value),
+      })
+    })
+
+    document.getElementById('quizLeaveBtn').addEventListener('click', () => {
+      send({
+        type: 'quiz:leave',
+        sessionId: Number(quizSessionId.value),
+      })
+    })
+
+    document.getElementById('quizAnswerBtn').addEventListener('click', () => {
+      send({
+        type: 'quiz:answerSubmit',
+        sessionId: Number(quizSessionId.value),
+        questionId: Number(questionId.value),
+        answer: answer.value,
+      })
+    })
+
+    document.getElementById('getStandingsBtn').addEventListener('click', async () => {
+      try {
+        const sessionId = Number(standingsSessionId.value)
+        const data = await rest('GET', `/api/quiz-sessions/${sessionId}/standings`)
+        renderStandings(data)
+      } catch (err) {
+        log('Fetch standings failed', String(err))
+      }
+    })
+
+    document.getElementById('sendRawBtn').addEventListener('click', () => {
+      try {
+        const payload = JSON.parse(rawPayload.value)
+        send(payload)
+      } catch (err) {
+        log('Invalid raw JSON', String(err))
+      }
+    })
+
+    document.getElementById('clearLogBtn').addEventListener('click', () => {
+      logEl.textContent = ''
+    })
+
+    loadToken()
+  </script>
+</body>
+</html>

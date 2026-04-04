@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Adonis Chat API Tester (New Controller)</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; }
+    .row { display: flex; gap: 16px; flex-wrap: wrap; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; max-width: 920px; width: 100%; }
+    label { display:block; font-weight: 600; margin: 8px 0 4px; }
+    input, textarea, button, select { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ccc; }
+    textarea { min-height: 90px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    button { cursor: pointer; font-weight: 600; }
+    .actions { display:flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .actions button { width: auto; }
+    pre { background: #0b1020; color: #e7e7e7; padding: 12px; border-radius: 12px; overflow:auto; }
+    small { color: #555; }
+    .hint { background: #fff7cc; border: 1px solid #f2d25a; padding: 10px; border-radius: 10px; }
+    .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+    .pill { display:inline-block; padding:2px 10px; border:1px solid #ddd; border-radius:999px; font-size:12px; margin-left:8px; color:#444; }
+  </style>
+</head>
+<body>
+  <h1>Adonis Chat API Tester <span class="pill">/api</span></h1>
+
+  <div class="card hint">
+    <div><strong>Note:</strong> This page uses <code>fetch()</code>. If you get CORS errors, either enable CORS in Adonis or serve this HTML from Adonis (same origin).</div>
+    <div><small>Endpoints assumed from your controller: <code>/api/me</code>, <code>/api/conversations</code>, <code>/api/conversations/add-user</code>, <code>/api/conversations/remove-user</code>, <code>/api/conversations/:id/messages</code>.</small></div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <h2>Base / Auth</h2>
+
+      <label>Base URL</label>
+      <input id="baseUrl" value="http://localhost:3333" />
+
+      <label>Bearer Token</label>
+      <input id="token" placeholder="Paste token here (without 'Bearer ')" />
+
+      <div class="actions">
+        <button id="btnMe">GET /api/me</button>
+        <button id="btnConversations">GET /api/conversations</button>
+      </div>
+      <small>If these return 401, you need to login and paste the access token.</small>
+    </div>
+
+    <div class="card">
+      <h2>Create / Get Conversation</h2>
+      <label>otherUserId</label>
+      <input id="otherUserId" type="number" value="2" />
+
+      <div class="actions">
+        <button id="btnCreateConversation">POST /api/conversations</button>
+      </div>
+
+      <small>Tip: after a successful response, this page will try to auto-fill “Conversation ID”.</small>
+    </div>
+
+    <div class="card">
+      <h2>Add user to conversation</h2>
+      <div class="grid2">
+        <div>
+          <label>conversationId</label>
+          <input id="addConversationId" type="number" placeholder="e.g. 1" />
+        </div>
+        <div>
+          <label>otherUserId</label>
+          <input id="addOtherUserId" type="number" value="3" />
+        </div>
+      </div>
+      <div class="actions">
+        <button id="btnAddUser">POST /api/conversations/add-user</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Remove user from conversation</h2>
+      <div class="grid2">
+        <div>
+          <label>conversationId</label>
+          <input id="removeConversationId" type="number" placeholder="e.g. 1" />
+        </div>
+        <div>
+          <label>otherUserId</label>
+          <input id="removeOtherUserId" type="number" value="3" />
+        </div>
+      </div>
+      <div class="actions">
+        <button id="btnRemoveUser">DELETE /api/conversations/remove-user</button>
+      </div>
+      <small>Note: your controller expects <strong>JSON body</strong> for DELETE. Some setups don’t like bodies on DELETE; if this fails, consider moving ids into the URL params.</small>
+    </div>
+
+    <div class="card">
+      <h2>Messages</h2>
+
+      <label>Conversation ID (params :id)</label>
+      <input id="conversationId" type="number" placeholder="e.g. 1" />
+
+      <div class="actions">
+        <button id="btnListMessages">GET /api/conversations/:id/messages</button>
+      </div>
+
+      <label>Message text</label>
+      <input id="messageText" placeholder="Type message..." value="Hello from HTML tester" />
+
+      <div class="actions">
+        <button id="btnSendMessage">POST /api/conversations/:id/messages</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Raw Response</h2>
+      <pre id="out">(no requests yet)</pre>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function getBaseUrl() {
+      return $('baseUrl').value.replace(/\/+$/, '');
+    }
+
+    function getHeaders() {
+      const headers = { 'Accept': 'application/json', 'Content-Type': 'application/json' };
+      const token = $('token').value.trim();
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      return headers;
+    }
+
+    function show(out) {
+      $('out').textContent = out;
+    }
+
+    async function request(method, path, body) {
+      const url = getBaseUrl() + path;
+      const opts = { method, headers: getHeaders() };
+
+      // Only attach body for methods that allow it
+      if (body !== undefined) opts.body = JSON.stringify(body);
+
+      show(`→ ${method} ${url}\n\n(sending...)`);
+      try {
+        const res = await fetch(url, opts);
+        const text = await res.text();
+
+        let parsed = null;
+        try { parsed = JSON.parse(text); } catch {}
+
+        const pretty = parsed ? JSON.stringify(parsed, null, 2) : text;
+
+        show(
+          `→ ${method} ${url}\n` +
+          `← ${res.status} ${res.statusText}\n\n` +
+          pretty
+        );
+
+        return { status: res.status, data: parsed, raw: text };
+      } catch (err) {
+        show(`Request failed:\n${err?.message || err}`);
+        throw err;
+      }
+    }
+
+    function tryAutofillConversationId(data) {
+      const maybeId =
+        data?.id ??
+        data?.conversation?.id ??
+        data?.data?.id;
+
+      if (maybeId) {
+        $('conversationId').value = String(maybeId);
+        $('addConversationId').value = String(maybeId);
+        $('removeConversationId').value = String(maybeId);
+      }
+    }
+
+    // Buttons
+    $('btnMe').addEventListener('click', async () => {
+      await request('GET', '/api/me');
+    });
+
+    $('btnConversations').addEventListener('click', async () => {
+      await request('GET', '/api/conversations');
+    });
+
+    $('btnCreateConversation').addEventListener('click', async () => {
+      const otherUserId = Number($('otherUserId').value);
+      const r = await request('POST', '/api/conversations', { otherUserId });
+      tryAutofillConversationId(r.data);
+    });
+
+    $('btnAddUser').addEventListener('click', async () => {
+      const conversationId = Number($('addConversationId').value);
+      const otherUserId = Number($('addOtherUserId').value);
+      if (!conversationId || !otherUserId) return show('Set add-user conversationId and otherUserId.');
+
+      await request('POST', '/api/conversations/add-user', { conversationId, otherUserId });
+    });
+
+    $('btnRemoveUser').addEventListener('click', async () => {
+      const conversationId = Number($('removeConversationId').value);
+      const otherUserId = Number($('removeOtherUserId').value);
+      if (!conversationId || !otherUserId) return show('Set remove-user conversationId and otherUserId.');
+
+      // Your controller reads request.input(), so we send JSON body even on DELETE.
+      await request('DELETE', '/api/conversations/remove-user', { conversationId, otherUserId });
+    });
+
+    $('btnListMessages').addEventListener('click', async () => {
+      const id = Number($('conversationId').value);
+      if (!id) return show('Set Conversation ID first.');
+      await request('GET', `/api/conversations/${id}/messages`);
+    });
+
+    $('btnSendMessage').addEventListener('click', async () => {
+      const id = Number($('conversationId').value);
+      if (!id) return show('Set Conversation ID first.');
+
+      const text = $('messageText').value;
+      await request('POST', `/api/conversations/${id}/messages`, { text });
+    });
+  </script>
+</body>
+</html>
