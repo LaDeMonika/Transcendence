@@ -23,11 +23,15 @@ export default class AuthController {
    * @description authenticate user and provide a access token
    * @requestBody <userLoginValidator>
    */
-  async login({ request }: HttpContext) {
+  async login({ request , auth}: HttpContext) {
     const body = request.only(['email', 'password'])
     const validatedData = await userLoginValidator.validate(body)
 
+    
     const user = await User.verifyCredentials(validatedData.email, validatedData.password)
+
+    // session-based login needed for websocket authentication
+    await auth.use('web').login(user)
 
     const token = await User.accessTokens.create(user)
     return token

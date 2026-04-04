@@ -1,0 +1,239 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Adonis Chat WS + API Tester</title>
+  <style>
+    body { font-family: system-ui; margin: 20px; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    input, textarea, button { width: 100%; padding: 8px; margin-top: 6px; border-radius: 8px; border: 1px solid #ccc; }
+    button { cursor: pointer; font-weight: bold; }
+    pre { background: #0b1020; color: #e7e7e7; padding: 12px; border-radius: 12px; height: 340px; overflow: auto; }
+    .row { display:flex; gap:8px; flex-wrap: wrap; }
+    .row button { width:auto; }
+    .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+    small { color: #666; display:block; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+<h2>Adonis Chat Tester</h2>
+
+<div class="card">
+  <label>Base URL</label>
+  <input id="baseUrl" value="http://localhost:3333"/>
+
+  <label>Bearer Token</label>
+  <input id="token" placeholder="Paste access token here"/>
+  <small>Used for HTTP endpoints. WebSocket connects to <code>/ws</code> (session-based) or adjust if you still use token-in-query.</small>
+</div>
+
+<div class="card">
+  <h3>Create / Get Conversation</h3>
+  <div class="grid2">
+    <div>
+      <label>otherUserId</label>
+      <input id="otherUserId" type="number" placeholder="e.g. 2" value="2"/>
+    </div>
+    <div>
+      <label>&nbsp;</label>
+      <button onclick="createOrGetConversation()">POST /api/conversations</button>
+    </div>
+  </div>
+  <small>This calls your <code>createOrGetConversation</code> and auto-fills Conversation ID if possible.</small>
+</div>
+
+<div class="card">
+  <h3>HTTP</h3>
+  <div class="row">
+    <button onclick="getMe()">GET /api/me</button>
+    <button onclick="getConversations()">GET /api/conversations</button>
+  </div>
+
+  <label>Conversation ID</label>
+  <input id="conversationId" type="number" placeholder="e.g. 1"/>
+
+  <div class="row">
+    <button onclick="getMessages()">GET /api/conversations/:id/messages</button>
+  </div>
+
+  <label>Message Text</label>
+  <input id="messageText" placeholder="Hello via HTTP / WS" value="Hello from tester"/>
+
+  <div class="row">
+    <button onclick="sendMessageHttp()">POST /api/conversations/:id/messages (HTTP)</button>
+  </div>
+</div>
+
+<div class="card">
+  <h3>WebSocket</h3>
+
+  <div class="row">
+    <button onclick="connectWS()">Connect WS</button>
+    <button onclick="disconnectWS()">Disconnect</button>
+  </div>
+
+  <div class="row">
+    <button onclick="joinRoom()">Join</button>
+    <button onclick="leaveRoom()">Leave</button>
+  </div>
+
+  <div class="row">
+    <button onclick="sendMessageWS()">Send WS Message</button>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Log</h3>
+  <pre id="log"></pre>
+</div>
+
+<script>
+let ws = null
+
+function log(msg, obj) {
+  const el = document.getElementById('log')
+  let line = `[${new Date().toISOString()}] ${msg}`
+  if (obj !== undefined) line += "\n" + (typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2))
+  el.textContent = line + "\n\n" + el.textContent
+}
+
+function base() {
+  return document.getElementById('baseUrl').value.replace(/\/+$/, '')
+}
+
+function token() {
+  return document.getElementById('token').value.trim()
+}
+
+function headers() {
+  const h = {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+  }
+  const t = token()
+  if (t) h['Authorization'] = `Bearer ${t}`
+  return h
+}
+
+async function safeJson(res) {
+  const text = await res.text()
+  try { return JSON.parse(text) } catch { return text }
+}
+
+function tryAutofillConversationId(data) {
+  const maybeId =
+    data?.id ??
+    data?.conversation?.id ??
+    data?.data?.id
+
+  if (maybeId) {
+    document.getElementById('conversationId').value = String(maybeId)
+    log('Auto-filled conversationId', { conversationId: maybeId })
+  }
+}
+
+async function getMe() {
+  const res = await fetch(base() + '/api/me', { headers: headers() })
+  log('GET /api/me ' + res.status, await safeJson(res))
+}
+
+async function getConversations() {
+  const res = await fetch(base() + '/api/conversations', { headers: headers() })
+  log('GET /api/conversations ' + res.status, await safeJson(res))
+}
+
+async function createOrGetConversation() {
+  const otherUserId = Number(document.getElementById('otherUserId').value)
+  if (!otherUserId) return log('Set otherUserId first')
+
+  const res = await fetch(base() + '/api/conversations', {
+    method: 'POST',
+    headers: headers(),
+    body: JSON.stringify({ otherUserId }),
+  })
+
+  const data = await safeJson(res)
+  log('POST /api/conversations ' + res.status, data)
+  if (res.ok) tryAutofillConversationId(data)
+}
+
+async function getMessages() {
+  const id = Number(document.getElementById('conversationId').value)
+  if (!id) return log('Set conversationId first')
+
+  const res = await fetch(base() + `/api/conversations/${id}/messages`, { headers: headers() })
+  log(`GET /api/conversations/${id}/messages ` + res.status, await safeJson(res))
+}
+
+async function sendMessageHttp() {
+  const id = Number(document.getElementById('conversationId').value)
+  if (!id) return log('Set conversationId first')
+
+  const text = document.getElementById('messageText').value
+
+  const res = await fetch(base() + `/api/conversations/${id}/messages`, {
+    method: 'POST',
+    headers: headers(),
+    body: JSON.stringify({ text })
+  })
+
+  log('POST message HTTP ' + res.status, await safeJson(res))
+}
+
+function connectWS() {
+  // Session-based
+  const wsUrl = base().replace(/^http/, 'ws') + '/ws'
+
+  // If you are still using token-in-query auth, swap to:
+  // const wsUrl = base().replace(/^http/, 'ws') + `/ws?token=${encodeURIComponent(token())}`
+
+  ws = new WebSocket(wsUrl)
+  log('Connecting WS...', { url: wsUrl })
+
+  ws.onopen = () => log('WS connected')
+  ws.onmessage = (e) => {
+    try { log('WS message', JSON.parse(e.data)) }
+    catch { log('WS message (raw)', e.data) }
+  }
+  ws.onerror = (e) => log('WS error', e)
+  ws.onclose = () => log('WS closed')
+}
+
+function disconnectWS() {
+  if (ws) ws.close()
+}
+
+function joinRoom() {
+  const id = Number(document.getElementById('conversationId').value)
+  if (!ws || ws.readyState !== WebSocket.OPEN) return log('WS not connected')
+  if (!id) return log('Set conversationId first')
+
+  ws.send(JSON.stringify({ type: 'join', conversationId: id }))
+  log('WS send join', { conversationId: id })
+}
+
+function leaveRoom() {
+  const id = Number(document.getElementById('conversationId').value)
+  if (!ws || ws.readyState !== WebSocket.OPEN) return log('WS not connected')
+  if (!id) return log('Set conversationId first')
+
+  ws.send(JSON.stringify({ type: 'leave', conversationId: id }))
+  log('WS send leave', { conversationId: id })
+}
+
+function sendMessageWS() {
+  const id = Number(document.getElementById('conversationId').value)
+  const body = document.getElementById('messageText').value
+  if (!ws || ws.readyState !== WebSocket.OPEN) return log('WS not connected')
+  if (!id) return log('Set conversationId first')
+  if (!body.trim()) return log('Message body empty')
+
+  ws.send(JSON.stringify({ type: 'message:new', conversationId: id, body }))
+  log('WS send message', { conversationId: id, body })
+}
+</script>
+
+</body>
+</html>
