@@ -1,14 +1,13 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, hasOne, manyToMany, hasMany } from '@adonisjs/lucid/orm'
+import { BaseModel, column, manyToMany, hasMany } from '@adonisjs/lucid/orm'
 import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import ConversationParticipant from '#models/chatsystem/ConversationParticipant'
-import type { HasOne, ManyToMany } from '@adonisjs/lucid/types/relations'
+import type { ManyToMany } from '@adonisjs/lucid/types/relations'
 import QuizPlayer from './quizsession/quiz_player.js'
-import Profile from '#models/profile'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -35,6 +34,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column()
   declare userName: string
 
+  @column()
+  declare avatarUrl: string | null
+
   @manyToMany(() => User, {
     pivotTable: 'friends',
     pivotForeignKey: 'user_id',
@@ -43,9 +45,6 @@ export default class User extends compose(BaseModel, AuthFinder) {
     pivotColumns: ['status'],
   })
   declare friends: ManyToMany<typeof User>
-
-  @hasOne(() => Profile)
-  declare profile: HasOne<typeof Profile>
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

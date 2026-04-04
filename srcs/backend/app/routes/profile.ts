@@ -6,6 +6,7 @@ router
   .group(() => {
     router.get('/getAvatar', [ProfilesController, 'getAvatar'])
     router.post('/uploadAvatar', [ProfilesController, 'uploadAvatar'])
+    router.delete('/deleteAvatar', [ProfilesController, 'deleteAvatar'])
     router.get('/', [ProfilesController, 'privateProfile'])
     // router.put('/', [ProfilesController, 'update'])
     router.get('/:userId', [ProfilesController, 'publicProfile'])

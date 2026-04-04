@@ -3,6 +3,7 @@ import { cuid } from '@adonisjs/core/helpers'
 import type { HttpContext } from '@adonisjs/core/http'
 import app from '@adonisjs/core/services/app'
 import env from '#start/env'
+import fs from 'fs'
 
 export default class ProfilesController {
     /**
@@ -11,8 +12,7 @@ export default class ProfilesController {
     async privateProfile({ auth }: HttpContext) {
         const authenticatedUser = auth.user as User
         const user = await User.find(authenticatedUser.id)
-        await user!.load('profile')
-        return user!.profile.serialize()
+        return user!.serialize()
     }
     /**
      *  Use publicProfile method to retrieve information that what other users can see
@@ -25,8 +25,7 @@ export default class ProfilesController {
         if (Number.isNaN(data.userId)) return response.status(400).send({ errors: [{ messages: 'Invalid userId' }] })
         const user = await User.find(data.userId)
         if (!user) return response.status(400).send({ error: [{ messages: 'User not found' }] })
-        await user.load('profile')
-        return user.profile.serialize()
+        return user.serialize()
     }
     
     // update methods will be added for different parts
@@ -61,20 +60,43 @@ export default class ProfilesController {
 
         if (!file.fileName) return response.status(500).send({ message: 'Can not save file' })
 
-        await user.load('profile')
-        user.profile.avatarUrl = file.fileName
-        await user.profile.save()
+        if (user.avatarUrl)
+        {
+            const path = app.makePath(env.get('IMAGES_PATH'), user.avatarUrl)
+            fs.unlink(path, (err) => console.log('old file deleted: ', user.avatarUrl, err))
+        }
+        user.avatarUrl = file.fileName
+        await user.save()
         return response.ok({ message: 'Avatar url updated' })
     }
 
+    /**
+     * @getAvatar
+     * @tag profile
+     * @description download profile avatar
+     */
     async getAvatar({ response, auth }: HttpContext){
-        const authenticatedUser = auth.user as User
-        const user = await User.find(authenticatedUser.id)
-        if (!user) return response.badRequest({ message: 'User not found' })
-        await user.load('profile')
-        console.log(user.profile.avatarUrl)
-        const absolutePath = app.makePath(env.get('IMAGES_PATH'), user.profile.avatarUrl)
+        const user = auth.user as User
+        console.log(user.avatarUrl)
+        const absolutePath = app.makePath(env.get('IMAGES_PATH'), user.avatarUrl || 'default.png')
         console.log(absolutePath)
         return response.download(absolutePath)
+    }
+
+    /**
+     * @deleteAvatar
+     * @tag profile
+     * @description download profile avatar
+     */
+    async deleteAvatar({ response, auth }: HttpContext){
+        const user = auth.user as User
+        if (!user.avatarUrl) return response.badRequest({ message: 'No custom avatar picture'})
+        console.log(user.avatarUrl)
+        const absolutePath = app.makePath(env.get('IMAGES_PATH'), user.avatarUrl)
+        fs.unlink(absolutePath, (err) => console.log('Avatar picture deleted'))
+        user.avatarUrl = null
+        await user.save()
+        console.log(absolutePath)
+        return response.ok({ message: 'Avatar deleted' })
     }
 }

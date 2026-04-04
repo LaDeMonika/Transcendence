@@ -9,32 +9,20 @@ export default class extends BaseSeeder {
         email: 'user1@test.com',
         userName: 'Guest 1',
         password: 'password',
+        avatarUrl: null
       },
       {
         email: 'user2@test.com',
         userName: 'Guest 2',
         password: 'password',
+        avatarUrl: null
       },
       {
         email: 'user3@test.com',
         userName: 'Guest 3',
         password: 'password',
+        avatarUrl: null
       },
     ])
-    const user1 = await User.query().where('email', 'user1@test.com').first()
-    // await user1?.load('profile')
-    await user1?.related('profile').create({
-      avatarUrl: 'default.png'
-    })
-    const user2 = await User.query().where('email', 'user2@test.com').first()
-    // await user1?.load('profile')
-    await user2?.related('profile').create({
-      avatarUrl: 'default.png'
-    })
-    const user3 = await User.query().where('email', 'user3@test.com').first()
-    // await user1?.load('profile')
-    await user3?.related('profile').create({
-      avatarUrl: 'default.png'
-    })
   }
 }
