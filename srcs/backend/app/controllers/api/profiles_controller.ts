@@ -75,12 +75,12 @@ export default class ProfilesController {
      * @tag profile
      * @description download profile avatar
      */
-    async getAvatar({ response, auth }: HttpContext){
-        const user = auth.user as User
-        console.log(user.avatarUrl)
+    async getAvatar({ request, response }: HttpContext){
+        const targetUserId = request.param('userid');
+        const user = await User.find(targetUserId)
+        if (!user) return response.badRequest({ message: 'User not found' })
         const absolutePath = app.makePath(env.get('IMAGES_PATH'), user.avatarUrl || 'default.png')
-        console.log(absolutePath)
-        return response.download(absolutePath)
+        return response.download(absolutePath, false)
     }
 
     /**
@@ -91,12 +91,10 @@ export default class ProfilesController {
     async deleteAvatar({ response, auth }: HttpContext){
         const user = auth.user as User
         if (!user.avatarUrl) return response.badRequest({ message: 'No custom avatar picture'})
-        console.log(user.avatarUrl)
         const absolutePath = app.makePath(env.get('IMAGES_PATH'), user.avatarUrl)
-        fs.unlink(absolutePath, (err) => console.log('Avatar picture deleted'))
+        fs.unlink(absolutePath, () => null)
         user.avatarUrl = null
         await user.save()
-        console.log(absolutePath)
         return response.ok({ message: 'Avatar deleted' })
     }
 }

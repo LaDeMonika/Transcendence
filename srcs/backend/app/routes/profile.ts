@@ -4,7 +4,6 @@ import router from '@adonisjs/core/services/router'
 
 router
   .group(() => {
-    router.get('/getAvatar', [ProfilesController, 'getAvatar'])
     router.post('/uploadAvatar', [ProfilesController, 'uploadAvatar'])
     router.delete('/deleteAvatar', [ProfilesController, 'deleteAvatar'])
     router.get('/', [ProfilesController, 'privateProfile'])
@@ -13,3 +12,6 @@ router
   })
   .prefix('/api/profile')
   .use(middleware.auth())
+
+router.get('/getAvatar/:userid', [ProfilesController, 'getAvatar'])
+  .prefix('/api/profile')
