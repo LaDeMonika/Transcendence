@@ -8,6 +8,8 @@ router
     router.delete('/deleteAvatar', [ProfilesController, 'deleteAvatar'])
     router.get('/', [ProfilesController, 'privateProfile'])
     // router.put('/', [ProfilesController, 'update'])
+    router.get('/myQuizs', [ProfilesController, 'myQuizzes'])
+    router.get('/othersQuizs/:userid', [ProfilesController, 'othersQuizzes'])
     router.get('/:userId', [ProfilesController, 'publicProfile'])
   })
   .prefix('/api/profile')

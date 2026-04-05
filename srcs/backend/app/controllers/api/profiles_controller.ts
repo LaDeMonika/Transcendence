@@ -4,6 +4,11 @@ import type { HttpContext } from '@adonisjs/core/http'
 import app from '@adonisjs/core/services/app'
 import env from '#start/env'
 import fs from 'fs'
+import Quiz from '#models/Quiz'
+import QuizPlayer from '#models/quizsession/quiz_player'
+import Session from '#models/quizsession/quizsession'
+import Question from '#models/Question'
+import { request } from 'http'
 
 export default class ProfilesController {
     /**
@@ -32,6 +37,10 @@ export default class ProfilesController {
     // update(ctx: HttpContext) {
     //     return ctx.response.ok({ message: "request got update profile" })
     // }
+
+    /****************************************************************/
+    /*                    PROFILE PICTURE                           */
+    /****************************************************************/
 
   /**
    * @uploadAvatar
@@ -74,9 +83,11 @@ export default class ProfilesController {
      * @getAvatar
      * @tag profile
      * @description download profile avatar
+     * NOTE: sometimes it does not update new avatars possibly due to catching system
      */
-    async getAvatar({ request, response }: HttpContext){
-        const targetUserId = request.param('userid');
+    async getAvatar({ request, response }: HttpContext) {
+        const targetUserId = Number(request.param('userid'));
+        if (isNaN(targetUserId)) return response.badRequest({ message: 'Invalid user id' })
         const user = await User.find(targetUserId)
         if (!user) return response.badRequest({ message: 'User not found' })
         const absolutePath = app.makePath(env.get('IMAGES_PATH'), user.avatarUrl || 'default.png')
@@ -88,7 +99,7 @@ export default class ProfilesController {
      * @tag profile
      * @description download profile avatar
      */
-    async deleteAvatar({ response, auth }: HttpContext){
+    async deleteAvatar({ response, auth }: HttpContext) {
         const user = auth.user as User
         if (!user.avatarUrl) return response.badRequest({ message: 'No custom avatar picture'})
         const absolutePath = app.makePath(env.get('IMAGES_PATH'), user.avatarUrl)
@@ -96,5 +107,60 @@ export default class ProfilesController {
         user.avatarUrl = null
         await user.save()
         return response.ok({ message: 'Avatar deleted' })
+    }
+    
+    /****************************************************************/
+    /*                    DASHBOARD - STATISTICS                    */
+    /****************************************************************/
+
+    /**
+     * @myQuizzes
+     * @tag profile
+     * @description all quizzes that current user attended
+     */
+    async myQuizzes({ response, auth }:HttpContext) {
+        const user = auth.user as User
+        const quizzes = await QuizPlayer.findManyBy('userId', user.id)
+        if (!quizzes.length) return response.ok({ message: 'User did not play any games yet' })
+        const promises = quizzes.map(async (q) => {
+            const quizSession =  await Session.find(q.sessionId)
+            const quiz = await Quiz.find(quizSession.quizId)
+            const questions = await Question.query().where('quiz_id', quiz.id)
+            return {
+                ...quiz?.serialize(),
+                 questionCount: questions.length,
+                 score: q.score 
+                }
+        })
+        const result = await Promise.all(promises)
+        return (result)
+    }
+
+    /**
+     * @othersQuizzes
+     * @tag profile
+     * @description find last 5 quizzes according to given userID
+     */
+    async othersQuizzes({ request, response }:HttpContext) {
+        const userId = Number(request.param('userid'))
+        if (isNaN(userId)) return response.badRequest({ error: [{ message: 'Invalid user id' }]})
+        
+        const user = await User.find(userId)
+        if (!user) return response.badRequest({ error: [{ message: 'User not fount' }]})
+        
+        const quizzes = await QuizPlayer.query().where('userId', user.id).orderBy('createdAt').limit(5)
+        if (!quizzes.length) return response.ok({ message: 'User did not play any games yet' })
+        const promises = quizzes.map(async (q) => {
+            const quizSession =  await Session.find(q.sessionId)
+            const quiz = await Quiz.find(quizSession.quizId)
+            const questions = await Question.query().where('quiz_id', quiz.id)
+            return {
+                ...quiz?.serialize(),
+                questionCount: questions.length,
+                score: q.score
+            }
+        })
+        const result = await Promise.all(promises)
+        return (result)
     }
 }
