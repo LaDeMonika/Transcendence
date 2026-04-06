@@ -45,14 +45,21 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router'; // 1. Import the router hook
+
+const router = useRouter(); // 2. Initialize the router instance
 
 const roomId = ref('');
+const roomPath = ref('lobby');
 
 const handleJoin = () => {
   if (roomId.value.trim()) {
     console.log("Joining room:", roomId.value);
-    // Logic to route to the game or emit event goes here:
-    // router.push(`/game/${roomId.value}`);
+    
+    // 3. Use the router instance to navigate
+    // This will go to: /game/lobby/12345
+    // router.push(`/game/${roomPath.value}/${roomId.value}`);
+    router.push(`/${roomPath.value}`);
   }
 };
 </script>
