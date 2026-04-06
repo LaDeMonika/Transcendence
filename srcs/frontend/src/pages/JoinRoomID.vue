@@ -53,14 +53,7 @@ const roomId = ref('');
 const roomPath = ref('lobby');
 
 const handleJoin = () => {
-  if (roomId.value.trim()) {
-    console.log("Joining room:", roomId.value);
-    
-    // 3. Use the router instance to navigate
-    // This will go to: /game/lobby/12345
-    // router.push(`/game/${roomPath.value}/${roomId.value}`);
     router.push(`/${roomPath.value}`);
-  }
 };
 </script>
 
