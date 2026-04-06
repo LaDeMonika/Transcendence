@@ -17,9 +17,9 @@
       <div class="col-sm d-flex justify-content-center border m-3 mb-5" style="height: 250px">
         <div class="d-flex flex-column align-items-center justify-content-center">
           <h2>Join Room</h2>
-          <!-- <router-link to="/"> -->
+          <router-link to="/join-room">
             <button class="btn btn-primary">ENTER</button>
-          <!-- </router-link> -->
+          </router-link>
         </div>
       </div>
     </div>

@@ -1,0 +1,60 @@
+<template>
+  <div class="container d-flex flex-column" style="min-height: 100%">
+    <div class="row border">
+      <div class="col-sm d-flex justify-content-center">
+        <h1>Join Room</h1>
+      </div>
+    </div>
+    <div class="row flex-grow-1 align-items-center justify-content-center border mb-5">
+      <div class="col-sm d-flex justify-content-center border m-3 mb-5" style="height: 250px">
+        <div class="d-flex flex-column align-items-center justify-content-center">
+
+          <form @submit.prevent="handleJoin">
+            <div class="mb-3 text-center">
+            <label for="roomId" class="form-label">Room ID</label>
+            <input 
+                v-model="roomId"
+                type="text" 
+                id="roomId" 
+                class="form-control form-control-lg" 
+                placeholder="e.g. 12345"
+                maxlength="10"
+                required
+            />
+            </div>
+
+            <button 
+            type="submit" 
+            class="btn btn-primary btn-lg w-100"
+            :disabled="!roomId"
+            >
+            Join Game
+            </button>
+        </form>
+
+        <div class="text-center mt-3">
+            <small class="text-muted">Enter the ID provided by the host</small>
+        </div>
+
+
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+
+const roomId = ref('');
+
+const handleJoin = () => {
+  if (roomId.value.trim()) {
+    console.log("Joining room:", roomId.value);
+    // Logic to route to the game or emit event goes here:
+    // router.push(`/game/${roomId.value}`);
+  }
+};
+</script>
+
+<style scoped></style>

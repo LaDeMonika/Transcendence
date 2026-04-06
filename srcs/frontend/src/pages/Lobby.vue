@@ -25,7 +25,7 @@
         <div class="d-flex flex-column align-items-center justify-content-center">
           <h2>MULTIPLAYER</h2>
           <p>Play with others</p>
-          <router-link to="/multiplayer/setup">
+          <router-link to="/mulitplayer-create-join-room">
             <button class="btn btn-primary">ENTER</button>
           </router-link>
         </div>

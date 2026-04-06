@@ -5,6 +5,8 @@ import PrivacyPolicy from '@/pages/PrivacyPolicy.vue'
 import Lobby from '@/pages/Lobby.vue'
 import ChooseQuiz from '@/pages/ChooseQuiz.vue'
 import Game from '@/pages/Game.vue'
+import CreateJoinRoom from '@/pages/CreateJoinRoom.vue'
+import JoinRoom from '@/pages/JoinRoomID.vue'
 
 import { createRouter, createWebHistory } from 'vue-router'
 
@@ -17,7 +19,9 @@ const router = createRouter({
     { path: '/privacy_policy', component: PrivacyPolicy },
     { path: '/lobby', component: Lobby, meta: { bodyClass: 'bg-lobby' } },
     { path: '/choose-quiz', component: ChooseQuiz },
-    { path: '/game', component: Game},
+    { path: '/game', component: Game },
+    { path: '/mulitplayer-create-join-room', component: CreateJoinRoom },
+    { path: '/join-room', component: JoinRoom },
   ],
 })
 
