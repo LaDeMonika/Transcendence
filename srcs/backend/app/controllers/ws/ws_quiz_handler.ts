@@ -92,6 +92,11 @@ export async function handleWsQuizMessage(ws: any, user: User, payload: any) {
       ws.send(JSON.stringify({ type: 'error', error: 'Invalid sessionId' }))
       return true
     }
+    //check if user is part of the quiz session and the session is accepting answers for the question
+    if (!quizRooms.isInSession(String(sessionId), ws)) {
+      ws.send(JSON.stringify({ type: 'error', error: 'User is not part of the quiz session' }))
+      return true
+    }
     // Answers are only valid while the session is in the active question phase.
     if (quizSession.state !== 'question') {
       ws.send(JSON.stringify({ type: 'error', error: 'Question is not currently accepting answers' }))

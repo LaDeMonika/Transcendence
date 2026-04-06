@@ -36,5 +36,9 @@ export default class QuizzesController {
     return quiz
   }
 
-  // GET /api/start-quiz/:id
+  // GET /api/quizzes
+  public async index() {
+    const quizzes = await Quiz.query().select('id', 'title')
+    return quizzes
+  }
 }

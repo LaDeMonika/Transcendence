@@ -2,6 +2,18 @@ import Question from '#models/Question'
 import type { HttpContext } from '@adonisjs/core/http'
 
 export default class QuestionsController {
+  // Helper method to sanitize question data by excluding the correct answer
+  private sanitizeQuestion(question: Question) {
+    return {
+      id: question.id,
+      quizId: question.quizId,
+      question: question.question,
+      answerA: question.answerA,
+      answerB: question.answerB,
+      answerC: question.answerC,
+      answerD: question.answerD,
+    }
+  }
 
   // GET /api/random-question
   public async random() {
@@ -9,7 +21,7 @@ export default class QuestionsController {
       .orderByRaw('RANDOM()')
       .firstOrFail()
 
-    return question
+    return this.sanitizeQuestion(question)
   }
 
   // GET /api/:quizId/:questionId/next-question
@@ -22,7 +34,14 @@ export default class QuestionsController {
       .orderBy('id')
       .first()
 
-    return nextQuestion || null
+    return nextQuestion ? this.sanitizeQuestion(nextQuestion) : null
+  }
+
+  //GET /api/question/:id
+  public async show({ params }: HttpContext) {
+    const { id } = params
+    const question = await Question.findOrFail(id)
+    return this.sanitizeQuestion(question)
   }
 
   // POST /api/submit-answer
