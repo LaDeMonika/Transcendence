@@ -6,6 +6,11 @@ export const chatService = {
     return res.data
   },
 
+  async searchUsers(query) {
+    const res = await client.get('/search-users', { params: { query } })
+    return res.data
+  },
+
   async getConversations() {
     const res = await client.get('/conversations')
     return res.data
