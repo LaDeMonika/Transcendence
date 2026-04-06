@@ -8,7 +8,7 @@ import Quiz from '#models/Quiz'
 import QuizPlayer from '#models/quizsession/quiz_player'
 import Session from '#models/quizsession/quizsession'
 import Question from '#models/Question'
-import { request } from 'http'
+import QuizAnswer from '#models/quizsession/quiz_answer'
 
 export default class ProfilesController {
     /**
@@ -124,12 +124,14 @@ export default class ProfilesController {
         if (!quizzes.length) return response.ok({ message: 'User did not play any games yet' })
         const promises = quizzes.map(async (q) => {
             const quizSession =  await Session.find(q.sessionId)
-            const quiz = await Quiz.find(quizSession.quizId)
-            const questions = await Question.query().where('quiz_id', quiz.id)
+            const quiz = await Quiz.find(quizSession!.quizId)
+            const questions = await Question.query().where('quiz_id', quiz!.id).count('* as count')
+            const correctAnswersCount = await QuizAnswer.query().where('session_id', q.sessionId).andWhere('user_id', user.id).andWhere('is_correct', true).count('* as count')
             return {
                 ...quiz?.serialize(),
-                 questionCount: questions.length,
-                 score: q.score 
+                questionCount: Number(questions[0].$extras.count),
+                score: q.score,
+                correctAnswerCount: Number(correctAnswersCount[0].$extras.count)
                 }
         })
         const result = await Promise.all(promises)
@@ -149,18 +151,64 @@ export default class ProfilesController {
         if (!user) return response.badRequest({ error: [{ message: 'User not fount' }]})
         
         const quizzes = await QuizPlayer.query().where('userId', user.id).orderBy('createdAt').limit(5)
-        if (!quizzes.length) return response.ok({ message: 'User did not play any games yet' })
+        if (!quizzes.length) return response.ok({ error:[{ message: 'User did not play any games yet' }]})
         const promises = quizzes.map(async (q) => {
             const quizSession =  await Session.find(q.sessionId)
-            const quiz = await Quiz.find(quizSession.quizId)
-            const questions = await Question.query().where('quiz_id', quiz.id)
+            const quiz = await Quiz.find(quizSession!.quizId)
+            const questionCount = await Question.query().where('quiz_id', quiz!.id).count('*')
             return {
                 ...quiz?.serialize(),
-                questionCount: questions.length,
+                questionCount: questionCount,
                 score: q.score
             }
         })
         const result = await Promise.all(promises)
         return (result)
+    }
+
+    async stats({ request, response }:HttpContext) {
+        const userId = Number(request.param('userid'))
+        if (isNaN(userId)) return response.badRequest({ error: [{ message: 'Invalid user id' }]})
+        const user = await User.find(userId)
+        if (!user) return response.badRequest({ error: [{ message: 'User not found' }]})
+        const gameSessions = await QuizPlayer.query().where('user_id', user.id).count('* as count').first()
+        const totalQuestions = await QuizPlayer.query()
+            .join('quiz_sessions', 'quiz_players.session_id', '=', 'quiz_sessions.id')
+            .join('quizzes', 'quizzes.id', '=', 'quiz_sessions.quiz_id')
+            .join('questions', 'questions.quiz_id', '=', 'quizzes.id')
+            .where('user_id', user.id)
+            .count('questions.question as count')
+            .first()
+        const totalAnswers = await QuizPlayer.query()
+            .join('quiz_sessions', (query) => {
+                query   // include session table
+                    .on('quiz_players.session_id', '=', 'quiz_sessions.id')
+                    // .andOnVal('quiz_sessions.state', '=', 'finished') // comment out after tests
+            })
+            .join('quizzes', 'quizzes.id', '=', 'quiz_sessions.quiz_id')
+            .join('questions', 'questions.quiz_id', '=', 'quizzes.id')
+            .join('quiz_answers', (query) => {
+                query
+                    .on('quiz_answers.question_id', '=', 'questions.id')
+                    .andOn('quiz_sessions.id', '=', 'quiz_answers.session_id')
+                    .andOn('quiz_answers.user_id', '=', 'quiz_players.user_id')
+            })
+            .where('quiz_players.user_id', user.id)
+            .count({
+                'total': '*',
+                'correctAnswers': 'is_correct'
+            })
+            .first()
+        // console.log(
+        //     'Sessions: ', gameSessions?.$extras.count,
+        //     '\nQuestions: ', totalQuestions?.$extras.count,
+        //     '\nTotal answers: ', totalAnswers?.$extras
+        // )
+        return response.ok({
+            'playedSessions': Number(gameSessions?.$extras.count),
+            'totalQuestions': Number(totalQuestions?.$extras.count),
+            'totalAnswers': Number(totalAnswers?.$extras.total) ,
+            'totalCorrectAnswerd': Number(totalAnswers?.$extras.correctAnswers)
+        })
     }
 }

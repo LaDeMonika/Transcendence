@@ -9,6 +9,7 @@ router
     router.get('/', [ProfilesController, 'privateProfile'])
     // router.put('/', [ProfilesController, 'update'])
     router.get('/myQuizs', [ProfilesController, 'myQuizzes'])
+    router.get('/stats/:userid', [ProfilesController, 'stats'])
     router.get('/othersQuizs/:userid', [ProfilesController, 'othersQuizzes'])
     router.get('/:userId', [ProfilesController, 'publicProfile'])
   })
