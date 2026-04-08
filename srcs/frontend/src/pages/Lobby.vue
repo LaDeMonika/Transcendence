@@ -6,11 +6,23 @@
       </div>
     </div>
     <div class="row flex-grow-1 align-items-center justify-content-center border mb-5">
-      <p>waiting for players ...</p>
+      <div class="d-flex flex-column align-items-center">
+        <p class="fs-4 text-muted mb-4">waiting for players ...</p>
+        <button class="btn btn-success btn-lg px-5 shadow" @click="startGame">Start Game</button>
+      </div>
     </div>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const startGame = () => {
+  // Pass index: 0 to ensure game starts at the very first question properly
+  router.push({ path: '/game', query: { index: 0 } })
+}
+</script>
 
 <style scoped></style>

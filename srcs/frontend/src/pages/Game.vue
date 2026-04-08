@@ -54,8 +54,8 @@
                 The answer was:
                 <strong>{{ currentQuestion.options[currentQuestion.answer] }}</strong>
               </p>
-              <button class="btn btn-light mt-3" @click="nextQuestion">
-                Next Question
+              <button v-if="false" class="btn btn-light mt-3" @click="viewLeaderboard">
+                View Leaderboard
               </button>
             </div>
 
@@ -68,14 +68,18 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+
+const router = useRouter();
+const route = useRoute();
 
 // State
-// Pro-tip: Use 'const' for refs. The value inside changes, but the reference doesn't!
-const currentQuestionIndex = ref(0); 
+const currentQuestionIndex = ref(parseInt(route.query.index) || 0); 
 const selectedAnswer = ref(null);
 const isFlipped = ref(false);
 const timeLeft = ref(10);
 let timerInterval = null;
+let transitionTimeout = null;
 
 const questions = [
   {
@@ -91,17 +95,14 @@ const questions = [
 ];
 
 // Computed
-// Fixed: Using .value to access the index correctly
 const currentQuestion = computed(() => questions[currentQuestionIndex.value]);
 
-// Fixed: Added safety check to ensure currentQuestion exists
 const isCorrect = computed(() => {
   return currentQuestion.value && selectedAnswer.value === currentQuestion.value.answer;
 });
 
 // Logic
 const startTimer = () => {
-  // Clear any existing timer before starting a new one to avoid "speed-up" bugs
   if (timerInterval) clearInterval(timerInterval);
   
   timeLeft.value = 10;
@@ -123,21 +124,26 @@ const selectAnswer = (index) => {
 const revealAnswer = () => {
   clearInterval(timerInterval);
   isFlipped.value = true;
+  
+  transitionTimeout = setTimeout(() => {
+    viewLeaderboard();
+  }, 3000);
 };
 
-const nextQuestion = () => {
-  if (currentQuestionIndex.value < questions.length - 1) {
-    currentQuestionIndex.value++;
-    isFlipped.value = false;
-    selectedAnswer.value = null;
-    startTimer();
-  } else {
-    alert("Quiz Finished!");
-  }
+const viewLeaderboard = () => {
+  const isFinal = currentQuestionIndex.value >= questions.length - 1;
+  const nextIndex = currentQuestionIndex.value + 1;
+  router.push({ 
+    path: '/leaderboard', 
+    query: { isFinal: isFinal, nextIndex: nextIndex } 
+  });
 };
 
 onMounted(() => startTimer());
-onUnmounted(() => clearInterval(timerInterval));
+onUnmounted(() => {
+  clearInterval(timerInterval);
+  if (transitionTimeout) clearTimeout(transitionTimeout);
+});
 </script>
 
 <style>

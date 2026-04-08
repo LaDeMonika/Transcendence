@@ -5,6 +5,7 @@ import PrivacyPolicy from '@/pages/PrivacyPolicy.vue'
 import Lobby from '@/pages/Lobby.vue'
 import ChooseQuiz from '@/pages/ChooseQuiz.vue'
 import Game from '@/pages/Game.vue'
+import GameLeaderboard from '@/pages/GameLeaderboard.vue'
 import CreateJoinRoom from '@/pages/CreateJoinRoom.vue'
 import JoinRoom from '@/pages/JoinRoomID.vue'
 import LandingPage from '@/pages/LandingPage.vue'
@@ -21,6 +22,7 @@ const router = createRouter({
     { path: '/home', component: Home, meta: { bodyClass: 'bg-lobby', layout: 'auth' } },
     { path: '/choose-quiz', component: ChooseQuiz, meta: { layout: 'auth' } },
     { path: '/game', component: Game, meta: { layout: 'auth' } },
+    { path: '/leaderboard', component: GameLeaderboard, meta: { layout: 'auth' } },
     { path: '/mulitplayer-create-join-room', component: CreateJoinRoom, meta: { layout: 'auth' } },
     { path: '/join-room', component: JoinRoom, meta: { layout: 'auth' } },
     { path: '/lobby', component: Lobby, meta: { layout: 'auth' } },
