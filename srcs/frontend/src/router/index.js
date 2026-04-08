@@ -14,16 +14,16 @@ import { createRouter, createWebHistory } from 'vue-router'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path: '/', component: LandingPage },
-    { path: '/login', component: SignIn },
-    { path: '/sign_up', component: SignUp },
-    { path: '/privacy_policy', component: PrivacyPolicy },
-    { path: '/home', component: Home, meta: { bodyClass: 'bg-lobby' } },
-    { path: '/choose-quiz', component: ChooseQuiz },
-    { path: '/game', component: Game },
-    { path: '/mulitplayer-create-join-room', component: CreateJoinRoom },
-    { path: '/join-room', component: JoinRoom },
-    { path: '/lobby', component: Lobby },
+    { path: '/', component: LandingPage, meta: { layout: 'public' } },
+    { path: '/login', component: SignIn, meta: { layout: 'public' } },
+    { path: '/sign_up', component: SignUp, meta: { layout: 'public' } },
+    { path: '/privacy_policy', component: PrivacyPolicy, meta: { layout: 'public' } },
+    { path: '/home', component: Home, meta: { bodyClass: 'bg-lobby', layout: 'auth' } },
+    { path: '/choose-quiz', component: ChooseQuiz, meta: { layout: 'auth' } },
+    { path: '/game', component: Game, meta: { layout: 'auth' } },
+    { path: '/mulitplayer-create-join-room', component: CreateJoinRoom, meta: { layout: 'auth' } },
+    { path: '/join-room', component: JoinRoom, meta: { layout: 'auth' } },
+    { path: '/lobby', component: Lobby, meta: { layout: 'auth' } },
   ],
 })
 
