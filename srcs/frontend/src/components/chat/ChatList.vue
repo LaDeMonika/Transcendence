@@ -9,7 +9,7 @@
       :class="{ 'bg-primary text-white': selectedId === conv.id, 'bg-light': selectedId !== conv.id }"
       @click="select(conv)"
     >
-      {{ conv.name || conv.id }}
+      {{ conv.otherParticipants?.map(p => p.userName).join(', ') || conv.id }}
     </div>
   </div>
 </template>

@@ -56,8 +56,8 @@
     </div>
   </div>
 
-  <ChatCreateModal v-model="showCreateModal" @close="showCreateModal = false" />
-  <ChatMembersModal v-model="showMembersModal" :conversation="activeConversation" />
+  <ChatCreateModal v-model="showCreateModal" @close="showCreateModal = false" @conversation-created="handleConversationCreated" />
+  <ChatMembersModal v-model="showMembersModal" :conversation="activeConversation" @conversation-updated="handleConversationUpdated" />
 </template>
 
 <script setup>
@@ -99,6 +99,20 @@ const openConversation = (conv) => {
   if (conv?.id) {
     sendWs({ type: 'chat:join', conversationId: conv.id })
   }
+}
+
+const handleConversationCreated = (conversation) => {
+  chatListRef.value?.loadConversations()
+}
+
+const handleConversationUpdated = (otherParticipants) => {
+  if (activeConversation.value) {
+    activeConversation.value = {
+      ...activeConversation.value,
+      otherParticipants,
+    }
+  }
+  chatListRef.value?.loadConversations()
 }
 
 const leaveConversation = async () => {
