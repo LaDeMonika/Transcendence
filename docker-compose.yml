@@ -77,7 +77,7 @@ services:
        - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
        - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
        - ./docker/nginx/ssl:/etc/nginx/ssl:ro
-       #- ./srcs/frontend/dist:/var/www/html:ro
+       - ./srcs/frontend/dist:/var/www/html:ro
      networks:
        - transcendence
 ##VOLUMES##
