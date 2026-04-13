@@ -24,6 +24,7 @@ router.group(() => {
   // Quiz-related routes
   router.get('/quiz/:id', [QuizzesController, 'show'])
   router.get('/admin/quiz/:id', [QuizzesController, 'showAdmin'])
+  router.get('/admin/quiz/:id/export', [QuizzesController, 'export']) // ?format=json|csv
   router.get('/quizzes', [QuizzesController, 'index'])
   
 }).prefix('/api')
