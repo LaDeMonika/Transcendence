@@ -336,6 +336,9 @@
 
   <script>
     let socket = null
+    let reconnectTimer = null
+    let intentionalClose = false
+    let activeQuizSessionId = null
 
     const wsStatus = document.getElementById('wsStatus')
     const logEl = document.getElementById('log')
@@ -427,6 +430,80 @@
 
       const separator = base.includes('?') ? '&' : '?'
       return `${base}${separator}token=${encodeURIComponent(token)}`
+    }
+
+    function resendActiveQuizJoin() {
+      const sessionId = activeQuizSessionId
+      if (!sessionId || !socket || socket.readyState !== WebSocket.OPEN) return
+
+      const payload = {
+        type: 'quiz:join',
+        sessionId,
+      }
+
+      log('WS AUTO-REJOIN', payload)
+      socket.send(JSON.stringify(payload))
+    }
+
+    function scheduleReconnect() {
+      if (intentionalClose || reconnectTimer) return
+
+      reconnectTimer = setTimeout(() => {
+        reconnectTimer = null
+        connectWebSocket()
+      }, 3000)
+    }
+
+    function connectWebSocket() {
+      if (socket && socket.readyState <= WebSocket.OPEN) {
+        log('WS already connected')
+        return
+      }
+
+      intentionalClose = false
+      const finalWsUrl = buildWsUrl()
+      log('WS CONNECT', finalWsUrl)
+
+      socket = new WebSocket(finalWsUrl)
+
+      socket.addEventListener('open', () => {
+        setStatus('Connected', true)
+        log('WS connected')
+        resendActiveQuizJoin()
+      })
+
+      socket.addEventListener('message', (event) => {
+        const parsed = safeJsonParse(event.data)
+        log('WS RECV', parsed)
+
+        if (parsed && parsed.type === 'quiz:join:ok') {
+          activeQuizSessionId = Number(parsed.sessionId) || activeQuizSessionId
+        }
+
+        if (parsed && parsed.type === 'quiz:leave:ok') {
+          activeQuizSessionId = null
+        }
+
+        if (parsed && parsed.type === 'quiz:standings') {
+          renderStandings(parsed.standings ?? parsed)
+        }
+
+        if (parsed && (parsed.type === 'chat:message:created' || parsed.type === 'message:created')) {
+          appendChatMessage(parsed.message ?? {}, parsed.conversationId ?? null)
+        }
+      })
+
+      socket.addEventListener('close', () => {
+        setStatus('Disconnected', false)
+        log('WS closed')
+        socket = null
+        scheduleReconnect()
+      })
+
+      socket.addEventListener('error', (err) => {
+        setStatus('Error', false)
+        log('WS error', err)
+      })
     }
 
     async function rest(method, url, body) {
@@ -543,46 +620,15 @@
     document.getElementById('clearTokenBtn').addEventListener('click', clearToken)
 
     document.getElementById('connectBtn').addEventListener('click', () => {
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        log('WS already connected')
-        return
-      }
-
-      const finalWsUrl = buildWsUrl()
-      log('WS CONNECT', finalWsUrl)
-
-      socket = new WebSocket(finalWsUrl)
-
-      socket.addEventListener('open', () => {
-        setStatus('Connected', true)
-        log('WS connected')
-      })
-
-      socket.addEventListener('message', (event) => {
-        const parsed = safeJsonParse(event.data)
-        log('WS RECV', parsed)
-
-        if (parsed && parsed.type === 'quiz:standings') {
-          renderStandings(parsed.standings ?? parsed)
-        }
-
-        if (parsed && (parsed.type === 'chat:message:created' || parsed.type === 'message:created')) {
-          appendChatMessage(parsed.message ?? {}, parsed.conversationId ?? null)
-        }
-      })
-
-      socket.addEventListener('close', () => {
-        setStatus('Disconnected', false)
-        log('WS closed')
-      })
-
-      socket.addEventListener('error', (err) => {
-        setStatus('Error', false)
-        log('WS error', err)
-      })
+      connectWebSocket()
     })
 
     document.getElementById('disconnectBtn').addEventListener('click', () => {
+      intentionalClose = true
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer)
+        reconnectTimer = null
+      }
       if (socket) socket.close()
     })
 
@@ -658,6 +704,7 @@
     })
 
     document.getElementById('quizJoinBtn').addEventListener('click', () => {
+      activeQuizSessionId = Number(quizSessionId.value) || null
       send({
         type: 'quiz:join',
         sessionId: Number(quizSessionId.value),
@@ -665,6 +712,7 @@
     })
 
     document.getElementById('quizLeaveBtn').addEventListener('click', () => {
+      activeQuizSessionId = null
       send({
         type: 'quiz:leave',
         sessionId: Number(quizSessionId.value),
