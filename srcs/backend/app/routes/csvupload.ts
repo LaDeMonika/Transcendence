@@ -8,6 +8,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 router.post('/api/quizzes/import-csv', [CsvQuizController, 'importCsv'])
+router.post('/api/quizzes/import-json', [CsvQuizController, 'importJson'])
 router.get('/uploadcsv', async ({ response }) => {
   const filePath = path.join(process.cwd(), 'public', 'uploadcsv.html')
   const html = fs.readFileSync(filePath, 'utf8')
