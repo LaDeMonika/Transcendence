@@ -2,41 +2,27 @@
   <div class="container d-flex flex-column" style="min-height: 100%">
     <div class="row border">
       <div class="col-sm d-flex justify-content-center">
-        <h1>Hello Monika!</h1>
+        <h1>Lobby</h1>
       </div>
     </div>
     <div class="row flex-grow-1 align-items-center justify-content-center border mb-5">
-      <div class="col-sm d-flex justify-content-center border m-3 mb-5" style="height: 250px">
-        <div class="d-flex flex-column align-items-center justify-content-center">
-          <h2>SIMGLE MODE</h2>
-          <p>Play solo quizzez</p>
-          <router-link to="/single/setup">
-            <button class="btn btn-primary">ENTER</button>
-          </router-link>
-        </div>
-      </div>
-      <div class="col-sm d-flex justify-content-center border m-3 mb-5" style="height: 250px">
-        <div class="d-flex flex-column align-items-center justify-content-center">
-          <h2>MULTIPAYER</h2>
-          <p>Play with others</p>
-          <router-link to="/multiplayer/setup">
-            <button class="btn btn-primary">ENTER</button>
-          </router-link>
-        </div>
-      </div>
-      <div class="col-sm d-flex justify-content-center border m-3 mb-5" style="height: 250px">
-        <div class="d-flex flex-column align-items-center justify-content-center">
-          <h2>TOURNAMENT</h2>
-          <p>Play with others</p>
-          <!-- <router-link to="/"> -->
-            <button class="btn btn-primary">ENTER</button>
-          <!-- </router-link> -->
-        </div>
+      <div class="d-flex flex-column align-items-center">
+        <p class="fs-4 text-muted mb-4">waiting for players ...</p>
+        <button class="btn btn-success btn-lg px-5 shadow" @click="startGame">Start Game</button>
       </div>
     </div>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const startGame = () => {
+  // Pass index: 0 to ensure game starts at the very first question properly
+  router.push({ path: '/game', query: { index: 0 } })
+}
+</script>
 
 <style scoped></style>
