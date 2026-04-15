@@ -6,18 +6,21 @@ export default class extends BaseSeeder {
     const users = [
       {
         email: 'user1@test.com',
+        userName: 'Guest 1',
         password: 'password',
-        userName: 'user1',
+        avatarUrl: null
       },
       {
         email: 'user2@test.com',
+        userName: 'Guest 2',
         password: 'password',
-        userName: 'user2',
+        avatarUrl: null
       },
       {
         email: 'user3@test.com',
+        userName: 'Guest 3',
         password: 'password',
-        userName: 'user3',
+        avatarUrl: null
       },
     ]
 
