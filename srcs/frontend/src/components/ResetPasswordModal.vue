@@ -19,7 +19,7 @@
   </BModal>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import {reactive} from 'vue'
   const form = reactive({
   reset_code: '',
