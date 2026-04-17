@@ -79,6 +79,21 @@ export default class QuizSessionController {
     return quizEngine.startSession(quizSession)
   }
 
+  public async state({ params, auth }: HttpContext) {
+    const { id } = params
+    const quizSession = await Session.findOrFail(id)
+
+    let userId: number | undefined
+    try {
+      const user = await auth.authenticate() as User
+      userId = user.id
+    } catch {
+      // TODO: error handling?
+    }
+
+    return quizEngine.buildStatePayload(quizSession, userId)
+  }
+
   public async standings({ params }: HttpContext) {
     const { id } = params
 

@@ -24,11 +24,11 @@ const router = createRouter({
     { path: '/home', component: Home, meta: { bodyClass: 'bg-lobby', layout: 'auth' } },
     { path: '/chat', component: Chat, meta: { layout: 'auth' } },
     { path: '/choose-quiz', component: ChooseQuiz, meta: { layout: 'auth' } },
-    { path: '/game', component: Game, meta: { layout: 'auth' } },
+    { path: '/game/:sessionId?', name: 'Game', component: Game, meta: { layout: 'auth' } },
     { path: '/leaderboard', component: GameLeaderboard, meta: { layout: 'auth' } },
-    { path: '/mulitplayer-create-join-room', component: CreateJoinRoom, meta: { layout: 'auth' } },
+    { path: '/multiplayer-create-join-room', component: CreateJoinRoom, meta: { layout: 'auth' } },
     { path: '/join-room', component: JoinRoom, meta: { layout: 'auth' } },
-    { path: '/lobby', component: Lobby, meta: { layout: 'auth' } },
+    { path: '/lobby/:sessionId', name: 'Lobby', component: Lobby, meta: { layout: 'auth' } },
   ],
 })
 

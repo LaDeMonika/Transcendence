@@ -5,21 +5,27 @@
         <h3 class="mb-0">Match Leaderboard</h3>
         <small class="text-light">Current Progress</small>
       </div>
-      
+
       <div class="card-body p-0">
-        <!-- Uses the reusable LeaderboardRow we created -->
-        <LeaderboardRow 
-          v-for="(player, index) in sortedPlayers" 
-          :key="player.id" 
-          :player="player" 
-          :rank="index + 1" 
-        />
-        
-        <div v-if="players.length === 0" class="p-4 text-center text-muted">
-          Waiting for players to join...
+        <div v-if="isLoading" class="p-4 text-center text-muted">
+          <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+          Loading standings...
         </div>
+
+        <template v-else>
+          <LeaderboardRow
+            v-for="(player, index) in sortedPlayers"
+            :key="player.id"
+            :player="player"
+            :rank="index + 1"
+          />
+
+          <div v-if="sortedPlayers.length === 0" class="p-4 text-center text-muted">
+            No standings available.
+          </div>
+        </template>
       </div>
-      
+
       <div class="card-footer bg-light text-center py-3">
         <div v-if="!isFinal" class="fs-5 fw-bold" :class="timeLeft <= 1 ? 'text-danger' : 'text-primary'">
           Next Question in {{ timeLeft }}s...
@@ -34,31 +40,40 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import LeaderboardRow from '@/components/LeaderboardRow.vue'
+import { getQuizSessionStandings } from '@/services/quizSessionService.js'
 
 const router = useRouter()
 const route = useRoute()
 
 const isFinal = computed(() => route.query.isFinal === 'true')
 const nextIndex = computed(() => route.query.nextIndex || 0)
+const sessionId = route.query.sessionId
 
 const timeLeft = ref(3)
+const isLoading = ref(true)
 let timerInterval = null
 
-// Trash/mock data based on requirement
-const mockPlayers = [
-  { id: 1, name: 'Alice Smith', avatar: 'https://i.pravatar.cc/150?img=1', score: 450 },
-  { id: 2, name: 'Bob Jones', avatar: 'https://i.pravatar.cc/150?img=53', score: 320 },
-  { id: 3, name: 'Charlie Brown', avatar: 'https://i.pravatar.cc/150?img=33', score: 500 },
-  { id: 4, name: 'Diana Prince', avatar: 'https://i.pravatar.cc/150?img=4', score: 150 },
-  { id: 5, name: 'Evan Wright', avatar: 'https://i.pravatar.cc/150?img=11', score: 280 }
-]
+const players = ref([])
 
-const players = ref(mockPlayers)
-
-// We dynamically sort the state so the rank is accurate 
 const sortedPlayers = computed(() => {
   return [...players.value].sort((a, b) => b.score - a.score)
 })
+
+const loadStandings = async () => {
+  if (!sessionId) return
+  try {
+    const data = await getQuizSessionStandings(sessionId)
+    players.value = data.standings.map((entry) => ({
+      id: entry.userId,
+      name: entry.username,
+      score: entry.score,
+    }))
+  } catch (err) {
+    console.error('Failed to load standings:', err)
+  } finally {
+    isLoading.value = false
+  }
+}
 
 const nextQuestion = () => {
   router.push({ path: '/game', query: { index: nextIndex.value } })
@@ -68,7 +83,9 @@ const goToLobby = () => {
   router.push('/lobby')
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await loadStandings()
+
   // If not final leaderboard, wait with a live countdown
   if (!isFinal.value) {
     timerInterval = setInterval(() => {
@@ -88,5 +105,4 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Optional specific styling */
 </style>

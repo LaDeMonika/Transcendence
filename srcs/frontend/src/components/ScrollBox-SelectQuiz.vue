@@ -5,13 +5,19 @@
       <div class="scroll-box">
         <div class="grid">
           <div
+            v-if="items.length === 0"
+            class="card empty"
+          >
+            No quizzes available.
+          </div>
+          <div
             v-for="item in items"
-            :key="item"
+            :key="item.id"
             class="card"
-            :class="{ selected: selectedItems.includes(item) }"
+            :class="{ selected: selectedIds.includes(item.id) }"
             @click="toggleCard(item)"
           >
-            {{ item }}
+            {{ item.title }}
           </div>
         </div>
       </div>
@@ -22,22 +28,29 @@
 
 <script>
 export default {
+  props: {
+    items: {
+      type: Array,
+      default: () => [],
+    },
+  },
   data() {
     return {
-      items: Array.from({ length: 30 }, (_, i) => `Box ${i + 1}`),
-      selectedItems: [],
+      selectedIds: [],
       selectedDifficulty: null, // make sure this exists if you use :disabled
     };
   },
   methods: {
     toggleCard(item) {
-      if (this.selectedItems.includes(item)) {
-        this.selectedItems = this.selectedItems.filter((i) => i !== item);
+      const itemId = item.id
+      if (this.selectedIds.includes(itemId)) {
+        this.selectedIds = this.selectedIds.filter((id) => id !== itemId)
       } else {
-        this.selectedItems.push(item);
+        this.selectedIds.push(itemId)
       }
 
-      this.$emit('update:selectedItems', this.selectedItems)
+      const selectedItems = this.items.filter((quiz) => this.selectedIds.includes(quiz.id))
+      this.$emit('update:selectedItems', selectedItems)
     },
   },
 };

@@ -15,5 +15,6 @@ router.group(() => {
     router.get('/quiz-sessions/:id', [QuizSessionController, 'show'])
     router.post('/quiz-sessions/:id/join', [QuizSessionController, 'join'])
     router.post('/quiz-sessions/:id/start', [QuizSessionController, 'start'])
+    router.get('/quiz-sessions/:id/state', [QuizSessionController, 'state'])
     router.get('/quiz-sessions/:id/standings', [QuizSessionController, 'standings'])
 }).prefix('/api')
