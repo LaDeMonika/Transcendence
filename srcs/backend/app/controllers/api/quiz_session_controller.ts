@@ -87,8 +87,11 @@ export default class QuizSessionController {
     try {
       const user = await auth.authenticate() as User
       userId = user.id
-    } catch {
-      // TODO: error handling?
+    } catch (error: any) {
+      // If the user is not authenticated, we can still return the quiz state, but we won't be able to indicate if they already answered the current question.
+      if (error?.status !== 401 && error?.code !== 'E_UNAUTHORIZED_ACCESS') {
+        throw error
+      }
     }
 
     return quizEngine.buildStatePayload(quizSession, userId)
