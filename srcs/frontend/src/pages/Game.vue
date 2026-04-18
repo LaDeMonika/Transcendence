@@ -90,7 +90,6 @@ import { ref, computed, onMounted, onUnmounted, onBeforeUnmount } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { connect, disconnect, onWs } from '@/services/wsConnection.js'
 import { submitAnswer, joinQuizSession, leaveQuizSession } from '@/services/quizSocket.js'
-import { getNextQuestion } from '@/services/questionsService.js'
 import { getQuizSessionState } from '@/services/quizSessionService.js'
 
 const router = useRouter();
@@ -221,10 +220,20 @@ const cleanupWebSocketListeners = () => {
 };
 
 const updateQuizState = (data) => {
+  if (transitionTimeout) {
+    clearTimeout(transitionTimeout);
+    transitionTimeout = null;
+  }
+
   sessionState.value = data.state;
   currentQuestion.value = normalizeQuestion(data.question);
   alreadyAnswered.value = data.alreadyAnswered ?? false;
   isLoadingNextQuestion.value = false;
+  isFlipped.value = data.state === 'reveal';
+
+  if (data.state !== 'reveal') {
+    correctAnswer.value = null;
+  }
 
   if (data.state === 'question' && data.questionEndsAt) {
     questionEndTime = new Date(data.questionEndsAt).getTime();
@@ -241,6 +250,11 @@ const updateQuizState = (data) => {
 };
 
 const handleQuestionStart = (data) => {
+  if (transitionTimeout) {
+    clearTimeout(transitionTimeout);
+    transitionTimeout = null;
+  }
+
   sessionState.value = 'question';
   currentQuestion.value = normalizeQuestion(data.question);
   selectedAnswer.value = null;
@@ -249,27 +263,6 @@ const handleQuestionStart = (data) => {
   isLoadingNextQuestion.value = false;
   questionEndTime = new Date(data.endsAt).getTime();
   startTimer();
-};
-
-const loadNextQuestionViaApi = async () => {
-  if (!currentQuestion.value?.quizId || !currentQuestion.value?.id) {
-    return false;
-  }
-
-  try {
-    const nextQuestion = await getNextQuestion(currentQuestion.value.quizId, currentQuestion.value.id);
-    if (!nextQuestion) {
-      return false;
-    }
-
-    currentQuestion.value = normalizeQuestion(nextQuestion);
-    selectedAnswer.value = null;
-    alreadyAnswered.value = false;
-    return true;
-  } catch (error) {
-    console.error('Failed to load next question via API:', error);
-    return false;
-  }
 };
 
 const handleQuestionClosed = (data) => {
@@ -285,17 +278,10 @@ const handleQuestionReveal = (data) => {
   // Auto-advance after reveal period
   const revealEndTime = new Date(data.revealEndsAt).getTime();
   const delay = revealEndTime - Date.now();
-  transitionTimeout = setTimeout(async () => {
+  transitionTimeout = setTimeout(() => {
     isFlipped.value = false;
     correctAnswer.value = null;
     isLoadingNextQuestion.value = true;
-
-    const loaded = await loadNextQuestionViaApi();
-    if (!loaded) {
-      currentQuestion.value = null;
-    }
-
-    isLoadingNextQuestion.value = false;
   }, Math.max(0, delay));
 };
 
