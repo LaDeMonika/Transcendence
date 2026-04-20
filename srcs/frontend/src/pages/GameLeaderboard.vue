@@ -76,11 +76,12 @@ const loadStandings = async () => {
 }
 
 const nextQuestion = () => {
-  router.push({ path: '/game', query: { index: nextIndex.value } })
+  if (!sessionId) return
+  router.push({ name: 'Game', params: { sessionId } })
 }
 
 const goToLobby = () => {
-  router.push('/lobby')
+  router.push('/home')
 }
 
 onMounted(async () => {

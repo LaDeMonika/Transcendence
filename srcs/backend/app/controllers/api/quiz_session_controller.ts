@@ -41,7 +41,12 @@ export default class QuizSessionController {
 
   public async show({ params }: HttpContext) {
     const { id } = params
-    const quizSession = await Session.query().where('id', id).preload('players').firstOrFail()
+    const quizSession = await Session.query()
+      .where('id', id)
+      .preload('players', (query) => {
+        query.preload('user')
+      })
+      .firstOrFail()
     return quizSession
   }
 

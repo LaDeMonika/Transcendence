@@ -32,7 +32,7 @@
           v-if="isHost"
           class="btn btn-success btn-lg px-5 shadow"
           @click="startGame"
-          :disabled="isStarting"
+          :disabled="isStarting || !hasJoinedSession"
         >
           {{ isStarting ? 'Starting...' : 'Start Game' }}
         </button>
@@ -47,7 +47,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { connect, disconnect, onWs } from '@/services/wsConnection.js'
 import { joinQuizSession, leaveQuizSession, startQuiz } from '@/services/quizSocket.js'
-import { getQuizSession, getQuizSessionStandings } from '@/services/quizSessionService.js'
+import { getQuizSession } from '@/services/quizSessionService.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -59,23 +59,32 @@ const isSingleMode = route.query.mode === 'single'
 const players = ref([])
 const hostId = ref(null)
 const isStarting = ref(false)
+const hasJoinedSession = ref(false)
 let wsUnsubscribers = []
 
-const fetchPlayers = async () => {
-  try {
-    const data = await getQuizSessionStandings(sessionId)
-    players.value = data.standings
-  } catch (err) {
-    console.error('Failed to fetch players:', err)
-  }
-}
-
 const startGame = () => {
+  if (isStarting.value || !hasJoinedSession.value) return
   isStarting.value = true
   startQuiz(sessionId)
 }
 
 const setupWsListeners = () => {
+  cleanupWsListeners()
+
+  wsUnsubscribers.push(onWs('ws:connected', () => {
+    hasJoinedSession.value = false
+    joinQuizSession(sessionId)
+  }))
+
+  wsUnsubscribers.push(onWs('quiz:join:ok', (data) => {
+    if (data.sessionId !== sessionId) return
+    hasJoinedSession.value = true
+
+    if (isSingleMode && isHost && !isStarting.value) {
+      startGame()
+    }
+  }))
+
   wsUnsubscribers.push(onWs('quiz:player:joined', (data) => {
     if (data.sessionId !== sessionId) return
     const exists = players.value.some((p) => p.userId === data.userId)
@@ -113,24 +122,24 @@ onMounted(async () => {
       return
     }
     hostId.value = session.hostId
+    players.value = (session.players ?? []).map((player) => ({
+      userId: player.userId,
+      username: player.user?.userName ?? `User ${player.userId}`,
+      score: player.score ?? 0,
+    }))
   } catch (err) {
     console.error('Failed to load session:', err)
   }
 
-  await fetchPlayers()
-
-  connect()
   setupWsListeners()
-  joinQuizSession(sessionId)
-
-  if (isSingleMode) {
-    startGame()
-  }
+  connect()
 })
 
 onBeforeUnmount(() => {
   cleanupWsListeners()
-  leaveQuizSession(sessionId)
+  if (hasJoinedSession.value) {
+    leaveQuizSession(sessionId)
+  }
   disconnect()
 })
 </script>

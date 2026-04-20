@@ -44,9 +44,9 @@ export default {
     toggleCard(item) {
       const itemId = item.id
       if (this.selectedIds.includes(itemId)) {
-        this.selectedIds = this.selectedIds.filter((id) => id !== itemId)
+        this.selectedIds = []
       } else {
-        this.selectedIds.push(itemId)
+        this.selectedIds = [itemId]
       }
 
       const selectedItems = this.items.filter((quiz) => this.selectedIds.includes(quiz.id))
