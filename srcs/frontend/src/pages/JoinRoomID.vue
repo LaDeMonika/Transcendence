@@ -23,17 +23,27 @@
             />
             </div>
 
-            <button 
-            type="submit" 
-            class="btn btn-primary btn-lg w-100"
-            :disabled="!roomId"
-            >
-            Join Game
-            </button>
+            <div class="d-grid gap-2">
+              <button
+                type="submit"
+                class="btn btn-primary btn-lg w-100"
+                :disabled="!roomId"
+              >
+                Join As Player
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-secondary btn-lg w-100"
+                :disabled="!roomId"
+                @click="handleSpectate"
+              >
+                Watch As Spectator
+              </button>
+            </div>
         </form>
 
         <div class="text-center mt-3">
-            <small class="text-muted">Enter the ID provided by the host</small>
+            <small class="text-muted">Enter the ID provided by the host and choose whether to play or watch live.</small>
         </div>
 
 
@@ -52,7 +62,11 @@ const router = useRouter(); // 2. Initialize the router instance
 const roomId = ref('');
 
 const handleJoin = () => {
-    router.push({ name: 'Lobby', params: { sessionId: roomId.value } });
+    router.push({ name: 'Lobby', params: { sessionId: roomId.value }, query: { role: 'player' } });
+};
+
+const handleSpectate = () => {
+    router.push({ name: 'Lobby', params: { sessionId: roomId.value }, query: { role: 'spectator' } });
 };
 </script>
 

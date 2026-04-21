@@ -15,6 +15,11 @@ export const joinQuizSession = async (id, playerData) => {
   return res.data
 }
 
+export const spectateQuizSession = async (id) => {
+  const res = await client.post(`/quiz-sessions/${id}/spectate`)
+  return res.data
+}
+
 export const startQuizSession = async (id) => {
   const res = await client.post(`/quiz-sessions/${id}/start`)
   return res.data

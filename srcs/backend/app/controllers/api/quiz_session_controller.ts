@@ -44,8 +44,8 @@ export default class QuizSessionController {
     const { id } = params
     const quizSession = await Session.query()
       .where('id', id)
-      .preload('players')
-      .preload('spectators')
+      .preload('players', (query) => query.preload('user'))
+      .preload('spectators', (query) => query.preload('user'))
       .firstOrFail()
     return quizSession
   }
@@ -133,9 +133,19 @@ export default class QuizSessionController {
     const quizSession = await Session.findOrFail(id)
 
     let userId: number | undefined
+    let role: 'player' | 'spectator' = 'player'
     try {
       const user = await auth.authenticate() as User
       userId = user.id
+
+      const isSpectator = await QuizSpectator.query()
+        .where('sessionId', quizSession.id)
+        .where('userId', user.id)
+        .first()
+
+      if (isSpectator) {
+        role = 'spectator'
+      }
     } catch (error: any) {
       // If the user is not authenticated, we can still return the quiz state, but we won't be able to indicate if they already answered the current question.
       if (error?.status !== 401 && error?.code !== 'E_UNAUTHORIZED_ACCESS') {
@@ -143,7 +153,7 @@ export default class QuizSessionController {
       }
     }
 
-    return quizEngine.buildStatePayload(quizSession, userId)
+    return quizEngine.buildStatePayload(quizSession, userId, role)
   }
 
   public async standings({ params }: HttpContext) {

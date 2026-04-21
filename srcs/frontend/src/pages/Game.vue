@@ -15,6 +15,12 @@
           </span>
         </div>
 
+        <div class="row align-items-center justify-content-center border">
+          <span class="text-muted">
+            {{ quizRole === 'spectator' ? 'Spectator Mode: read-only live view' : 'Player Mode' }}
+          </span>
+        </div>
+
       </div>
     </div>
 
@@ -43,9 +49,9 @@
           <div class="col-lg-6">
             <div
               class="card p-4 shadow-sm text-center h-100"
-              :class="isCorrect ? 'bg-success text-white' : 'bg-danger text-white'"
+              :class="revealCardClass"
             >
-              <h2>{{ isCorrect ? "CORRECT!" : "WRONG!" }}</h2>
+              <h2>{{ revealHeadline }}</h2>
               <p class="mt-3 mb-0">
                 The correct answer was:
                 <strong>{{ correctAnswerText }}</strong>
@@ -90,13 +96,16 @@
                   @click="selectAnswer(index)"
                   class="list-group-item list-group-item-action"
                   :class="{ active: selectedAnswer === index }"
-                  :disabled="alreadyAnswered"
+                  :disabled="alreadyAnswered || quizRole === 'spectator'"
                 >
                   {{ option }}
                 </button>
               </div>
-              <div v-if="alreadyAnswered" class="mt-3 text-muted">
+              <div v-if="alreadyAnswered && quizRole === 'player'" class="mt-3 text-muted">
                 Answer submitted!
+              </div>
+              <div v-else-if="quizRole === 'spectator'" class="mt-3 text-muted">
+                Spectators receive live updates but cannot submit answers.
               </div>
             </div>
 
@@ -112,13 +121,14 @@ import { ref, computed, onMounted, onUnmounted, onBeforeUnmount } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import LeaderboardRow from '@/components/LeaderboardRow.vue'
 import { connect, disconnect, onWs, getIsConnected } from '@/services/wsConnection.js'
-import { submitAnswer, joinQuizSession, leaveQuizSession } from '@/services/quizSocket.js'
+import { submitAnswer, joinQuizSession, spectateQuizSession, leaveQuizSession } from '@/services/quizSocket.js'
 import { getQuizSessionState } from '@/services/quizSessionService.js'
 
 const router = useRouter();
 const route = useRoute();
 
 const sessionId = route.params.sessionId
+const fallbackRole = route.query.role === 'spectator' ? 'spectator' : 'player'
 
 // State
 const currentQuestion = ref(null);
@@ -130,6 +140,7 @@ const standings = ref([]);
 const alreadyAnswered = ref(false);
 const correctAnswer = ref(null);
 const isLoadingNextQuestion = ref(false);
+const quizRole = ref(fallbackRole);
 let timerInterval = null;
 let transitionTimeout = null;
 let questionEndTime = null;
@@ -157,6 +168,16 @@ const isCorrect = computed(() => {
   const selectedLetter = String.fromCharCode(65 + selectedAnswer.value); // Convert index to letter
   return selectedLetter === correctAnswer.value;
 });
+
+const revealHeadline = computed(() => {
+  if (quizRole.value === 'spectator') return 'ANSWER REVEALED'
+  return isCorrect.value ? 'CORRECT!' : 'WRONG!'
+})
+
+const revealCardClass = computed(() => {
+  if (quizRole.value === 'spectator') return 'bg-dark text-white'
+  return isCorrect.value ? 'bg-success text-white' : 'bg-danger text-white'
+})
 
 const correctAnswerText = computed(() => {
   if (!correctAnswer.value || !currentQuestion.value) return '';
@@ -211,7 +232,11 @@ const connectWebSocket = () => {
     console.log('WebSocket connecting for session:', sessionId);
 
     if (getIsConnected()) {
-      joinQuizSession(sessionId);
+      if (quizRole.value === 'spectator') {
+        spectateQuizSession(sessionId);
+      } else {
+        joinQuizSession(sessionId);
+      }
     }
   } catch (error) {
     console.error('Failed to connect WebSocket:', error);
@@ -224,11 +249,22 @@ const setupWebSocketListeners = () => {
 
   wsUnsubscribers.push(onWs('ws:connected', () => {
     console.log('WebSocket connected, joining session:', sessionId);
+    if (quizRole.value === 'spectator') {
+      spectateQuizSession(sessionId);
+      return
+    }
     joinQuizSession(sessionId);
   }));
 
   wsUnsubscribers.push(onWs('quiz:join:ok', (data) => {
     if (Number(data.sessionId) !== Number(sessionId)) return;
+    quizRole.value = 'player'
+    void refreshQuizState();
+  }));
+
+  wsUnsubscribers.push(onWs('quiz:spectate:ok', (data) => {
+    if (Number(data.sessionId) !== Number(sessionId)) return;
+    quizRole.value = 'spectator'
     void refreshQuizState();
   }));
 
@@ -298,8 +334,9 @@ const updateQuizState = (data) => {
   }
 
   sessionState.value = data.state;
+  quizRole.value = data.role ?? quizRole.value;
   currentQuestion.value = normalizeQuestion(data.question);
-  alreadyAnswered.value = data.alreadyAnswered ?? false;
+  alreadyAnswered.value = quizRole.value === 'player' ? (data.alreadyAnswered ?? false) : true;
   isLoadingNextQuestion.value = false;
   isFlipped.value = data.state === 'reveal';
 
@@ -331,7 +368,7 @@ const handleQuestionStart = (data) => {
   currentQuestion.value = normalizeQuestion(data.question);
   selectedAnswer.value = null;
   isFlipped.value = false;
-  alreadyAnswered.value = false;
+  alreadyAnswered.value = quizRole.value === 'spectator';
   isLoadingNextQuestion.value = false;
   questionEndTime = new Date(data.endsAt).getTime();
   startTimer();
@@ -380,7 +417,7 @@ const startTimer = () => {
 };
 
 const selectAnswer = (index) => {
-  if (isFlipped.value || alreadyAnswered.value || !currentQuestion.value) return;
+  if (quizRole.value === 'spectator' || isFlipped.value || alreadyAnswered.value || !currentQuestion.value) return;
 
   selectedAnswer.value = index;
 

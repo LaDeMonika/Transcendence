@@ -4,6 +4,10 @@ export function joinQuizSession(sessionId) {
   sendWs({ type: 'quiz:join', sessionId })
 }
 
+export function spectateQuizSession(sessionId) {
+  sendWs({ type: 'quiz:spectate', sessionId })
+}
+
 export function leaveQuizSession(sessionId) {
   sendWs({ type: 'quiz:leave', sessionId })
 }
