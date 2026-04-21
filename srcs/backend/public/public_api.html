@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Public API Tester</title>
+  <style>
+    :root {
+      --bg: #f5efe6;
+      --panel: #fffaf2;
+      --ink: #18202a;
+      --muted: #5f6b76;
+      --line: #d7cbb8;
+      --accent: #0f766e;
+      --accent-2: #c2410c;
+      --ok: #166534;
+      --error: #b91c1c;
+      --shadow: 0 18px 40px rgba(24, 32, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 30%),
+        radial-gradient(circle at top right, rgba(194, 65, 12, 0.1), transparent 28%),
+        linear-gradient(180deg, #f7f1e7 0%, var(--bg) 100%);
+    }
+
+    main {
+      width: min(1100px, calc(100% - 32px));
+      margin: 32px auto 48px;
+    }
+
+    .hero,
+    .panel,
+    .endpoint {
+      background: color-mix(in srgb, var(--panel) 92%, white 8%);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+
+    .hero p,
+    .hint,
+    .endpoint p,
+    label {
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .panel {
+      padding: 18px;
+      margin-bottom: 20px;
+    }
+
+    .endpoint {
+      padding: 18px;
+    }
+
+    .method {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: rgba(15, 118, 110, 0.12);
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .method.write {
+      background: rgba(194, 65, 12, 0.12);
+      color: var(--accent-2);
+    }
+
+    h2,
+    h3 {
+      margin-top: 0;
+    }
+
+    .fields {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 0.95rem;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font: inherit;
+      color: var(--ink);
+      background: #fffdf9;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.95rem;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      background: var(--ink);
+      color: white;
+      font: inherit;
+      font-weight: 700;
+      padding: 11px 18px;
+      cursor: pointer;
+      transition: transform 120ms ease, opacity 120ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      opacity: 0.95;
+    }
+
+    .response-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(24, 32, 42, 0.08);
+    }
+
+    .badge.ok {
+      color: var(--ok);
+      background: rgba(22, 101, 52, 0.12);
+    }
+
+    .badge.error {
+      color: var(--error);
+      background: rgba(185, 28, 28, 0.12);
+    }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #171b22;
+      color: #eff6ff;
+      border-radius: 14px;
+      padding: 16px;
+      overflow: auto;
+    }
+
+    code {
+      background: rgba(24, 32, 42, 0.08);
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    @media (max-width: 640px) {
+      main {
+        width: min(100% - 18px, 1100px);
+        margin-top: 12px;
+      }
+
+      .hero,
+      .panel,
+      .endpoint {
+        border-radius: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <h1>Public API Tester</h1>
+      <p>
+        This page sends requests directly to the backend and includes the
+        <code>x-api-key</code> header automatically.
+      </p>
+      <p class="hint">
+        There is a rate limit applied to the public API. If you test several endpoints quickly,
+        expect a <code>429 Rate limit exceeded</code> response.
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2>Connection</h2>
+      <div class="grid">
+        <label>
+          Base URL
+          <input id="baseUrl" type="text" value="http://localhost:3333" />
+        </label>
+        <label>
+          API Key
+          <input id="apiKey" type="text" value="transc-public-demo-key-2026" />
+        </label>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="endpoint">
+        <span class="method">GET</span>
+        <h3>List Quizzes</h3>
+        <p>Returns quiz IDs and titles. Good first endpoint to confirm the API key works.</p>
+        <button data-endpoint="listQuizzes">Send Request</button>
+      </article>
+
+      <article class="endpoint">
+        <span class="method">GET</span>
+        <h3>Show Quiz</h3>
+        <p>Returns one quiz and its questions, but leaves out the correct answers.</p>
+        <div class="fields">
+          <label>
+            Quiz ID
+            <input id="quizId" type="number" min="1" value="1" />
+          </label>
+          <button data-endpoint="showQuiz">Send Request</button>
+        </div>
+      </article>
+
+      <article class="endpoint">
+        <span class="method">GET</span>
+        <h3>Show User</h3>
+        <p>Returns a public user profile with <code>id</code>, <code>userName</code>, and <code>avatarUrl</code>.</p>
+        <div class="fields">
+          <label>
+            User ID
+            <input id="userId" type="number" min="1" value="1" />
+          </label>
+          <button data-endpoint="showUser">Send Request</button>
+        </div>
+      </article>
+
+      <article class="endpoint">
+        <span class="method write">POST</span>
+        <h3>Create Quiz Session</h3>
+        <p>Creates a quiz session. Required body fields are <code>quizId</code> and <code>hostId</code>.</p>
+        <div class="fields">
+          <label>
+            JSON Body
+            <textarea id="createSessionBody">{
+  "quizId": 1,
+  "hostId": 1,
+  "conversationId": null
+}</textarea>
+          </label>
+          <button data-endpoint="createSession">Send Request</button>
+        </div>
+      </article>
+
+      <article class="endpoint">
+        <span class="method write">PUT</span>
+        <h3>Update User</h3>
+        <p>Changes a username. The name must be unique or the API returns a <code>400</code>.</p>
+        <div class="fields">
+          <label>
+            User ID
+            <input id="updateUserId" type="number" min="1" value="1" />
+          </label>
+          <label>
+            JSON Body
+            <textarea id="updateUserBody">{
+  "userName": "NewName"
+}</textarea>
+          </label>
+          <button data-endpoint="updateUser">Send Request</button>
+        </div>
+      </article>
+
+      <article class="endpoint">
+        <span class="method write">DELETE</span>
+        <h3>Delete Quiz Session</h3>
+        <p>Deletes an existing quiz session by ID.</p>
+        <div class="fields">
+          <label>
+            Session ID
+            <input id="deleteSessionId" type="number" min="1" value="1" />
+          </label>
+          <button data-endpoint="deleteSession">Send Request</button>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel" style="margin-top: 20px;">
+      <h2>Response</h2>
+      <div class="response-meta">
+        <span class="badge" id="responseStatus">No request yet</span>
+        <span class="badge" id="responseUrl">-</span>
+      </div>
+      <pre id="responseBody">Use one of the endpoint cards above to send a request.</pre>
+    </section>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id)
+
+    async function request(endpoint) {
+      const baseUrl = $('baseUrl').value.trim().replace(/\/$/, '')
+      const apiKey = $('apiKey').value.trim()
+
+      if (!baseUrl) {
+        renderResponse({
+          ok: false,
+          status: 'Missing base URL',
+          url: '-',
+          body: 'Enter a backend base URL first.',
+        })
+        return
+      }
+
+      if (!apiKey) {
+        renderResponse({
+          ok: false,
+          status: 'Missing API key',
+          url: '-',
+          body: 'Enter an API key first.',
+        })
+        return
+      }
+
+      const config = buildRequestConfig(endpoint, baseUrl)
+      const headers = {
+        'x-api-key': apiKey,
+        ...config.headers,
+      }
+
+      renderResponse({
+        ok: true,
+        status: 'Sending...',
+        url: config.url,
+        body: '',
+      })
+
+      try {
+        const response = await fetch(config.url, {
+          method: config.method,
+          headers,
+          body: config.body,
+        })
+
+        const text = await response.text()
+        let parsed = text
+
+        try {
+          parsed = text ? JSON.stringify(JSON.parse(text), null, 2) : '(empty body)'
+        } catch {
+          parsed = text || '(empty body)'
+        }
+
+        renderResponse({
+          ok: response.ok,
+          status: `${response.status} ${response.statusText}`,
+          url: config.url,
+          body: parsed,
+        })
+      } catch (error) {
+        renderResponse({
+          ok: false,
+          status: 'Network error',
+          url: config.url,
+          body: String(error),
+        })
+      }
+    }
+
+    function buildRequestConfig(endpoint, baseUrl) {
+      switch (endpoint) {
+        case 'listQuizzes':
+          return {
+            method: 'GET',
+            url: `${baseUrl}/api/public/quizzes`,
+          }
+        case 'showQuiz':
+          return {
+            method: 'GET',
+            url: `${baseUrl}/api/public/quiz/${$('quizId').value || '1'}`,
+          }
+        case 'showUser':
+          return {
+            method: 'GET',
+            url: `${baseUrl}/api/public/users/${$('userId').value || '1'}`,
+          }
+        case 'createSession':
+          return {
+            method: 'POST',
+            url: `${baseUrl}/api/public/quiz-sessions`,
+            headers: { 'Content-Type': 'application/json' },
+            body: $('createSessionBody').value,
+          }
+        case 'updateUser':
+          return {
+            method: 'PUT',
+            url: `${baseUrl}/api/public/users/${$('updateUserId').value || '1'}`,
+            headers: { 'Content-Type': 'application/json' },
+            body: $('updateUserBody').value,
+          }
+        case 'deleteSession':
+          return {
+            method: 'DELETE',
+            url: `${baseUrl}/api/public/quiz-sessions/${$('deleteSessionId').value || '1'}`,
+          }
+        default:
+          throw new Error(`Unsupported endpoint: ${endpoint}`)
+      }
+    }
+
+    function renderResponse(result) {
+      const status = $('responseStatus')
+      const url = $('responseUrl')
+      const body = $('responseBody')
+
+      status.textContent = result.status
+      status.className = `badge ${result.ok ? 'ok' : 'error'}`
+      url.textContent = result.url
+      body.textContent = result.body
+    }
+
+    document.querySelectorAll('[data-endpoint]').forEach((button) => {
+      button.addEventListener('click', () => request(button.dataset.endpoint))
+    })
+  </script>
+</body>
+</html>

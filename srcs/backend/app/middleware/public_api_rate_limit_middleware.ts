@@ -9,7 +9,7 @@ type Bucket = {
 // currently one per minute to keep it simple, but this could be extended
 const buckets = new Map<string, Bucket>()
 const WINDOW_MS = 60 * 1000
-const LIMIT = 1
+const LIMIT = 15
 
 export default class PublicApiRateLimitMiddleware {
   async handle({ request, response }: HttpContext, next: () => Promise<void>) {

@@ -7,6 +7,7 @@ import { BaseSeeder } from '@adonisjs/lucid/seeders'
 const DEMO_API_KEY_NAME = 'evaluation-demo'
 export const DEMO_PUBLIC_API_KEY = 'transc-public-demo-key-2026'
 
+
 export default class extends BaseSeeder {
   async run() {
     await ApiKey.updateOrCreate(

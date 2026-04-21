@@ -20,6 +20,8 @@ import '../app/routes/quiz_session.js'
 import '../app/routes/users.js'
 import '../app/routes/public_api.js'
 
+
 router.get('/', async () => {
   return 'Welcome to ft_trancenders secret vault :D'
 })
+

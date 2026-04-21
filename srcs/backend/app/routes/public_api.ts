@@ -1,6 +1,7 @@
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
-
+import app from '@adonisjs/core/services/app'
+import { readFile } from 'node:fs/promises'
 const PublicApiController = () => import('#controllers/api/public_api_controller')
 
 /**
@@ -26,3 +27,10 @@ router
   })
   .prefix('/api/public')
   .use([middleware.publicApiKey(), middleware.publicApiRateLimit()])
+
+  router.get('/public-api', async ({ response }) => {
+  const html = await readFile(app.makePath('public', 'public_api.html'), 'utf-8')
+  response.type('html')
+  return response.send(html)
+  })
+
