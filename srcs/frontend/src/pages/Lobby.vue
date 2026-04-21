@@ -6,6 +6,15 @@
       </div>
     </div>
 
+    <div class="row border py-3">
+      <div class="col-sm d-flex justify-content-center">
+        <p class="mb-0 fs-5">
+          Session ID:
+          <strong>{{ sessionId }}</strong>
+        </p>
+      </div>
+    </div>
+
     <div class="row flex-grow-1 align-items-start justify-content-center border py-4">
       <div class="col-sm-6">
         <h5 class="text-center mb-3">Players ({{ players.length }})</h5>
