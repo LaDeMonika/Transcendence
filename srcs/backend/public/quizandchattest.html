@@ -234,6 +234,16 @@
     </div>
 
     <div class="card">
+      <h2>REST: Spectate Quiz Session</h2>
+
+      <label for="spectateSessionId">Session ID</label>
+      <input id="spectateSessionId" type="number" placeholder="e.g. 5" />
+
+      <button id="spectateSessionBtn">Spectate Session (REST)</button>
+      <div class="muted">This creates a spectator record without affecting standings or scoring.</div>
+    </div>
+
+    <div class="card">
       <h2>REST: Start Quiz Session</h2>
 
       <label for="startSessionId">Session ID</label>
@@ -284,6 +294,7 @@
 
       <div class="row">
         <button id="quizJoinBtn">Quiz Join (WS)</button>
+        <button id="quizSpectateBtn" class="secondary">Quiz Spectate (WS)</button>
         <button id="quizLeaveBtn" class="secondary">Quiz Leave</button>
       </div>
 
@@ -339,6 +350,7 @@
     let reconnectTimer = null
     let intentionalClose = false
     let activeQuizSessionId = null
+    let activeQuizRole = 'player'
 
     const wsStatus = document.getElementById('wsStatus')
     const logEl = document.getElementById('log')
@@ -353,6 +365,7 @@
     const createHostId = document.getElementById('createHostId')
 
     const joinSessionId = document.getElementById('joinSessionId')
+    const spectateSessionId = document.getElementById('spectateSessionId')
     const startSessionId = document.getElementById('startSessionId')
 
     const conversationId = document.getElementById('conversationId')
@@ -437,7 +450,7 @@
       if (!sessionId || !socket || socket.readyState !== WebSocket.OPEN) return
 
       const payload = {
-        type: 'quiz:join',
+        type: activeQuizRole === 'spectator' ? 'quiz:spectate' : 'quiz:join',
         sessionId,
       }
 
@@ -478,10 +491,17 @@
 
         if (parsed && parsed.type === 'quiz:join:ok') {
           activeQuizSessionId = Number(parsed.sessionId) || activeQuizSessionId
+          activeQuizRole = 'player'
+        }
+
+        if (parsed && parsed.type === 'quiz:spectate:ok') {
+          activeQuizSessionId = Number(parsed.sessionId) || activeQuizSessionId
+          activeQuizRole = 'spectator'
         }
 
         if (parsed && parsed.type === 'quiz:leave:ok') {
           activeQuizSessionId = null
+          activeQuizRole = 'player'
         }
 
         if (parsed && parsed.type === 'quiz:standings') {
@@ -651,6 +671,7 @@
         if (data?.id) {
           quizSessionId.value = data.id
           joinSessionId.value = data.id
+          spectateSessionId.value = data.id
           startSessionId.value = data.id
           standingsSessionId.value = data.id
         }
@@ -665,6 +686,15 @@
         await rest('POST', `/api/quiz-sessions/${sessionId}/join`, {})
       } catch (err) {
         log('Join session failed', String(err))
+      }
+    })
+
+    document.getElementById('spectateSessionBtn').addEventListener('click', async () => {
+      try {
+        const sessionId = Number(spectateSessionId.value)
+        await rest('POST', `/api/quiz-sessions/${sessionId}/spectate`, {})
+      } catch (err) {
+        log('Spectate session failed', String(err))
       }
     })
 
@@ -705,14 +735,25 @@
 
     document.getElementById('quizJoinBtn').addEventListener('click', () => {
       activeQuizSessionId = Number(quizSessionId.value) || null
+      activeQuizRole = 'player'
       send({
         type: 'quiz:join',
         sessionId: Number(quizSessionId.value),
       })
     })
 
+    document.getElementById('quizSpectateBtn').addEventListener('click', () => {
+      activeQuizSessionId = Number(quizSessionId.value) || null
+      activeQuizRole = 'spectator'
+      send({
+        type: 'quiz:spectate',
+        sessionId: Number(quizSessionId.value),
+      })
+    })
+
     document.getElementById('quizLeaveBtn').addEventListener('click', () => {
       activeQuizSessionId = null
+      activeQuizRole = 'player'
       send({
         type: 'quiz:leave',
         sessionId: Number(quizSessionId.value),

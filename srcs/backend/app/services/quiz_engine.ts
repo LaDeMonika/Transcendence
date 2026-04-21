@@ -1,5 +1,6 @@
 import Question from '#models/Question'
 import QuizPlayer from '#models/quizsession/quiz_player'
+import QuizSpectator from '#models/quizsession/quiz_spectator'
 import Session from '#models/quizsession/quizsession'
 import { quizRooms } from '#services/quizroom'
 import { DateTime } from 'luxon'
@@ -71,11 +72,23 @@ class QuizEngine {
     }))
   }
 
-  async buildStatePayload(session: Session, userId?: number) {
+  private async getAudienceCounts(sessionId: number) {
+    const [playerResult, spectatorResult] = await Promise.all([
+      QuizPlayer.query().where('sessionId', sessionId).count('* as total').first(),
+      QuizSpectator.query().where('sessionId', sessionId).count('* as total').first(),
+    ])
+
+    return {
+      playerCount: Number(playerResult?.$extras.total ?? 0),
+      spectatorCount: Number(spectatorResult?.$extras.total ?? 0),
+    }
+  }
+
+  async buildStatePayload(session: Session, userId?: number, role: 'player' | 'spectator' = 'player') {
     // Rejoining clients need the current question and their answered state to rebuild the live UI.
     const currentQuestion = session.currentQuestionId ? await Question.find(session.currentQuestionId) : null
     let alreadyAnswered = false
-    if (userId && session.currentQuestionId) {
+    if (role === 'player' && userId && session.currentQuestionId) {
       const answer = await db.from('quiz_answers')
         .where('session_id', session.id)
         .where('question_id', session.currentQuestionId)
@@ -89,6 +102,7 @@ class QuizEngine {
       type: 'quiz:state',
       sessionId: session.id,
       state: session.state,
+      role,
       questionId: session.currentQuestionId ?? null,
       question: currentQuestion ? this.sanitizeQuestion(currentQuestion) : null,
       startedAt: session.startedAt?.toISO() ?? null,
@@ -97,15 +111,16 @@ class QuizEngine {
       revealEndsAt: session.revealEndsAt?.toISO() ?? null,
       finishedAt: session.finishedAt?.toISO() ?? null,
       alreadyAnswered,
+      ...(await this.getAudienceCounts(session.id)),
       standings: session.state === 'reveal' || session.state === 'finished'
         ? await this.getStandings(session.id)
         : undefined,
     }
   }
 
-  async syncSocket(ws: any, session: Session, userId?: number) {
+  async syncSocket(ws: any, session: Session, userId?: number, role: 'player' | 'spectator' = 'player') {
     // Send the current server state immediately after join so reconnects do not drift from the round timer.
-    ws.send(JSON.stringify(await this.buildStatePayload(session, userId)))
+    ws.send(JSON.stringify(await this.buildStatePayload(session, userId, role)))
   }
 
   async startSession(session: Session) {

@@ -1,5 +1,6 @@
 import Session from '#models/quizsession/quizsession'
 import QuizPlayer from '#models/quizsession/quiz_player'
+import QuizSpectator from '#models/quizsession/quiz_spectator'
 import type { HttpContext } from '@adonisjs/core/http'
 import type User from '#models/user'
 import Question from '#models/Question'
@@ -41,14 +42,27 @@ export default class QuizSessionController {
 
   public async show({ params }: HttpContext) {
     const { id } = params
-    const quizSession = await Session.query().where('id', id).preload('players').firstOrFail()
+    const quizSession = await Session.query()
+      .where('id', id)
+      .preload('players')
+      .preload('spectators')
+      .firstOrFail()
     return quizSession
   }
 
-    public async join({ params, auth }: HttpContext) {
+  public async join({ params, auth, response }: HttpContext) {
     const { id } = params
     const user = await auth.authenticate() as User
     const quizSession = await Session.findOrFail(id)
+
+    const spectator = await QuizSpectator.query()
+      .where('sessionId', quizSession.id)
+      .where('userId', user.id)
+      .first()
+
+    if (spectator) {
+      await spectator.delete()
+    }
 
     let quizPlayer = await QuizPlayer.query()
         .where('sessionId', quizSession.id)
@@ -63,8 +77,43 @@ export default class QuizSessionController {
         })
     }
 
-    return quizPlayer
+    return response.ok({
+      role: 'player',
+      participant: quizPlayer,
+    })
+  }
+
+  public async spectate({ params, auth, response }: HttpContext) {
+    const { id } = params
+    const user = await auth.authenticate() as User
+    const quizSession = await Session.findOrFail(id)
+
+    const existingPlayer = await QuizPlayer.query()
+      .where('sessionId', quizSession.id)
+      .where('userId', user.id)
+      .first()
+
+    if (existingPlayer) {
+      return response.badRequest({ error: 'Players cannot join the same session as spectators' })
     }
+
+    let spectator = await QuizSpectator.query()
+      .where('sessionId', quizSession.id)
+      .where('userId', user.id)
+      .first()
+
+    if (!spectator) {
+      spectator = await QuizSpectator.create({
+        sessionId: quizSession.id,
+        userId: user.id,
+      })
+    }
+
+    return response.ok({
+      role: 'spectator',
+      participant: spectator,
+    })
+  }
 
   public async start({ params, auth }: HttpContext) {
     const { id } = params

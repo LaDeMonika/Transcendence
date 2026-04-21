@@ -2,6 +2,7 @@ import { quizRooms } from '#services/quizroom'
 import type User from '#models/user'
 import Question from '#models/Question'
 import QuizPlayer from '#models/quizsession/quiz_player'
+import QuizSpectator from '#models/quizsession/quiz_spectator'
 import Session from '#models/quizsession/quizsession'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
@@ -22,6 +23,11 @@ export async function handleWsQuizMessage(ws: any, user: User, payload: any) {
 
     const quizPlayerExists = await QuizPlayer.query().where('sessionId', sessionId).where('userId', user.id).first()
     if (!quizPlayerExists) {
+      const spectator = await QuizSpectator.query().where('sessionId', sessionId).where('userId', user.id).first()
+      if (spectator) {
+        await spectator.delete()
+      }
+
       await QuizPlayer.create({
         sessionId,
         userId: user.id,
@@ -31,9 +37,42 @@ export async function handleWsQuizMessage(ws: any, user: User, payload: any) {
 
     // Joining the socket room enables all future quiz broadcasts for this session.
     quizRooms.join(String(sessionId), ws)
-    ws.send(JSON.stringify({ type: 'quiz:join:ok', sessionId }))
+    ws.send(JSON.stringify({ type: 'quiz:join:ok', sessionId, role: 'player' }))
     // Send the current quiz state right away so late joiners and reconnects can render the active round.
-    await quizEngine.syncSocket(ws, quizSession, user.id)
+    await quizEngine.syncSocket(ws, quizSession, user.id, 'player')
+    return true
+  }
+
+  if (payload.type === 'quiz:spectate') {
+    const sessionId = Number(payload.sessionId)
+    if (!sessionId) {
+      ws.send(JSON.stringify({ type: 'error', error: 'Missing sessionId' }))
+      return true
+    }
+
+    const quizSession = await Session.query().where('id', sessionId).first()
+    if (!quizSession) {
+      ws.send(JSON.stringify({ type: 'error', error: 'Invalid sessionId' }))
+      return true
+    }
+
+    const quizPlayer = await QuizPlayer.query().where('sessionId', sessionId).where('userId', user.id).first()
+    if (quizPlayer) {
+      ws.send(JSON.stringify({ type: 'error', error: 'Players cannot join the same session as spectators' }))
+      return true
+    }
+
+    const spectatorExists = await QuizSpectator.query().where('sessionId', sessionId).where('userId', user.id).first()
+    if (!spectatorExists) {
+      await QuizSpectator.create({
+        sessionId,
+        userId: user.id,
+      })
+    }
+
+    quizRooms.join(String(sessionId), ws)
+    ws.send(JSON.stringify({ type: 'quiz:spectate:ok', sessionId, role: 'spectator' }))
+    await quizEngine.syncSocket(ws, quizSession, user.id, 'spectator')
     return true
   }
 
@@ -95,6 +134,11 @@ export async function handleWsQuizMessage(ws: any, user: User, payload: any) {
     //check if user is part of the quiz session and the session is accepting answers for the question
     if (!quizRooms.isInSession(String(sessionId), ws)) {
       ws.send(JSON.stringify({ type: 'error', error: 'User is not part of the quiz session' }))
+      return true
+    }
+    const player = await QuizPlayer.query().where('sessionId', sessionId).where('userId', user.id).first()
+    if (!player) {
+      ws.send(JSON.stringify({ type: 'error', error: 'Spectators cannot submit answers' }))
       return true
     }
     // Answers are only valid while the session is in the active question phase.
