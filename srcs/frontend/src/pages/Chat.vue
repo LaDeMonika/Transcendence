@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isMobile" class="w-100">
+  <div v-if="isMobile" class="w-100 h-100">
     <div v-if="!activeConversation" class="p-3">
       <BButton class="mb-3" @click="showCreateModal = true">
         New Chat
@@ -26,42 +26,52 @@
     </div>
   </div>
 
-  <div v-else class="row w-100">
-    <div class="col-3">
-      <div class="p-3">
-        <BButton class="mb-3" @click="showCreateModal = true">
-          New Chat
-        </BButton>
+  <div v-else class="row w-100 h-100">
+    <div class="col-3 d-flex flex-column h-100 border-end">
+      <div class="py-3 px-3 d-flex flex-column flex-grow-1">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h5 class="mb-0">Chats</h5>
+          <BButton size="sm" @click="showCreateModal = true">
+            New Chat
+          </BButton>
+        </div>
         <ChatList ref="chatListRef" :selected-id="activeConversation?.id" @select="openConversation" />
       </div>
     </div>
-    <div class="col-9 d-flex flex-column">
-      <div v-if="activeConversation" class="px-3 pt-2 d-flex justify-content-end gap-2">
-        <BButton size="sm" variant="outline-secondary" @click="showMembersModal = true">
-          Manage Users
-        </BButton>
-        <BButton size="sm" variant="outline-danger" :disabled="leaving" @click="leaveConversation">
-          Leave
-        </BButton>
+    <div class="col-9 d-flex flex-column h-100">
+      <div v-if="activeConversation" class="px-3 py-2 d-flex justify-content-between align-items-center border-bottom">
+        <h6 class="mb-0">{{ activeConversation.otherParticipants?.map(p => p.userName).join(', ') || activeConversation.id }}</h6>
+        <div class="d-flex gap-2">
+          <BButton size="sm" variant="outline-secondary" @click="showMembersModal = true">
+            Manage Users
+          </BButton>
+          <BButton size="sm" variant="outline-danger" :disabled="leaving" @click="leaveConversation">
+            Leave
+          </BButton>
 
-        <BButton size="sm" variant="outline-primary" @click="closeConversation">
-          Close
-        </BButton>
+          <BButton size="sm" variant="outline-primary" @click="closeConversation" aria-label="Close chat">
+            <BiX />
+          </BButton>
+        </div>
       </div>
 
-      <div v-if="activeConversation">
+      <div v-if="activeConversation" class="d-flex flex-column flex-grow-1 overflow-auto">
         <MessageList :conversation-id="activeConversation?.id" :conversation="activeConversation" :key="activeConversation?.id" />
         <MessageForm :conversation-id="activeConversation?.id" />
+      </div>
+      <div v-else class="d-flex justify-content-center align-items-center flex-grow-1">
+        <h4>{{ chatListRef?.conversations?.length === 0 ? 'Create your first chat' : 'Select a chat' }}</h4>
       </div>
     </div>
   </div>
 
-  <ChatCreateModal v-model="showCreateModal" @close="showCreateModal = false" />
-  <ChatMembersModal v-model="showMembersModal" :conversation="activeConversation" />
+  <ChatCreateModal v-model="showCreateModal" @close="showCreateModal = false" @conversation-created="handleConversationCreated" />
+  <ChatMembersModal v-model="showMembersModal" :conversation="activeConversation" @conversation-updated="handleConversationUpdated" />
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import BiX from 'virtual:icons/bi/x'
 import ChatCreateModal from "@/components/chat/ChatCreateModal.vue";
 import ChatMembersModal from "@/components/chat/ChatMembersModal.vue";
 import ChatList from "@/components/chat/ChatList.vue";
@@ -99,6 +109,20 @@ const openConversation = (conv) => {
   if (conv?.id) {
     sendWs({ type: 'chat:join', conversationId: conv.id })
   }
+}
+
+const handleConversationCreated = (conversation) => {
+  chatListRef.value?.loadConversations()
+}
+
+const handleConversationUpdated = (otherParticipants) => {
+  if (activeConversation.value) {
+    activeConversation.value = {
+      ...activeConversation.value,
+      otherParticipants,
+    }
+  }
+  chatListRef.value?.loadConversations()
 }
 
 const leaveConversation = async () => {

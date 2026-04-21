@@ -1,15 +1,15 @@
 <template>
-  <div>
+  <div class="chat-list-container bg-light rounded p-3 flex-grow-1 overflow-auto">
     <div v-if="loading">Loading...</div>
     <div v-else-if="error" class="text-danger">{{ error }}</div>
     <div
       v-for="conv in conversations"
       :key="conv.id"
-      class="p-2 mb-1 rounded cursor-pointer"
-      :class="{ 'bg-primary text-white': selectedId === conv.id, 'bg-light': selectedId !== conv.id }"
+      class="p-3 mb-2 rounded cursor-pointer transition border"
+      :class="{ 'bg-primary text-white border-primary': selectedId === conv.id, 'bg-white border-light': selectedId !== conv.id }"
       @click="select(conv)"
     >
-      {{ conv.name || conv.id }}
+      {{ conv.otherParticipants?.map(p => p.userName).join(', ') || conv.id }}
     </div>
   </div>
 </template>
@@ -50,9 +50,19 @@ onMounted(() => {
   loadConversations()
 })
 
-defineExpose({ loadConversations })
+defineExpose({ loadConversations, conversations })
 </script>
 
 <style scoped>
 .cursor-pointer { cursor: pointer; }
+.chat-list-container {
+  display: flex;
+  flex-direction: column;
+}
+.transition {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.transition:hover {
+  transform: translateX(2px);
+}
 </style>

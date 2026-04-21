@@ -80,7 +80,7 @@ const props = defineProps({
   modelValue: Boolean,
   conversation: { type: Object, default: null }
 })
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'conversation-updated'])
 
 const show = computed({
   get: () => props.modelValue,
@@ -91,14 +91,30 @@ const members = ref([])
 const removing = ref(null)
 const adding = ref(null)
 const error = ref(null)
+const me = ref(null)
 
 const query = ref('')
 const searchResults = ref([])
 const searching = ref(false)
 let debounceTimer = null
 
-const onOpen = () => {
+const loadMe = async () => {
+  if (!me.value) {
+    me.value = await chatService.getMe()
+  }
+}
+
+const emitConversationUpdated = () => {
+  const updatedOtherParticipants = members.value.filter((m) => m.id !== me.value?.id)
+  emit('conversation-updated', updatedOtherParticipants)
+}
+
+const onOpen = async () => {
+  await loadMe()
   members.value = [...(props.conversation?.otherParticipants ?? [])]
+  if (me.value && !members.value.some((member) => member.id === me.value.id)) {
+    members.value.unshift(me.value)
+  }
 }
 
 const isMember = (userId) => members.value.some((m) => m.id === userId)
@@ -109,6 +125,7 @@ const removeMember = async (member) => {
   try {
     await chatService.removeUserFromConversation(props.conversation.id, member.id)
     members.value = members.value.filter((m) => m.id !== member.id)
+    emitConversationUpdated()
   } catch (err) {
     error.value = 'Failed to remove user: ' + err.message
   } finally {
@@ -123,6 +140,7 @@ const addMember = async (user) => {
     await chatService.addUserToConversation(props.conversation.id, user.id)
     members.value.push(user)
     searchResults.value = searchResults.value.filter((u) => u.id !== user.id)
+    emitConversationUpdated()
   } catch (err) {
     error.value = 'Failed to add user: ' + err.message
   } finally {

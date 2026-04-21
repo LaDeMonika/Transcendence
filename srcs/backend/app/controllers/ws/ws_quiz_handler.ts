@@ -37,7 +37,14 @@ export async function handleWsQuizMessage(ws: any, user: User, payload: any) {
 
     // Joining the socket room enables all future quiz broadcasts for this session.
     quizRooms.join(String(sessionId), ws)
-    ws.send(JSON.stringify({ type: 'quiz:join:ok', sessionId, role: 'player' }))
+    ws.send(JSON.stringify({ type: 'quiz:join:ok', sessionId }))
+    // Notify everyone in the room (including the new joiner) that a player has arrived.
+    quizRooms.broadcastToSession(String(sessionId), {
+      type: 'quiz:player:joined',
+      sessionId,
+      userId: user.id,
+      username: user.userName,
+    })
     // Send the current quiz state right away so late joiners and reconnects can render the active round.
     await quizEngine.syncSocket(ws, quizSession, user.id, 'player')
     return true

@@ -50,10 +50,9 @@ import { useRouter } from 'vue-router'; // 1. Import the router hook
 const router = useRouter(); // 2. Initialize the router instance
 
 const roomId = ref('');
-const roomPath = ref('lobby');
 
 const handleJoin = () => {
-    router.push(`/${roomPath.value}`);
+    router.push({ name: 'Lobby', params: { sessionId: roomId.value } });
 };
 </script>
 

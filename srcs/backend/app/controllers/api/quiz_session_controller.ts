@@ -128,6 +128,24 @@ export default class QuizSessionController {
     return quizEngine.startSession(quizSession)
   }
 
+  public async state({ params, auth }: HttpContext) {
+    const { id } = params
+    const quizSession = await Session.findOrFail(id)
+
+    let userId: number | undefined
+    try {
+      const user = await auth.authenticate() as User
+      userId = user.id
+    } catch (error: any) {
+      // If the user is not authenticated, we can still return the quiz state, but we won't be able to indicate if they already answered the current question.
+      if (error?.status !== 401 && error?.code !== 'E_UNAUTHORIZED_ACCESS') {
+        throw error
+      }
+    }
+
+    return quizEngine.buildStatePayload(quizSession, userId)
+  }
+
   public async standings({ params }: HttpContext) {
     const { id } = params
 

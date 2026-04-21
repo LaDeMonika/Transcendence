@@ -1,10 +1,11 @@
 <template>
-  <BForm @submit="onSubmit">
+  <BForm @submit="onSubmit" class="px-3 py-2">
     <div class="d-flex">
       <BFormTextarea
         v-model="form.message"
         placeholder="Enter message..."
         rows="3"
+        class="top-border-only"
       />
       <BButton
         type="submit"
@@ -43,3 +44,17 @@ const onSubmit = async (event) => {
   })
 }
 </script>
+
+<style scoped>
+.top-border-only {
+  border: none;
+  border-top: 1px solid #dee2e6;
+  border-radius: 0;
+}
+
+.top-border-only:focus {
+  border-top: 1px solid #0d6efd;
+  outline: none;
+  box-shadow: none;
+}
+</style>

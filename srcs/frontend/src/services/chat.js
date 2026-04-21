@@ -26,6 +26,9 @@ export const chatService = {
       conversationId,
       otherUserId
     })
+    if (res.data?.error) {
+      throw new Error(res.data.error)
+    }
     return res.data
   },
 

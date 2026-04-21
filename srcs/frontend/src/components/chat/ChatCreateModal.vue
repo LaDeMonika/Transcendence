@@ -49,6 +49,9 @@ const props = defineProps({
 })
 const emit = defineEmits(['update:modelValue', 'conversation-created'])
 
+const currentUser = ref(null)
+chatService.getMe().then(u => currentUser.value = u).catch(() => {})
+
 const show = computed({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val)
@@ -75,6 +78,7 @@ const onSearchInput = () => {
     error.value = null
     try {
       results.value = await chatService.searchUsers(query.value.trim())
+      results.value = results.value.filter(u => u.id !== currentUser.value?.id)
     } catch (err) {
       error.value = 'Search failed: ' + err.message
       results.value = []
