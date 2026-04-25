@@ -9,6 +9,7 @@ import GameLeaderboard from '@/pages/GameLeaderboard.vue'
 import CreateJoinRoom from '@/pages/CreateJoinRoom.vue'
 import JoinRoom from '@/pages/JoinRoomID.vue'
 import LandingPage from '@/pages/LandingPage.vue'
+import Profile from '@/pages/Profile.vue'
 
 import { createRouter, createWebHistory } from 'vue-router'
 
@@ -26,6 +27,8 @@ const router = createRouter({
     { path: '/mulitplayer-create-join-room', component: CreateJoinRoom, meta: { layout: 'auth' } },
     { path: '/join-room', component: JoinRoom, meta: { layout: 'auth' } },
     { path: '/lobby', component: Lobby, meta: { layout: 'auth' } },
+    { path: '/profile', component: Profile, meta: { layout: 'auth' } },
+    { path: '/profile/:userId', component: Profile, meta: { layout: 'auth' } },
   ],
 })
 
