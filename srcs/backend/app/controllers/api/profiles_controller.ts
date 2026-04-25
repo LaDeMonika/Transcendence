@@ -63,7 +63,7 @@ export default class ProfilesController {
         if (!file.isValid) return response.badRequest({
             error: file.errors
         })
-        await file.move(app.makePath(env.get('IMAGES_PATH')), {
+        await file.move(env.get('IMAGES_PATH'), {
             name: `${cuid()}.${file.extname}`
         })
 
@@ -71,7 +71,7 @@ export default class ProfilesController {
 
         if (user.avatarUrl)
         {
-            const path = app.makePath(env.get('IMAGES_PATH'), user.avatarUrl)
+            const path = env.get('IMAGES_PATH') + user.avatarUrl
             fs.unlink(path, (err) => console.log('old file deleted: ', user.avatarUrl, err))
         }
         user.avatarUrl = file.fileName
@@ -90,7 +90,8 @@ export default class ProfilesController {
         if (isNaN(targetUserId)) return response.badRequest({ message: 'Invalid user id' })
         const user = await User.find(targetUserId)
         if (!user) return response.badRequest({ message: 'User not found' })
-        const absolutePath = app.makePath(env.get('IMAGES_PATH'), user.avatarUrl || 'default.png')
+        const absolutePath = env.get('IMAGES_PATH') + (user.avatarUrl || 'default.png') 
+        console.log('Avatar path: ', absolutePath)
         return response.download(absolutePath, false)
     }
 
@@ -102,7 +103,7 @@ export default class ProfilesController {
     async deleteAvatar({ response, auth }: HttpContext) {
         const user = auth.user as User
         if (!user.avatarUrl) return response.badRequest({ message: 'No custom avatar picture'})
-        const absolutePath = app.makePath(env.get('IMAGES_PATH'), user.avatarUrl)
+        const absolutePath = env.get('IMAGES_PATH') + user.avatarUrl
         fs.unlink(absolutePath, () => null)
         user.avatarUrl = null
         await user.save()
