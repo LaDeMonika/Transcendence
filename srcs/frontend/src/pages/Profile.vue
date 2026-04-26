@@ -2,7 +2,7 @@
   <div class="container py-4 profile-page">
     <div class="text-center mb-4">
       <h2>{{ isPrivate ? 'My Profile' : 'Public Profile' }}</h2>
-      <p class="text-muted">{{ isPrivate ? 'Manage your account and view your game history.' : 'See this player’s recent games and public statistics.' }}</p>
+      <p class="text-muted">{{ isPrivate ? 'Manage your account.' : 'User details.' }}</p>
     </div>
 
     <div class="d-flex flex-wrap justify-content-center mb-4 profile-nav">
@@ -77,7 +77,7 @@
             <div v-for="(game, index) in games" :key="index" class="game-row mb-3 p-3 rounded border">
               <div class="d-flex justify-content-between flex-wrap gap-2">
                 <div>
-                  <strong>{{ game.title || game.quizName || 'Quiz game' }}</strong>
+                  <strong>{{ game.title || 'Deleted quiz game' }}</strong>
                   <div class="text-muted">Score: {{ game.score }}</div>
                 </div>
                 <div class="text-end">
@@ -170,7 +170,7 @@ const tabs = [
   { id: 'password', icon: '🔒', label: 'Password' },
   { id: 'history', icon: '🕘', label: 'History' },
   { id: 'stats', icon: '📊', label: 'Stats' },
-  { id: 'delete-account', icon: '❌', label: 'Delete' },
+  // { id: 'delete-account', icon: '❌', label: 'Delete' }, // add only if user is private
 ]
 
 const userId = computed(() => {
@@ -178,6 +178,10 @@ const userId = computed(() => {
 })
 
 const isPrivate = computed(() => !route.params.userId)
+
+if (isPrivate.value) {
+  tabs.push({ id: 'delete-account', icon: '❌', label: 'Delete' })
+}
 
 const avatarUrl = computed(() => {
   if (!profile.value) return ''
