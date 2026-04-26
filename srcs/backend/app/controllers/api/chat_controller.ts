@@ -3,6 +3,7 @@ import Conversation from '#models/chatsystem/Conversation'
 import Message from '#models/chatsystem/Message'
 import User from '#models/user'
 import ConversationParticipant from '#models/chatsystem/ConversationParticipant'
+import { CHAT_MESSAGE_MAX_LENGTH, getChatMessageLengthError } from '#services/chat_message'
 import { createConversationValidator } from '#validators/conversation'
 import '#validators/conversation' // Ensure the validator is registered
 
@@ -235,7 +236,21 @@ export default class ChatController {
         const conversationId = params.id
         const user = (await auth.authenticate()) as User
         const userId = user.id
-        const text = request.input('text')  
+        const text = String(request.input('text') ?? '').trim()
+
+        if (!text) {
+            return {
+                error: 'Empty message',
+            }
+        }
+
+        if (text.length > CHAT_MESSAGE_MAX_LENGTH) {
+            return {
+                error: getChatMessageLengthError(),
+                code: 'CHAT_MESSAGE_TOO_LONG',
+                maxLength: CHAT_MESSAGE_MAX_LENGTH,
+            }
+        }
 
         const message = await Message.create({
             conversationId,
