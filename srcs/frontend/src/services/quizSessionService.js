@@ -6,7 +6,11 @@ export const getCurrentUser = async () => {
 }
 
 export const createQuizSession = async (quizId) => {
-  const res = await client.post('/quiz-sessions', { quizId })
+  const currentUser = await getCurrentUser()
+  const res = await client.post('/quiz-sessions', {
+    quizId,
+    hostId: currentUser.id,
+  })
   return res.data
 }
 
