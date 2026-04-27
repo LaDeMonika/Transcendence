@@ -5,24 +5,209 @@
         <h1>Lobby</h1>
       </div>
     </div>
-    <div class="row flex-grow-1 align-items-center justify-content-center border mb-5">
-      <div class="d-flex flex-column align-items-center">
-        <p class="fs-4 text-muted mb-4">waiting for players ...</p>
-        <button class="btn btn-success btn-lg px-5 shadow" @click="startGame">Start Game</button>
+
+    <div class="row border py-3">
+      <div class="col-sm d-flex justify-content-center">
+        <p class="mb-0 fs-5">
+          Session ID:
+          <strong>{{ sessionId }}</strong>
+        </p>
+      </div>
+    </div>
+
+    <div class="row flex-grow-1 align-items-start justify-content-center border py-4">
+      <div class="col-sm-6">
+        <h5 class="text-center mb-3">Players ({{ players.length }})</h5>
+        <ul class="list-group">
+          <li
+            v-for="player in players"
+            :key="player.userId"
+            class="list-group-item d-flex justify-content-between align-items-center"
+          >
+            {{ player.username }}
+            <span v-if="player.userId === hostId" class="badge bg-primary">Host</span>
+          </li>
+        </ul>
+        <p v-if="players.length === 0" class="text-center text-muted mt-3">
+          <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+          Waiting for players to join...
+        </p>
+      </div>
+      <div class="col-sm-6 mt-4 mt-sm-0">
+        <h5 class="text-center mb-3">Spectators ({{ spectators.length }})</h5>
+        <ul class="list-group">
+          <li
+            v-for="spectator in spectators"
+            :key="spectator.userId"
+            class="list-group-item d-flex justify-content-between align-items-center"
+          >
+            {{ spectator.username }}
+            <span class="badge bg-secondary">Watching</span>
+          </li>
+        </ul>
+        <p v-if="spectators.length === 0" class="text-center text-muted mt-3">
+          No spectators connected yet.
+        </p>
+      </div>
+    </div>
+
+    <div class="row justify-content-center border py-4 mb-5">
+      <div class="d-flex justify-content-center">
+        <button
+          v-if="isHost && joinRole === 'player'"
+          class="btn btn-success btn-lg px-5 shadow"
+          @click="startGame"
+          :disabled="isStarting || !hasJoinedSession"
+        >
+          {{ isStarting ? 'Starting...' : 'Start Game' }}
+        </button>
+        <p v-else-if="joinRole === 'spectator'" class="text-muted fs-5 mb-0">Spectator mode is active. Waiting for the host to start the game...</p>
+        <p v-else class="text-muted fs-5 mb-0">Waiting for the host to start the game...</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { connect, disconnect, onWs } from '@/services/wsConnection.js'
+import { joinQuizSession, spectateQuizSession, leaveQuizSession, startQuiz } from '@/services/quizSocket.js'
+import { getQuizSession } from '@/services/quizSessionService.js'
 
 const router = useRouter()
+const route = useRoute()
+
+const sessionId = Number(route.params.sessionId)
+const isHost = route.query.isHost === 'true'
+const isSingleMode = route.query.mode === 'single'
+const joinRole = route.query.role === 'spectator' ? 'spectator' : 'player'
+
+const players = ref([])
+const spectators = ref([])
+const hostId = ref(null)
+const isStarting = ref(false)
+const hasJoinedSession = ref(false)
+let wsUnsubscribers = []
 
 const startGame = () => {
-  // Pass index: 0 to ensure game starts at the very first question properly
-  router.push({ path: '/game', query: { index: 0 } })
+  if (isStarting.value || !hasJoinedSession.value) return
+  isStarting.value = true
+  startQuiz(sessionId)
 }
+
+const setupWsListeners = () => {
+  cleanupWsListeners()
+
+  wsUnsubscribers.push(onWs('ws:connected', () => {
+    hasJoinedSession.value = false
+    if (joinRole === 'spectator') {
+      spectateQuizSession(sessionId)
+      return
+    }
+    joinQuizSession(sessionId)
+  }))
+
+  wsUnsubscribers.push(onWs('quiz:join:ok', (data) => {
+    if (Number(data.sessionId) !== sessionId) return
+    hasJoinedSession.value = true
+    void loadSession()
+
+    if (joinRole === 'player' && isSingleMode && isHost && !isStarting.value) {
+      startGame()
+    }
+  }))
+
+  wsUnsubscribers.push(onWs('quiz:spectate:ok', (data) => {
+    if (Number(data.sessionId) !== sessionId) return
+    hasJoinedSession.value = true
+    void loadSession()
+  }))
+
+  wsUnsubscribers.push(onWs('quiz:player:joined', (data) => {
+    if (Number(data.sessionId) !== sessionId) return
+    const exists = players.value.some((p) => p.userId === data.userId)
+    if (!exists) {
+      players.value.push({ userId: data.userId, username: data.username, score: 0 })
+    }
+  }))
+
+  wsUnsubscribers.push(onWs('quiz:spectator:joined', (data) => {
+    if (Number(data.sessionId) !== sessionId) return
+    const exists = spectators.value.some((spectator) => spectator.userId === data.userId)
+    if (!exists) {
+      spectators.value.push({ userId: data.userId, username: data.username })
+    }
+  }))
+
+  wsUnsubscribers.push(onWs('quiz:state', (data) => {
+    if (Number(data.sessionId) !== sessionId) return
+    if (typeof data.playerCount === 'number' && players.value.length !== data.playerCount) {
+      void loadSession()
+    }
+    if (typeof data.spectatorCount === 'number' && spectators.value.length !== data.spectatorCount) {
+      void loadSession()
+    }
+  }))
+
+  wsUnsubscribers.push(onWs('quiz:started', (data) => {
+    if (Number(data.sessionId) !== sessionId) return
+    router.push({ name: 'Game', params: { sessionId }, query: { role: joinRole } })
+  }))
+
+  wsUnsubscribers.push(onWs('error', (data) => {
+    console.error('WS error in lobby:', data.error)
+    isStarting.value = false
+  }))
+}
+
+const cleanupWsListeners = () => {
+  wsUnsubscribers.forEach((unsub) => unsub())
+  wsUnsubscribers = []
+}
+
+const loadSession = async () => {
+  const session = await getQuizSession(sessionId)
+  hostId.value = session.hostId
+  players.value = (session.players ?? []).map((player) => ({
+    userId: player.userId,
+    username: player.user?.userName ?? `User ${player.userId}`,
+    score: player.score ?? 0,
+  }))
+  spectators.value = (session.spectators ?? []).map((spectator) => ({
+    userId: spectator.userId,
+    username: spectator.user?.userName ?? `User ${spectator.userId}`,
+  }))
+  return session
+}
+
+onMounted(async () => {
+  if (!sessionId) {
+    router.push('/choose-quiz')
+    return
+  }
+
+  try {
+    const session = await loadSession()
+    if (session.state !== 'lobby') {
+      router.push({ name: 'Game', params: { sessionId }, query: { role: joinRole } })
+      return
+    }
+  } catch (err) {
+    console.error('Failed to load session:', err)
+  }
+
+  setupWsListeners()
+  connect()
+})
+
+onBeforeUnmount(() => {
+  cleanupWsListeners()
+  if (hasJoinedSession.value) {
+    leaveQuizSession(sessionId)
+  }
+  disconnect()
+})
 </script>
 
 <style scoped></style>

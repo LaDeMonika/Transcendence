@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz Export And Import Tester</title>
+  <style>
+    :root {
+      --bg: #eef4f1;
+      --panel: #fbfdfc;
+      --ink: #142129;
+      --muted: #5a6a73;
+      --line: #c9d8d1;
+      --accent: #14532d;
+      --accent-2: #1d4ed8;
+      --ok: #166534;
+      --error: #b91c1c;
+      --shadow: 0 18px 36px rgba(20, 33, 41, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Trebuchet MS", Verdana, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(20, 83, 45, 0.11), transparent 28%),
+        radial-gradient(circle at top right, rgba(29, 78, 216, 0.1), transparent 25%),
+        linear-gradient(180deg, #f7faf8 0%, var(--bg) 100%);
+    }
+
+    main {
+      width: min(1080px, calc(100% - 32px));
+      margin: 28px auto 40px;
+    }
+
+    .hero, .panel, .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero, .panel, .card { padding: 20px; }
+    .hero, .panel { margin-bottom: 18px; }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+
+    .hero p, .card p, label { color: var(--muted); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .pill {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 4px 10px;
+      border-radius: 999px;
+      color: var(--accent-2);
+      background: rgba(29, 78, 216, 0.11);
+      margin-bottom: 10px;
+    }
+
+    .pill.export {
+      color: var(--accent);
+      background: rgba(20, 83, 45, 0.12);
+    }
+
+    .fields {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 0.95rem;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.94rem;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 11px 18px;
+      background: var(--ink);
+      color: #fff;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .secondary {
+      background: #fff;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .response-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(20, 33, 41, 0.08);
+    }
+
+    .badge.ok {
+      color: var(--ok);
+      background: rgba(22, 101, 52, 0.12);
+    }
+
+    .badge.error {
+      color: var(--error);
+      background: rgba(185, 28, 28, 0.12);
+    }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #111827;
+      color: #f8fafc;
+      border-radius: 14px;
+      padding: 16px;
+      overflow: auto;
+    }
+
+    code {
+      background: rgba(20, 33, 41, 0.08);
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <h1>Quiz Export And Import Tester</h1>
+      <p>This page targets the quiz admin and export endpoints under <code>/api/admin/quiz/:id</code>.</p>
+      <p>Use it to inspect full quiz data, export structured JSON or CSV, and import quizzes from CSV or JSON files.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Connection</h2>
+      <div class="grid">
+        <label>
+          Base URL
+          <input id="baseUrl" type="text" value="http://localhost:3333" />
+        </label>
+        <label>
+          Quiz ID
+          <input id="quizId" type="number" min="1" value="1" />
+        </label>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <span class="pill export">EXPORT</span>
+        <h3>Export JSON</h3>
+        <p>Returns a JSON export with quiz metadata, all questions, correct answers, and aggregated answer statistics.</p>
+        <div class="actions">
+          <button data-action="jsonExport">Fetch JSON Export</button>
+        </div>
+      </article>
+
+      <article class="card">
+        <span class="pill export">EXPORT</span>
+        <h3>Export CSV</h3>
+        <p>Returns CSV with one row per question, including total answers, correct answers, incorrect answers, and correct rate.</p>
+        <div class="actions">
+          <button data-action="csvExport">Fetch CSV Export</button>
+          <button class="secondary" data-action="csvDownload">Download CSV</button>
+        </div>
+      </article>
+
+      <article class="card">
+        <span class="pill export">IMPORT</span>
+        <h3>Import CSV</h3>
+        <p>Uploads a CSV file to <code>/api/quizzes/import-csv</code>. The multipart field name is <code>csv</code>.</p>
+        <div class="fields">
+          <label>
+            CSV File
+            <input id="csvFile" type="file" accept=".csv,text/csv" />
+          </label>
+          <div class="actions">
+            <button data-action="csvImport">Upload CSV</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <span class="pill export">IMPORT</span>
+        <h3>Import JSON</h3>
+        <p>Uploads a JSON file to <code>/api/quizzes/import-json</code>. It accepts both import payloads and exported quiz JSON.</p>
+        <div class="fields">
+          <label>
+            JSON File
+            <input id="jsonFile" type="file" accept=".json,application/json" />
+          </label>
+          <div class="actions">
+            <button data-action="jsonImport">Upload JSON</button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <h2>Route Summary</h2>
+      <div class="grid">
+        <div>
+          <p><code>GET /api/admin/quiz/:id/export?format=json</code></p>
+          <p>Structured export payload, suitable for integrations or debugging.</p>
+        </div>
+        <div>
+          <p><code>GET /api/admin/quiz/:id/export?format=csv</code></p>
+          <p>Spreadsheet-friendly export with per-question stats.</p>
+        </div>
+        <div>
+          <p><code>POST /api/quizzes/import-csv</code></p>
+          <p>Imports a quiz from a CSV file uploaded as multipart form-data with the field name <code>csv</code>.</p>
+        </div>
+        <div>
+          <p><code>POST /api/quizzes/import-json</code></p>
+          <p>Imports a quiz from a JSON file uploaded as multipart form-data with the field name <code>json</code>.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Response</h2>
+      <div class="response-meta">
+        <span class="badge" id="responseStatus">No request yet</span>
+        <span class="badge" id="responseUrl">-</span>
+        <span class="badge" id="responseType">-</span>
+      </div>
+      <pre id="responseBody">Use one of the export actions above.</pre>
+    </section>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id)
+
+    function getBaseUrl() {
+      return $('baseUrl').value.trim().replace(/\/$/, '')
+    }
+
+    function getQuizId() {
+      return $('quizId').value || '1'
+    }
+
+    function buildUrl(action) {
+      const baseUrl = getBaseUrl()
+      const quizId = getQuizId()
+
+      if (action === 'jsonExport') return `${baseUrl}/api/admin/quiz/${quizId}/export?format=json`
+      if (action === 'csvImport') return `${baseUrl}/api/quizzes/import-csv`
+      if (action === 'jsonImport') return `${baseUrl}/api/quizzes/import-json`
+      return `${baseUrl}/api/admin/quiz/${quizId}/export?format=csv`
+    }
+
+    async function run(action) {
+      const url = buildUrl(action)
+      render({ ok: true, status: 'Sending...', url, type: '-', body: '' })
+
+      if (action === 'csvDownload') {
+        window.open(url, '_blank', 'noopener,noreferrer')
+        render({
+          ok: true,
+          status: 'Opened download URL',
+          url,
+          type: 'text/csv',
+          body: 'The CSV export was opened in a new tab/window. The browser may download it automatically.',
+        })
+        return
+      }
+
+      if (action === 'csvImport' || action === 'jsonImport') {
+        const fieldName = action === 'csvImport' ? 'csv' : 'json'
+        const input = action === 'csvImport' ? $('csvFile') : $('jsonFile')
+        const file = input.files[0]
+
+        if (!file) {
+          render({
+            ok: false,
+            status: 'Missing file',
+            url,
+            type: 'multipart/form-data',
+            body: `Choose a ${fieldName.toUpperCase()} file first.`,
+          })
+          return
+        }
+
+        const formData = new FormData()
+        formData.append(fieldName, file)
+
+        try {
+          const response = await fetch(url, {
+            method: 'POST',
+            body: formData,
+          })
+          const contentType = response.headers.get('content-type') || 'unknown'
+          const text = await response.text()
+
+          let body = text || '(empty body)'
+          if (contentType.includes('application/json')) {
+            try {
+              body = JSON.stringify(JSON.parse(text), null, 2)
+            } catch {}
+          }
+
+          render({
+            ok: response.ok,
+            status: `${response.status} ${response.statusText}`,
+            url,
+            type: contentType,
+            body,
+          })
+        } catch (error) {
+          render({
+            ok: false,
+            status: 'Network error',
+            url,
+            type: 'multipart/form-data',
+            body: String(error),
+          })
+        }
+
+        return
+      }
+
+      try {
+        const response = await fetch(url)
+        const contentType = response.headers.get('content-type') || 'unknown'
+        const text = await response.text()
+
+        let body = text || '(empty body)'
+        if (contentType.includes('application/json')) {
+          try {
+            body = JSON.stringify(JSON.parse(text), null, 2)
+          } catch {}
+        }
+
+        render({
+          ok: response.ok,
+          status: `${response.status} ${response.statusText}`,
+          url,
+          type: contentType,
+          body,
+        })
+      } catch (error) {
+        render({
+          ok: false,
+          status: 'Network error',
+          url,
+          type: '-',
+          body: String(error),
+        })
+      }
+    }
+
+    function render(result) {
+      const status = $('responseStatus')
+      status.textContent = result.status
+      status.className = `badge ${result.ok ? 'ok' : 'error'}`
+      $('responseUrl').textContent = result.url
+      $('responseType').textContent = result.type
+      $('responseBody').textContent = result.body
+    }
+
+    document.querySelectorAll('[data-action]').forEach((button) => {
+      button.addEventListener('click', () => run(button.dataset.action))
+    })
+  </script>
+</body>
+</html>

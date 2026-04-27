@@ -1,67 +1,33 @@
-let wsUrl = import.meta.env.VITE_BACKEND_URL.replace('/api', '')
+import { connect as wsConnect, disconnect as wsDisconnect, sendWs, onWs, offWs } from './wsConnection.js'
 
-if (wsUrl.startsWith('https://')) {
-  wsUrl = 'wss://' + wsUrl.slice('https://'.length)
-} else if (wsUrl.startsWith('http://')) {
-  wsUrl = 'ws://' + wsUrl.slice('http://'.length)
+// Export the unified connection functions
+export function connect() {
+  return wsConnect()
 }
 
-if (wsUrl.endsWith('/')) {
-  wsUrl = wsUrl.slice(0, -1)
+export function disconnect() {
+  return wsDisconnect()
 }
 
-wsUrl += '/ws'
-
-const token = localStorage.getItem('token')
-if (token) {
-  wsUrl += '?token=' + encodeURIComponent(token)
-}
-
-let socket = null
-let intentionalClose = false
-const listeners = {}
-
-function dispatch(payload) {
-  for (const key of [payload.type, '*']) {
-    listeners[key]?.forEach((fn) => fn(payload))
-  }
-}
-
+// Legacy names for backward compatibility
 export function connectSocket() {
-  if (socket && socket.readyState <= WebSocket.OPEN) return
-  intentionalClose = false
-  socket = new WebSocket(wsUrl)
-
-  socket.addEventListener('message', (e) => {
-    let payload
-    try { payload = JSON.parse(e.data) } catch { return }
-    dispatch(payload)
-  })
-
-  socket.addEventListener('close', () => {
-    if (!intentionalClose) setTimeout(connectSocket, 3000)
-  })
+  return connect()
 }
 
 export function disconnectSocket() {
-  intentionalClose = true
-  socket?.close()
-  socket = null
+  return disconnect()
 }
 
-export function sendWs(payload) {
-  if (socket?.readyState === WebSocket.OPEN) {
-    socket.send(JSON.stringify(payload))
-    return true
-  }
-  return false
+export function sendMessage(conversationId, message) {
+  sendWs({ type: 'message:new', conversationId, body: message })
 }
 
-export function onWs(type, handler) {
-  if (!listeners[type]) listeners[type] = new Set()
-  listeners[type].add(handler)
+export function joinConversation(conversationId) {
+  sendWs({ type: 'conversation:join', conversationId })
 }
 
-export function offWs(type, handler) {
-  listeners[type]?.delete(handler)
+export function leaveConversation(conversationId) {
+  sendWs({ type: 'conversation:leave', conversationId })
 }
+
+export { sendWs, onWs, offWs }
