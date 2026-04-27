@@ -42,11 +42,11 @@ returning the created message so the frontend can append it to the chat UI (ofte
 */
 
 export default class ChatController {
-    // GET /api/me
-    public async me({ auth }: HttpContext) {
-        const user = await auth.authenticate()
-        return user
-    }
+    // // GET /api/me
+    // public async me({ auth }: HttpContext) {
+    //     const user = await auth.authenticate()
+    //     return user
+    // }
 
     // POST /api/conversations/add-user
     public async addUserToConversation({auth, request, response }: HttpContext) {

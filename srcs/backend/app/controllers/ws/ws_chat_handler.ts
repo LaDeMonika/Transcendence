@@ -25,6 +25,20 @@ export async function handleWsChatMessage(ws: any, user: User, payload: any){
     // Join a conversation room (client can also auto-join on connect, but this allows joining others)
     if (payload.type === 'chat:join') {
         const conversationId = Number(payload.conversationId)
+        
+        // Check if user is a participant, if not, add them back (allows rejoining after leaving)
+        const existingParticipant = await ConversationParticipant.query()
+            .where('conversationId', conversationId)
+            .where('userId', user.id)
+            .first()
+        
+        if (!existingParticipant) {
+            await ConversationParticipant.create({
+                conversationId,
+                userId: user.id,
+            })
+        }
+        
         chatRooms.join(conversationId, ws)
         ws.send(JSON.stringify({ type: 'join:ok', conversationId }))
         return true

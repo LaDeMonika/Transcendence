@@ -216,6 +216,7 @@ class QuizEngine {
       type: 'quiz:question:reveal',
       sessionId: session.id,
       questionId: session.currentQuestionId,
+      question: question ? this.sanitizeQuestion(question) : null,
       correctAnswer: question?.correctAnswer ?? null,
       standings: await this.getStandings(session.id),
       revealEndsAt: revealEndsAt.toISO(),
