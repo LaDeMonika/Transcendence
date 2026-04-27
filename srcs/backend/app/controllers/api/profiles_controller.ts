@@ -123,9 +123,11 @@ export default class ProfilesController {
         const quizzes = await QuizPlayer.findManyBy('userId', user.id)
         if (!quizzes.length) return response.ok({ message: 'User did not play any games yet' })
         const promises = quizzes.map(async (q) => {
-            const quizSession =  await Session.find(q.sessionId)
-            const quiz = await Quiz.find(quizSession!.quizId)
-            const questions = await Question.query().where('quiz_id', quiz!.id).count('* as count')
+            const quizSession = await Session.find(q.sessionId)
+            if (!quizSession) return null
+            const quiz = await Quiz.find(quizSession.quizId)
+            if (!quiz) return null
+            const questions = await Question.query().where('quiz_id', quiz.id).count('* as count')
             const correctAnswersCount = await QuizAnswer.query().where('session_id', q.sessionId).andWhere('user_id', user.id).andWhere('is_correct', true).count('* as count')
             return {
                 ...quiz?.serialize(),
@@ -135,7 +137,7 @@ export default class ProfilesController {
                 }
         })
         const result = await Promise.all(promises)
-        return (result)
+        return (result.filter((r) => r !== null))
     }
 
     /**

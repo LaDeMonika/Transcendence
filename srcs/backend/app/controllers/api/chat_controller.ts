@@ -80,7 +80,7 @@ export default class ChatController {
             .where('userId', otherUserId)
             .first()
         if (existingParticipant) {
-            return { error: 'User is already in the conversation' }
+            return response.badRequest({ error: 'User is already in the conversation' })
         }
 
         // Add the user to the conversation
@@ -232,24 +232,24 @@ export default class ChatController {
     }
 
     // POST /api/conversations/:id/messages
-    public async sendMessage({ params, request, auth }: HttpContext) {
+    public async sendMessage({ params, request, auth, response }: HttpContext) {
         const conversationId = params.id
         const user = (await auth.authenticate()) as User
         const userId = user.id
         const text = String(request.input('text') ?? '').trim()
 
         if (!text) {
-            return {
+            return response.badRequest({
                 error: 'Empty message',
-            }
+            })
         }
 
         if (text.length > CHAT_MESSAGE_MAX_LENGTH) {
-            return {
+            return response.badRequest({
                 error: getChatMessageLengthError(),
                 code: 'CHAT_MESSAGE_TOO_LONG',
                 maxLength: CHAT_MESSAGE_MAX_LENGTH,
-            }
+            })
         }
 
         const message = await Message.create({
