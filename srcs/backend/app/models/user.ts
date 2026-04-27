@@ -34,6 +34,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column()
   declare userName: string
 
+  @column()
+  declare avatarUrl: string | null
+
   @manyToMany(() => User, {
     pivotTable: 'friends',
     pivotForeignKey: 'user_id',
