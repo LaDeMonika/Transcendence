@@ -127,7 +127,7 @@ export default {
         const session = await createQuizSession(quizId)
         const query = { isHost: 'true' }
         if (this.$route.query.mode) query.mode = this.$route.query.mode
-        this.$router.push({ name: 'Lobby', params: { sessionId: session.id }, query })
+        this.$router.push({ path: `/lobby/${session.id}`, query })
       } catch (error) {
         console.error('Failed to create quiz session', error)
       }

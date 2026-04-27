@@ -29,7 +29,7 @@ const router = createRouter({
     { path: '/leaderboard', component: GameLeaderboard, meta: { layout: 'auth' } },
     { path: '/multiplayer-create-join-room', component: CreateJoinRoom, meta: { layout: 'auth' } },
     { path: '/join-room', component: JoinRoom, meta: { layout: 'auth' } },
-    { path: '/lobby', component: Lobby, meta: { layout: 'auth' } },
+    { path: '/lobby/:sessionId?', name: 'Lobby', component: Lobby, meta: { layout: 'auth' } },
     { path: '/profile', component: Profile, meta: { layout: 'auth' } },
     { path: '/profile/:userId', component: Profile, meta: { layout: 'auth' } },
   ],

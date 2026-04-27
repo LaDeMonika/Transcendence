@@ -62,11 +62,11 @@ const router = useRouter(); // 2. Initialize the router instance
 const roomId = ref('');
 
 const handleJoin = () => {
-    router.push({ name: 'Lobby', params: { sessionId: roomId.value }, query: { role: 'player' } });
+    router.push({ path: `/lobby/${roomId.value}`, query: { role: 'player' } });
 };
 
 const handleSpectate = () => {
-    router.push({ name: 'Lobby', params: { sessionId: roomId.value }, query: { role: 'spectator' } });
+    router.push({ path: `/lobby/${roomId.value}`, query: { role: 'spectator' } });
 };
 </script>
 
