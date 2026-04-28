@@ -1,59 +1,44 @@
 <template>
   <header>
-    <!-- Public Header (Before Login) -->
-    <nav v-if="$route.meta.layout === 'public'" class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
       <div class="container-fluid">
         <div class="col-sm d-flex justify-content-start">
-          <router-link class="navbar-brand" to="/">Logo here</router-link>
+          <router-link class="navbar-brand" to="/">
+            Transcendence
+          </router-link>
         </div>
 
         <div class="col-sm d-flex justify-content-center collapse navbar-collapse">
           <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-              <router-link class="nav-link" to="/privacy_policy">Privacy Policy</router-link>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Help</a>
-            </li>
+            <template v-if="$route.meta.layout === 'public'">
+              <li class="nav-item">
+                <router-link class="nav-link" to="/privacy_policy">Privacy Policy</router-link>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Help</a>
+              </li>
+            </template>
+
+             <template v-else>
+              <li class="nav-item">
+                <router-link class="nav-link" to="/home">Home</router-link>
+              </li>
+              <li class="nav-item">
+                <router-link class="nav-link" to="/chat">Chat</router-link>
+              </li>
+            </template>
           </ul>
         </div>
 
         <div class="col-sm d-flex justify-content-end gap-2">
-          <router-link to="/login" class="btn btn-outline-success mx-1">Login</router-link>
-          <router-link to="/sign_up" class="btn btn-success mx-1">Sign Up</router-link>
-        </div>
-      </div>
-    </nav>
+          <template v-if="$route.meta.layout === 'public'">
+            <router-link to="/login" class="btn btn-outline-success mx-1">Login</router-link>
+            <router-link to="/sign_up" class="btn btn-success mx-1">Sign Up</router-link>
+          </template>
 
-    <!-- Authenticated Header (After Login) -->
-    <nav v-else class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
-      <div class="container-fluid">
-        <div class="col-sm d-flex justify-content-start">
-          <router-link class="navbar-brand" to="/home">Transcendence</router-link>
-        </div>
-
-        <div class="col-sm d-flex justify-content-center collapse navbar-collapse">
-          <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-              <router-link class="nav-link" to="/home">Home</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/chat">Chat</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/profile">Profile</router-link>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="http://localhost:3333/public-api" target="_blank">API Docs</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="http://localhost:3333/quiz-export" target="_blank">Quiz Export</a>
-            </li>
-          </ul>
-        </div>
-
-        <div class="col-sm d-flex justify-content-end">
-          <button class="btn btn-outline-danger" type="button" @click="logout">Logout</button>
+          <template v-else>
+            <button class="btn btn-outline-danger" type="button" @click="logout">Logout</button>
+          </template>
         </div>
       </div>
     </nav>

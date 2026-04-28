@@ -62,7 +62,6 @@ const resetPasswordModal = ref(false)
 <style scoped>
 .signin-card {
   max-width: 30rem;
-  flex: 1 1 auto;
   margin: 1rem;
 }
 
