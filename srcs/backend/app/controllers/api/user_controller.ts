@@ -4,6 +4,12 @@ import User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
 
 export default class UserController {
+    // GET /api/me
+    public async me({ auth }: HttpContext) {
+        const user = await auth.authenticate() as User
+        return { id: user.id, userName: user.userName }
+    }
+
     // GET /api/users
     public async index() {
         const users = await User.query().select('id', 'userName')

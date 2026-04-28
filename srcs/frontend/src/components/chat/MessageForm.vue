@@ -15,33 +15,69 @@
         <IBiSend />
       </BButton>
     </div>
+    <p v-if="error" class="text-danger mt-2 mb-0">{{ error }}</p>
   </BForm>
 </template>
 
 <script setup>
-import { reactive } from 'vue'
-import { sendWs } from '@/services/chatSocket.js'
+import { onUnmounted, reactive, ref, watch } from 'vue'
+import { offWs, onWs, sendWs } from '@/services/chatSocket.js'
+
+const CHAT_MESSAGE_MAX_LENGTH = 255
 
 const props = defineProps({
   conversationId: { type: [Number, String], default: null }
 })
 
-const emit = defineEmits(['sent'])
-
 const form = reactive({ message: '' })
+const error = ref(null)
+
+const clearError = () => {
+  error.value = null
+}
+
+const onChatError = (payload) => {
+  if (Number(payload.conversationId) !== Number(props.conversationId)) return
+  error.value = payload.error || 'Failed to send message'
+}
+
+watch(() => props.conversationId, () => {
+  clearError()
+})
+
+watch(() => form.message, () => {
+  if (error.value) {
+    clearError()
+  }
+})
+
+onWs('chat:error', onChatError)
+onUnmounted(() => offWs('chat:error', onChatError))
 
 const onSubmit = async (event) => {
   event.preventDefault()
   const text = form.message.trim()
   if (!props.conversationId || !text) return
 
-  form.message = ''
+  if (text.length > CHAT_MESSAGE_MAX_LENGTH) {
+    error.value = `Message is too long. Maximum length is ${CHAT_MESSAGE_MAX_LENGTH} characters.`
+    return
+  }
 
-  sendWs({
+  clearError()
+
+  const wasSent = sendWs({
     type: 'chat:message:new',
     conversationId: props.conversationId,
     body: text,
   })
+
+  if (!wasSent) {
+    error.value = 'Chat is not connected right now. Please try again.'
+    return
+  }
+
+  form.message = ''
 }
 </script>
 

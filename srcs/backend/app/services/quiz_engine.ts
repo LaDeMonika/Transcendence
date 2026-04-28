@@ -7,7 +7,7 @@ import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 
 // These durations are server-owned so every client stays in sync with the same round timing.
-const QUESTION_DURATION_SECONDS = 20
+const QUESTION_DURATION_SECONDS = 5
 const REVEAL_DURATION_SECONDS = 5
 
 type TimerHandles = {
@@ -67,7 +67,7 @@ class QuizEngine {
     return standings.map((player, index) => ({
       rank: index + 1,
       userId: player.userId,
-      username: player.user.userName,
+      username: player.user?.userName ?? `User #${player.userId}`,
       score: player.score,
     }))
   }
@@ -185,8 +185,12 @@ class QuizEngine {
     })
 
     // The server, not the frontend, decides when the answer window closes.
-    const timeout = setTimeout(() => {
-      void this.closeQuestion(sessionId)
+    const timeout = setTimeout(async () => {
+      try {
+        await this.closeQuestion(sessionId)
+      } catch (error) {
+        console.error(`[quiz_engine] Error in closeQuestion for session ${sessionId}:`, error)
+      }
     }, QUESTION_DURATION_SECONDS * 1000)
     this.setQuestionTimeout(sessionId, timeout)
 
@@ -216,14 +220,19 @@ class QuizEngine {
       type: 'quiz:question:reveal',
       sessionId: session.id,
       questionId: session.currentQuestionId,
+      question: question ? this.sanitizeQuestion(question) : null,
       correctAnswer: question?.correctAnswer ?? null,
       standings: await this.getStandings(session.id),
       revealEndsAt: revealEndsAt.toISO(),
     })
 
     // After reveal time expires, the engine either advances or finishes automatically.
-    const timeout = setTimeout(() => {
-      void this.advanceSession(sessionId)
+    const timeout = setTimeout(async () => {
+      try {
+        await this.advanceSession(sessionId)
+      } catch (error) {
+        console.error(`[quiz_engine] Error in advanceSession for session ${sessionId}:`, error)
+      }
     }, REVEAL_DURATION_SECONDS * 1000)
     this.setRevealTimeout(sessionId, timeout)
 

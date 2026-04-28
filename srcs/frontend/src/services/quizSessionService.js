@@ -1,7 +1,16 @@
 import { client } from './client.js'
 
+export const getCurrentUser = async () => {
+  const res = await client.get('/me')
+  return res.data
+}
+
 export const createQuizSession = async (quizId) => {
-  const res = await client.post('/quiz-sessions', { quizId })
+  const currentUser = await getCurrentUser()
+  const res = await client.post('/quiz-sessions', {
+    quizId,
+    hostId: currentUser.id,
+  })
   return res.data
 }
 

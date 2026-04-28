@@ -40,6 +40,15 @@
             <li class="nav-item">
               <router-link class="nav-link" to="/chat">Chat</router-link>
             </li>
+            <li class="nav-item">
+              <router-link class="nav-link" to="/profile">Profile</router-link>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="http://localhost:3333/public-api" target="_blank">API Docs</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="http://localhost:3333/quiz-export" target="_blank">Quiz Export</a>
+            </li>
           </ul>
         </div>
 

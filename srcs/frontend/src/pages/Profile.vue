@@ -110,7 +110,7 @@
                 <div class="stat-card p-3 rounded border bg-light">Answers<br /><strong>{{ stats.totalAnswers }}</strong></div>
               </div>
               <div class="col-sm-6 col-md-3 mb-3">
-                <div class="stat-card p-3 rounded border bg-light">Correct<br /><strong>{{ stats.totalCorrectAnswerd }}</strong></div>
+                <div class="stat-card p-3 rounded border bg-light">Correct<br /><strong>{{ stats.totalCorrectAnswers }}</strong></div>
               </div>
               <div class="col-12">
                 <div class="mt-3 text-muted">Accuracy: <strong>{{ accuracy }}%</strong></div>
@@ -190,7 +190,7 @@ const avatarUrl = computed(() => {
 
 const accuracy = computed(() => {
   if (!stats.value || !stats.value.totalAnswers) return 0
-  return Math.round((stats.value.totalCorrectAnswerd / stats.value.totalAnswers) * 100)
+  return Math.round((stats.value.totalCorrectAnswers / stats.value.totalAnswers) * 100)
 })
 
 const setError = (error) => {
