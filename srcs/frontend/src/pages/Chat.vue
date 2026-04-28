@@ -26,8 +26,8 @@
     </div>
   </div>
 
-  <div v-else class="row w-100 h-100">
-    <div class="col-3 d-flex flex-column h-100 border-end">
+  <div v-else class="row w-100 flex-grow-1">
+    <div class="col-3 d-flex flex-column border-end">
       <div class="py-3 px-3 d-flex flex-column flex-grow-1">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <h5 class="mb-0">Chats</h5>
@@ -38,7 +38,7 @@
         <ChatList ref="chatListRef" :selected-id="activeConversation?.id" @select="openConversation" />
       </div>
     </div>
-    <div class="col-9 d-flex flex-column h-100">
+    <div class="col-9 d-flex flex-column">
       <div v-if="activeConversation" class="px-3 py-2 d-flex justify-content-between align-items-center border-bottom">
         <h6 class="mb-0">{{ activeConversation.otherParticipants?.map(p => p.userName).join(', ') || activeConversation.id }}</h6>
         <div class="d-flex gap-2">
