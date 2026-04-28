@@ -28,6 +28,8 @@
   import { signin } from '@/services/auth.js'
   import { setAuthToken } from '@/services/client.js'
   import {reactive, ref} from 'vue'
+  import { useRouter } from 'vue-router'
+  const router = useRouter()
   const form = reactive({
   email: '',
   password: ''
@@ -45,6 +47,7 @@ const onSubmit = async (event) => {
     } else if (response.value?.token) {
       const token = response.value.token
       setAuthToken(token)
+      await router.push('/home')
     }
   } catch (error) {
     if (error.response?.data?.errors) {

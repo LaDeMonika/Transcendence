@@ -5,7 +5,7 @@ type ConversationId = number
 type WsConn = WebSocketContext['ws'] // websocket connection object, has .id and .send() method 
 
 export class ChatRooms {
-
+  
   // conversation ID -> set of participant socket IDs
   private rooms = new Map<ConversationId, Set<WsConn>>()
 
@@ -25,7 +25,6 @@ export class ChatRooms {
     if (this.rooms.get(conversationId)?.size === 0) this.rooms.delete(conversationId)
 
     this.memberships.get(ws)?.delete(conversationId)
-    if (this.memberships.get(ws)?.size === 0) this.memberships.delete(ws)
   }
 
   leaveAll(ws: WsConn) {

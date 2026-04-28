@@ -2,6 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import QuizPlayer from '#models/quizsession/quiz_player'
+import QuizSpectator from '#models/quizsession/quiz_spectator'
 
 export default class Session extends BaseModel {
   public static table = 'quiz_sessions'
@@ -50,4 +51,9 @@ export default class Session extends BaseModel {
     foreignKey: 'sessionId',
   })
   declare players: HasMany<typeof QuizPlayer>
+
+  @hasMany(() => QuizSpectator, {
+    foreignKey: 'sessionId',
+  })
+  declare spectators: HasMany<typeof QuizSpectator>
 }
