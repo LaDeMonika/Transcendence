@@ -34,6 +34,7 @@ const router = createRouter({
     { path: '/profile', component: Profile, meta: { layout: 'auth' } },
     { path: '/profile/:userId', component: Profile, meta: { layout: 'auth' } },
     { path: '/friends', component: Friends, meta: { layout: 'auth' } },
+    { path: '/api-tester', component: PublicApiTester, meta: { layout: 'auth' } },
   ],
 })
 
