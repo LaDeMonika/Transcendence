@@ -15,7 +15,7 @@
                 <router-link class="nav-link" to="/privacy_policy">Privacy Policy</router-link>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">Help</a>
+                <router-link class="nav-link" to="/terms_of_service">Terms of Service</router-link>
               </li>
             </template>
 

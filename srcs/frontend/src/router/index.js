@@ -2,6 +2,7 @@ import Home from '@/pages/Home.vue'
 import SignIn from '@/pages/SignIn.vue'
 import SignUp from '@/pages/SignUp.vue'
 import PrivacyPolicy from '@/pages/PrivacyPolicy.vue'
+import TermsOfService from '@/pages/TermsOfService.vue'
 import Chat from '@/pages/Chat.vue'
 //** LOBBY **
 import Lobby from '@/pages/Lobby.vue'
@@ -24,6 +25,7 @@ const router = createRouter({
     { path: '/login', component: SignIn, meta: { layout: 'public' } },
     { path: '/sign_up', component: SignUp, meta: { layout: 'public' } },
     { path: '/privacy_policy', component: PrivacyPolicy, meta: { layout: 'public' } },
+    { path: '/terms_of_service', component: TermsOfService, meta: { layout: 'public' } },
     { path: '/home', component: Home, meta: { bodyClass: 'bg-lobby', layout: 'auth' } },
     { path: '/chat', component: Chat, meta: { layout: 'auth' } },
     { path: '/choose-quiz', component: ChooseQuiz, meta: { layout: 'auth' } },
