@@ -13,6 +13,7 @@ import JoinRoom from '@/pages/JoinRoomID.vue'
 import LandingPage from '@/pages/LandingPage.vue'
 import Profile from '@/pages/Profile.vue'
 import Friends from '@/pages/Friends.vue'
+import PublicApiTester from '@/pages/PublicApiTester.vue'
 
 import { createRouter, createWebHistory } from 'vue-router'
 
