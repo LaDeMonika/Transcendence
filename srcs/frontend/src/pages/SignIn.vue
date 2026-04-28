@@ -1,9 +1,9 @@
 <template>
   <BCard title="Welcome Back" class="signin-card text-center">
     <span>Don't have an account? <BLink to="/sign_up">Sign up</BLink></span>
-    <BButton variant="outline-primary" class="w-100 mt-2">Sign in with Google</BButton>
+    <!-- <BButton variant="outline-primary" class="w-100 mt-2">Sign in with Google</BButton>
     <BButton variant="outline-primary" class="w-100 mt-2">Sign in with Github</BButton>
-    <span>or</span>
+    <span>or</span> -->
     <BAlert v-if="errors.length > 0" variant="danger" show class="my-3">
       <div v-for="(error, index) in errors" :key="index">{{ error.message }}</div>
     </BAlert>
@@ -42,9 +42,7 @@ const onSubmit = async (event) => {
   errors.value = []
   try {
     const response = await signin(form.email, form.password)
-    if (response.value?.errors) {
-      errors.value = response.value.errors
-    } else if (response.value?.token) {
+    if (response.value.token) {
       const token = response.value.token
       setAuthToken(token)
       await router.push('/home')
