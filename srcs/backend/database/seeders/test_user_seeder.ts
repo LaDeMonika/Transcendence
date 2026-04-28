@@ -3,8 +3,7 @@ import { BaseSeeder } from '@adonisjs/lucid/seeders'
 
 export default class extends BaseSeeder {
   async run() {
-    // Write your database queries inside the run method
-    await User.createMany([
+    const users = [
       {
         email: 'user1@test.com',
         userName: 'Guest 1',
@@ -23,6 +22,10 @@ export default class extends BaseSeeder {
         password: 'password',
         avatarUrl: null
       },
-    ])
+    ]
+
+    for (const user of users) {
+      await User.updateOrCreate({ email: user.email }, user)
+    }
   }
 }

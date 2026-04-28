@@ -38,16 +38,13 @@
               <router-link class="nav-link" to="/home">Home</router-link>
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="/game">Game</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/lobby">Lobby</router-link>
+              <router-link class="nav-link" to="/chat">Chat</router-link>
             </li>
           </ul>
         </div>
 
         <div class="col-sm d-flex justify-content-end">
-          <button class="btn btn-outline-danger" type="button">Logout</button>
+          <button class="btn btn-outline-danger" type="button" @click="logout">Logout</button>
         </div>
       </div>
     </nav>
@@ -55,6 +52,13 @@
 </template>
 
 <script setup>
-// The setup script is intentionally left empty. 
-// $route is handled automatically in the template context in Vue 3.
+import { useRouter } from 'vue-router'
+import { setAuthToken } from '@/services/client.js'
+
+const router = useRouter()
+
+function logout() {
+  setAuthToken(null)
+  router.push('/login')
+}
 </script>

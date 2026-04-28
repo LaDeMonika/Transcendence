@@ -1,6 +1,7 @@
 // User Controller
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
+import db from '@adonisjs/lucid/services/db'
 
 export default class UserController {
     // GET /api/users
@@ -44,5 +45,65 @@ export default class UserController {
         const user = await auth.authenticate() as User
         await user.delete()
         return { message: 'User deleted successfully' }
+    }
+
+    // GET /api/user/:id/stats
+    // show quiz stats for user (correct/incorrect answers, total quizzes played, etc.)
+    public async stats({ params }: HttpContext) {
+        type AnswerStatsRow = {
+            totalAnswers: number | string | null
+            correctAnswers: number | string | null
+            totalPoints: number | string | null
+        }
+
+        type QuizStatsRow = {
+            totalQuizzesPlayed: number | string | null
+            totalScore: number | string | null
+            bestScore: number | string | null
+        }
+
+        const [answerStatsRow, quizStatsRow] = await Promise.all([
+            db
+                .from('quiz_answers')
+                .where('user_id', params.id)
+                .select(
+                    db.rawQuery('count(*) as "totalAnswers"'),
+                    db.rawQuery('sum(case when is_correct then 1 else 0 end) as "correctAnswers"'),
+                    db.rawQuery('coalesce(sum(points), 0) as "totalPoints"')
+                )
+                .first() as Promise<AnswerStatsRow | null>,
+            db
+                .from('quiz_players')
+                .where('user_id', params.id)
+                .select(
+                    db.rawQuery('count(*) as "totalQuizzesPlayed"'),
+                    db.rawQuery('coalesce(sum(score), 0) as "totalScore"'),
+                    db.rawQuery('coalesce(max(score), 0) as "bestScore"')
+                )
+                .first() as Promise<QuizStatsRow | null>,
+        ])
+
+        const totalAnswers = Number(answerStatsRow?.totalAnswers ?? 0)
+        const correctAnswers = Number(answerStatsRow?.correctAnswers ?? 0)
+        const totalPointsFromAnswers = Number(answerStatsRow?.totalPoints ?? 0)
+        const totalQuizzesPlayed = Number(quizStatsRow?.totalQuizzesPlayed ?? 0)
+        const totalScore = Number(quizStatsRow?.totalScore ?? 0)
+        const bestScore = Number(quizStatsRow?.bestScore ?? 0)
+        const incorrectAnswers = totalAnswers - correctAnswers
+
+        return {
+            userId: params.id,
+            stats: {
+                totalQuizzesPlayed,
+                totalAnswers,
+                correctAnswers,
+                incorrectAnswers,
+                accuracy: totalAnswers > 0 ? correctAnswers / totalAnswers : 0,
+                totalScore,
+                bestScore,
+                averageScore: totalQuizzesPlayed > 0 ? totalScore / totalQuizzesPlayed : 0,
+                totalPointsFromAnswers,
+            },
+        }
     }
 }

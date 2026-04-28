@@ -234,6 +234,16 @@
     </div>
 
     <div class="card">
+      <h2>REST: Spectate Quiz Session</h2>
+
+      <label for="spectateSessionId">Session ID</label>
+      <input id="spectateSessionId" type="number" placeholder="e.g. 5" />
+
+      <button id="spectateSessionBtn">Spectate Session (REST)</button>
+      <div class="muted">This creates a spectator record without affecting standings or scoring.</div>
+    </div>
+
+    <div class="card">
       <h2>REST: Start Quiz Session</h2>
 
       <label for="startSessionId">Session ID</label>
@@ -284,6 +294,7 @@
 
       <div class="row">
         <button id="quizJoinBtn">Quiz Join (WS)</button>
+        <button id="quizSpectateBtn" class="secondary">Quiz Spectate (WS)</button>
         <button id="quizLeaveBtn" class="secondary">Quiz Leave</button>
       </div>
 
@@ -336,6 +347,10 @@
 
   <script>
     let socket = null
+    let reconnectTimer = null
+    let intentionalClose = false
+    let activeQuizSessionId = null
+    let activeQuizRole = 'player'
 
     const wsStatus = document.getElementById('wsStatus')
     const logEl = document.getElementById('log')
@@ -350,6 +365,7 @@
     const createHostId = document.getElementById('createHostId')
 
     const joinSessionId = document.getElementById('joinSessionId')
+    const spectateSessionId = document.getElementById('spectateSessionId')
     const startSessionId = document.getElementById('startSessionId')
 
     const conversationId = document.getElementById('conversationId')
@@ -427,6 +443,87 @@
 
       const separator = base.includes('?') ? '&' : '?'
       return `${base}${separator}token=${encodeURIComponent(token)}`
+    }
+
+    function resendActiveQuizJoin() {
+      const sessionId = activeQuizSessionId
+      if (!sessionId || !socket || socket.readyState !== WebSocket.OPEN) return
+
+      const payload = {
+        type: activeQuizRole === 'spectator' ? 'quiz:spectate' : 'quiz:join',
+        sessionId,
+      }
+
+      log('WS AUTO-REJOIN', payload)
+      socket.send(JSON.stringify(payload))
+    }
+
+    function scheduleReconnect() {
+      if (intentionalClose || reconnectTimer) return
+
+      reconnectTimer = setTimeout(() => {
+        reconnectTimer = null
+        connectWebSocket()
+      }, 3000)
+    }
+
+    function connectWebSocket() {
+      if (socket && socket.readyState <= WebSocket.OPEN) {
+        log('WS already connected')
+        return
+      }
+
+      intentionalClose = false
+      const finalWsUrl = buildWsUrl()
+      log('WS CONNECT', finalWsUrl)
+
+      socket = new WebSocket(finalWsUrl)
+
+      socket.addEventListener('open', () => {
+        setStatus('Connected', true)
+        log('WS connected')
+        resendActiveQuizJoin()
+      })
+
+      socket.addEventListener('message', (event) => {
+        const parsed = safeJsonParse(event.data)
+        log('WS RECV', parsed)
+
+        if (parsed && parsed.type === 'quiz:join:ok') {
+          activeQuizSessionId = Number(parsed.sessionId) || activeQuizSessionId
+          activeQuizRole = 'player'
+        }
+
+        if (parsed && parsed.type === 'quiz:spectate:ok') {
+          activeQuizSessionId = Number(parsed.sessionId) || activeQuizSessionId
+          activeQuizRole = 'spectator'
+        }
+
+        if (parsed && parsed.type === 'quiz:leave:ok') {
+          activeQuizSessionId = null
+          activeQuizRole = 'player'
+        }
+
+        if (parsed && parsed.type === 'quiz:standings') {
+          renderStandings(parsed.standings ?? parsed)
+        }
+
+        if (parsed && (parsed.type === 'chat:message:created' || parsed.type === 'message:created')) {
+          appendChatMessage(parsed.message ?? {}, parsed.conversationId ?? null)
+        }
+      })
+
+      socket.addEventListener('close', () => {
+        setStatus('Disconnected', false)
+        log('WS closed')
+        socket = null
+        scheduleReconnect()
+      })
+
+      socket.addEventListener('error', (err) => {
+        setStatus('Error', false)
+        log('WS error', err)
+      })
     }
 
     async function rest(method, url, body) {
@@ -543,46 +640,15 @@
     document.getElementById('clearTokenBtn').addEventListener('click', clearToken)
 
     document.getElementById('connectBtn').addEventListener('click', () => {
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        log('WS already connected')
-        return
-      }
-
-      const finalWsUrl = buildWsUrl()
-      log('WS CONNECT', finalWsUrl)
-
-      socket = new WebSocket(finalWsUrl)
-
-      socket.addEventListener('open', () => {
-        setStatus('Connected', true)
-        log('WS connected')
-      })
-
-      socket.addEventListener('message', (event) => {
-        const parsed = safeJsonParse(event.data)
-        log('WS RECV', parsed)
-
-        if (parsed && parsed.type === 'quiz:standings') {
-          renderStandings(parsed.standings ?? parsed)
-        }
-
-        if (parsed && (parsed.type === 'chat:message:created' || parsed.type === 'message:created')) {
-          appendChatMessage(parsed.message ?? {}, parsed.conversationId ?? null)
-        }
-      })
-
-      socket.addEventListener('close', () => {
-        setStatus('Disconnected', false)
-        log('WS closed')
-      })
-
-      socket.addEventListener('error', (err) => {
-        setStatus('Error', false)
-        log('WS error', err)
-      })
+      connectWebSocket()
     })
 
     document.getElementById('disconnectBtn').addEventListener('click', () => {
+      intentionalClose = true
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer)
+        reconnectTimer = null
+      }
       if (socket) socket.close()
     })
 
@@ -605,6 +671,7 @@
         if (data?.id) {
           quizSessionId.value = data.id
           joinSessionId.value = data.id
+          spectateSessionId.value = data.id
           startSessionId.value = data.id
           standingsSessionId.value = data.id
         }
@@ -619,6 +686,15 @@
         await rest('POST', `/api/quiz-sessions/${sessionId}/join`, {})
       } catch (err) {
         log('Join session failed', String(err))
+      }
+    })
+
+    document.getElementById('spectateSessionBtn').addEventListener('click', async () => {
+      try {
+        const sessionId = Number(spectateSessionId.value)
+        await rest('POST', `/api/quiz-sessions/${sessionId}/spectate`, {})
+      } catch (err) {
+        log('Spectate session failed', String(err))
       }
     })
 
@@ -658,13 +734,26 @@
     })
 
     document.getElementById('quizJoinBtn').addEventListener('click', () => {
+      activeQuizSessionId = Number(quizSessionId.value) || null
+      activeQuizRole = 'player'
       send({
         type: 'quiz:join',
         sessionId: Number(quizSessionId.value),
       })
     })
 
+    document.getElementById('quizSpectateBtn').addEventListener('click', () => {
+      activeQuizSessionId = Number(quizSessionId.value) || null
+      activeQuizRole = 'spectator'
+      send({
+        type: 'quiz:spectate',
+        sessionId: Number(quizSessionId.value),
+      })
+    })
+
     document.getElementById('quizLeaveBtn').addEventListener('click', () => {
+      activeQuizSessionId = null
+      activeQuizRole = 'player'
       send({
         type: 'quiz:leave',
         sessionId: Number(quizSessionId.value),

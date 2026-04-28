@@ -35,7 +35,17 @@ class QuizRooms {
     const set = this.rooms.get(sessionId)
     if (!set) return
     const msg = JSON.stringify(payload)
-    for (const sock of set) sock.send(msg)
+    for (const sock of set) {
+      try {
+        sock.send(msg)
+      } catch {
+        set.delete(sock)
+      }
+    }
+
+    if (set.size === 0) {
+      this.rooms.delete(sessionId)
+    }
   }
 }
 
