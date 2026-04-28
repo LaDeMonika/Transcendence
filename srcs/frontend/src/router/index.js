@@ -12,6 +12,7 @@ import CreateJoinRoom from '@/pages/CreateJoinRoom.vue'
 import JoinRoom from '@/pages/JoinRoomID.vue'
 import LandingPage from '@/pages/LandingPage.vue'
 import Profile from '@/pages/Profile.vue'
+import Friends from '@/pages/Friends.vue'
 
 import { createRouter, createWebHistory } from 'vue-router'
 
@@ -32,6 +33,7 @@ const router = createRouter({
     { path: '/lobby/:sessionId', name: 'Lobby', component: Lobby, meta: { layout: 'auth' } },
     { path: '/profile', component: Profile, meta: { layout: 'auth' } },
     { path: '/profile/:userId', component: Profile, meta: { layout: 'auth' } },
+    { path: '/friends', component: Friends, meta: { layout: 'auth' } },
   ],
 })
 
