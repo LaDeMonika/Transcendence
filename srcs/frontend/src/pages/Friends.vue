@@ -54,20 +54,20 @@
           </div>
           <div
             v-for="user in friends"
-            :key="user.id"
+            :key="user.friend_id"
             class="friend-row d-flex align-items-center justify-content-between p-3 rounded border mb-2"
           >
             <div class="d-flex align-items-center gap-3">
-              <img :src="avatarUrl(user.id)" class="rounded-circle friend-avatar" alt="Avatar" />
-              <router-link :to="`/profile/${user.id}`" class="fw-bold text-decoration-none">
+              <img :src="avatarUrl(user.friend_id)" class="rounded-circle friend-avatar" alt="Avatar" />
+              <router-link :to="`/profile/${user.friend_id}`" class="fw-bold text-decoration-none">
                 {{ user.userName }}
               </router-link>
             </div>
             <BButton
               variant="outline-danger"
               size="sm"
-              @click="handleRemove(user.id)"
-              :disabled="actionLoading === user.id"
+              @click="handleRemove(user.friend_id)"
+              :disabled="actionLoading === user.friend_id"
             >
               Remove
             </BButton>
@@ -82,12 +82,12 @@
           </div>
           <div
             v-for="user in requests"
-            :key="user.id"
+            :key="user.friend_id"
             class="friend-row d-flex align-items-center justify-content-between p-3 rounded border mb-2"
           >
             <div class="d-flex align-items-center gap-3">
-              <img :src="avatarUrl(user.id)" class="rounded-circle friend-avatar" alt="Avatar" />
-              <router-link :to="`/profile/${user.id}`" class="fw-bold text-decoration-none">
+              <img :src="avatarUrl(user.friend_id)" class="rounded-circle friend-avatar" alt="Avatar" />
+              <router-link :to="`/profile/${user.friend_id}`" class="fw-bold text-decoration-none">
                 {{ user.userName }}
               </router-link>
             </div>
@@ -95,16 +95,16 @@
               <BButton
                 variant="success"
                 size="sm"
-                @click="handleAccept(user.id)"
-                :disabled="actionLoading === user.id"
+                @click="handleAccept(user.friend_id)"
+                :disabled="actionLoading === user.friend_id"
               >
                 Accept
               </BButton>
               <BButton
                 variant="outline-danger"
                 size="sm"
-                @click="handleRemove(user.id)"
-                :disabled="actionLoading === user.id"
+                @click="handleRemove(user.friend_id)"
+                :disabled="actionLoading === user.friend_id"
               >
                 Decline
               </BButton>
@@ -120,20 +120,20 @@
           </div>
           <div
             v-for="user in sent"
-            :key="user.id"
+            :key="user.friend_id"
             class="friend-row d-flex align-items-center justify-content-between p-3 rounded border mb-2"
           >
             <div class="d-flex align-items-center gap-3">
-              <img :src="avatarUrl(user.id)" class="rounded-circle friend-avatar" alt="Avatar" />
-              <router-link :to="`/profile/${user.id}`" class="fw-bold text-decoration-none">
+              <img :src="avatarUrl(user.friend_id)" class="rounded-circle friend-avatar" alt="Avatar" />
+              <router-link :to="`/profile/${user.friend_id}`" class="fw-bold text-decoration-none">
                 {{ user.userName }}
               </router-link>
             </div>
             <BButton
               variant="outline-secondary"
               size="sm"
-              @click="handleRemove(user.id)"
-              :disabled="actionLoading === user.id"
+              @click="handleRemove(user.friend_id)"
+              :disabled="actionLoading === user.friend_id"
             >
               Cancel
             </BButton>
@@ -244,7 +244,7 @@ const requests = computed(() => allFriends.value.filter((f) => f.status === 'pen
 const sent = computed(() => allFriends.value.filter((f) => f.status === 'requested'))
 const friendStatusMap = computed(() => {
   const map = {}
-  allFriends.value.forEach((f) => { map[f.id] = f.status })
+  allFriends.value.forEach((f) => { map[f.friend_id] = f.status })
   return map
 })
 
