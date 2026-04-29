@@ -120,10 +120,21 @@ const updateIsMobile = () => {
 onMounted(() => {
   connectSocket()
   window.addEventListener('resize', updateIsMobile)
+  
+  // CRITICAL: Disable parent scrolling for the chat page
+  document.body.style.overflow = 'hidden'
+  const scrollableContent = document.querySelector('.scrollable-content')
+  if (scrollableContent) scrollableContent.style.overflow = 'hidden'
 })
+
 onUnmounted(() => {
   disconnectSocket()
   window.removeEventListener('resize', updateIsMobile)
+  
+  // Re-enable parent scrolling
+  document.body.style.overflow = ''
+  const scrollableContent = document.querySelector('.scrollable-content')
+  if (scrollableContent) scrollableContent.style.overflow = ''
 })
 
 const activeConversation = ref(null)
@@ -177,7 +188,8 @@ const closeConversation = () => {
 .chat-page {
   flex: 1;
   width: 100%;
-  height: calc(100vh - 60px); /* Adjust based on header height */
+  /* We use height: 100% since we're disabling parent scroll */
+  height: 100%;
   background: linear-gradient(135deg, #0f0c29 0%, #302b63 45%, #24243e 100%);
   display: flex;
   flex-direction: column;
@@ -235,11 +247,12 @@ const closeConversation = () => {
   display: flex;
   flex-direction: column;
   position: relative;
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .window-header {
   padding: 1rem 1.5rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(15, 12, 41, 0.6);
   backdrop-filter: blur(10px);
   border-bottom: 1.5px solid rgba(255, 255, 255, 0.08);
   display: flex;
@@ -277,8 +290,7 @@ const closeConversation = () => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  background: rgba(0, 0, 0, 0.1);
+  overflow: hidden; /* Important to contain MessageList scrolling */
 }
 
 /* ─── Mobile View ────────────────────────────────────────── */
@@ -366,11 +378,6 @@ const closeConversation = () => {
   padding-top: 5rem;
   position: relative;
   overflow: hidden;
-}
-
-@keyframes float {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(20px, -20px); }
 }
 
 .empty-content {

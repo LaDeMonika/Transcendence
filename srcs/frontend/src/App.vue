@@ -34,5 +34,8 @@ body {
 .bg-lobby.main-wrapper,
 .no-padding.main-wrapper {
   padding-top: 0;
+  align-items: stretch;
+  flex: 1;
+  height: 100%;
 }
 </style>
