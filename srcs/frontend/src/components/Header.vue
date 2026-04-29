@@ -29,6 +29,9 @@
               <li class="nav-item">
                 <router-link class="nav-link" to="/friends">Friends</router-link>
               </li>
+              <li class="nav-item">
+                <router-link class="nav-link" to="/profile">My Profile</router-link>
+              </li>
             </template>
           </ul>
         </div>
