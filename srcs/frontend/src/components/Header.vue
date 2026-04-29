@@ -29,6 +29,15 @@
               <li class="nav-item">
                 <router-link class="nav-link" to="/friends">Friends</router-link>
               </li>
+              <li class="nav-item">
+                <router-link class="nav-link" to="/profile">Profile</router-link>
+              </li>
+              <li class="nav-item">
+                <router-link class="nav-link" to="/choose-quiz">Export Quiz</router-link>
+              </li>
+              <li class="nav-item">
+                <router-link class="nav-link" to="/api-tester">Public API</router-link>
+              </li>
             </template>
           </ul>
         </div>
