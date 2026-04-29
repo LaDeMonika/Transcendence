@@ -123,6 +123,7 @@ import LeaderboardRow from '@/components/LeaderboardRow.vue'
 import { connect, disconnect, onWs, getIsConnected } from '@/services/wsConnection.js'
 import { submitAnswer, joinQuizSession, spectateQuizSession, leaveQuizSession } from '@/services/quizSocket.js'
 import { getQuizSessionState } from '@/services/quizSessionService.js'
+import { showError } from '@/services/notifications.js'
 
 const router = useRouter();
 const route = useRoute();
@@ -220,7 +221,7 @@ const refreshQuizState = async () => {
     }
     updateQuizState(state);
   } catch (error) {
-    console.error('Failed to load session state:', error);
+    showError('Failed to load quiz session state.')
   }
 };
 
@@ -238,7 +239,7 @@ const connectWebSocket = () => {
       }
     }
   } catch (error) {
-    console.error('Failed to connect WebSocket:', error);
+    showError('Failed to connect to quiz session.')
     sessionState.value = 'error';
   }
 };
@@ -319,7 +320,7 @@ const setupWebSocketListeners = () => {
   }));
 
   wsUnsubscribers.push(onWs('error', (data) => {
-    console.error('WebSocket error:', data.error);
+    showError('WebSocket error occurred.')
   }));
 };
 
@@ -440,7 +441,7 @@ const leaveSession = () => {
 
 onMounted(async () => {
   if (!sessionId) {
-    console.error('No session ID provided');
+    showError('No session ID provided.')
     router.push('/choose-quiz');
     return;
   }

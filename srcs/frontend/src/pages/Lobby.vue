@@ -74,6 +74,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { connect, disconnect, onWs } from '@/services/wsConnection.js'
 import { joinQuizSession, spectateQuizSession, leaveQuizSession, startQuiz } from '@/services/quizSocket.js'
 import { getQuizSession, getCurrentUser } from '@/services/quizSessionService.js'
+import { showError } from '@/services/notifications.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -161,7 +162,7 @@ const setupWsListeners = () => {
   }))
 
   wsUnsubscribers.push(onWs('error', (data) => {
-    console.error('WS error in lobby:', data.error)
+    showError('WebSocket error in lobby.')
     isStarting.value = false
   }))
 }
@@ -217,7 +218,7 @@ onMounted(async () => {
       return
     }
   } catch (err) {
-    console.error('Failed to load session:', err)
+    showError('Failed to load session.')
   }
 
   setupWsListeners()

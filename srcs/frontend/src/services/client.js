@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { showError } from './notifications.js'
 
 const baseURL = import.meta.env.VITE_BACKEND_URL
 
@@ -16,7 +17,7 @@ export function setAuthToken(token) {
       localStorage.removeItem('token')
     }
   } catch (e) {
-    console.error(e)
+    showError('Failed to manage authentication token.')
   }
 }
 
@@ -25,7 +26,7 @@ try {
   const stored = localStorage.getItem('token')
   if (stored) setAuthToken(stored)
 } catch (e) {
-  console.error(e)
+  showError('Failed to initialize authentication.')
 }
 
 let unauthorizedHandler = null
@@ -40,7 +41,7 @@ client.interceptors.response.use(
         unauthorizedHandler()
       }
     } catch (e) {
-      console.error(e)
+      showError('Authentication error occurred.')
     }
     return Promise.reject(error)
   }

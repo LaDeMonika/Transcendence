@@ -17,6 +17,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { chatService } from '@/services/chat.js'
+import { showError } from '@/services/notifications.js'
 
 const props = defineProps({
   selectedId: { type: [Number, String], default: null }
@@ -36,7 +37,7 @@ const loadConversations = async () => {
     conversations.value = data
   } catch (err) {
     error.value = 'Failed to load conversations: ' + err.message
-    console.error('Error loading conversations:', err)
+    showError('Error loading conversations.')
   } finally {
     loading.value = false
   }

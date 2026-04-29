@@ -41,6 +41,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import LeaderboardRow from '@/components/LeaderboardRow.vue'
 import { getQuizSessionStandings } from '@/services/quizSessionService.js'
+import { showError } from '@/services/notifications.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -69,7 +70,7 @@ const loadStandings = async () => {
       score: entry.score,
     }))
   } catch (err) {
-    console.error('Failed to load standings:', err)
+    showError('Failed to load standings.')
   } finally {
     isLoading.value = false
   }

@@ -1,4 +1,6 @@
 
+import { showError } from './notifications.js'
+
 function buildWebSocketUrl() {
   let wsUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3333'
 
@@ -34,7 +36,7 @@ function dispatch(payload) {
     try {
       fn(payload)
     } catch (error) {
-      console.error('Error in WebSocket event handler:', error, payload)
+      showError('An error occurred in WebSocket event handler.')
     }
   })
 }
@@ -58,7 +60,7 @@ function openSocket() {
     try {
       payload = JSON.parse(e.data)
     } catch (error) {
-      console.error('Failed to parse WebSocket message:', error, e.data)
+      showError('Failed to parse WebSocket message.')
       return
     }
     dispatch(payload)
@@ -73,7 +75,7 @@ function openSocket() {
   })
 
   ws.addEventListener('error', (error) => {
-    console.error('WebSocket error:', error)
+    showError('WebSocket connection error.')
     dispatch({ type: 'ws:error', error })
   })
 }

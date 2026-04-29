@@ -88,6 +88,7 @@
 import ScrollBoxSelectQuiz from '@/components/ScrollBox-SelectQuiz.vue'
 import { listQuizzes, importCsv, importJson, exportQuizJson, exportQuizCsv } from '@/services/quizzes.js'
 import { createQuizSession } from '@/services/quizSessionService.js'
+import { showError } from '@/services/notifications.js'
 
 export default {
   data() {
@@ -121,7 +122,7 @@ export default {
       try {
         this.quizzes = await listQuizzes()
       } catch (error) {
-        console.error('Failed to load quizzes', error)
+        showError('Failed to load quizzes.')
         this.quizzes = []
       }
     },
@@ -153,7 +154,7 @@ export default {
         await this.fetchQuizzes()
         setTimeout(() => { this.showImportModal = false }, 1200)
       } catch (error) {
-        console.error(`Failed to import ${label}`, error)
+        showError(`Failed to import ${label}.`)
         this.importMessage = error.response?.data?.message || error.response?.data?.error || `Failed to import ${label}`
         this.importSuccess = false
       } finally {
@@ -168,7 +169,7 @@ export default {
         this.exportPreview = JSON.stringify(data, null, 2)
         this.showExportModal = true
       } catch (error) {
-        console.error('Failed to export JSON', error)
+        showError('Failed to export JSON.')
       }
     },
     async doExportCsv() {
@@ -183,7 +184,7 @@ export default {
         a.click()
         URL.revokeObjectURL(url)
       } catch (error) {
-        console.error('Failed to export CSV', error)
+        showError('Failed to export CSV.')
       }
     },
     async createAndStartSession(quizId) {
@@ -193,7 +194,7 @@ export default {
         if (this.$route.query.mode) query.mode = this.$route.query.mode
         this.$router.push({ name: 'Lobby', params: { sessionId: session.id }, query })
       } catch (error) {
-        console.error('Failed to create quiz session', error)
+        showError('Failed to create quiz session.')
       }
     },
   },
