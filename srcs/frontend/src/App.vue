@@ -30,4 +30,8 @@ body {
 .bg-lobby {
   background-color: azure;
 }
+
+.bg-lobby.main-wrapper {
+  padding-top: 0;
+}
 </style>
