@@ -15,7 +15,7 @@
         <BFormInput id="floatingPassword" type="password" required v-model="form.password" placeholder="Password" />
       </BFormFloatingLabel>
       <BButton type="submit" pill variant="primary">Login</BButton>
-      <ForgotPasswordModal @show-reset-password-modal="resetPasswordModal = true"/>
+      <!-- <ForgotPasswordModal @show-reset-password-modal="resetPasswordModal = true"/> -->
       <ResetPasswordModal v-model="resetPasswordModal" />
       <div>By logging in, you agree to our  <BLink to="/privacy_policy">Privacy Policy.</BLink></div>
     </BForm>
@@ -24,7 +24,7 @@
 
 <script setup>
   import ResetPasswordModal from '@/components/ResetPasswordModal.vue'
-  import ForgotPasswordModal from '@/components/ForgotPasswordModal.vue'
+  // import ForgotPasswordModal from '@/components/ForgotPasswordModal.vue'
   import { signin } from '@/services/auth.js'
   import { setAuthToken } from '@/services/client.js'
   import {reactive, ref} from 'vue'
