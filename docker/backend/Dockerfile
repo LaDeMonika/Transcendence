@@ -30,6 +30,7 @@ RUN npm ci
 COPY srcs/backend/ .
 COPY .env .
 RUN node ace build --ignore-ts-errors
+RUN mkdir -p build/public && cp -a public/. build/public/
 
 COPY docker/backend/entrypoint.sh .
 RUN chmod 777 entrypoint.sh

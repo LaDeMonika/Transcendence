@@ -15,13 +15,21 @@ export default class QuizSessionController {
 
     let resolvedHostId = hostId
     if (!resolvedHostId) {
-      try{
-        //TODO figure out why it fails to authenticate in this route when auth is optional, works fine in other routes with same auth.optional() setup
-        const user = await auth.authenticate() as User
-        resolvedHostId = user.id
-      } catch {
-        return response.badRequest({ error: 'hostId is required when unauthenticated' })
+      const authUser = auth.user as User | undefined
+      if (authUser?.id) {
+        resolvedHostId = authUser.id
+      } else {
+        try {
+          const user = await auth.authenticate() as User
+          resolvedHostId = user.id
+        } catch {
+          return response.badRequest({ error: 'hostId is required when unauthenticated' })
+        }
       }
+    }
+
+    if (!resolvedHostId) {
+        return response.badRequest({ error: 'hostId is required when unauthenticated' })
     }
 
     const quizSession = await Session.create({

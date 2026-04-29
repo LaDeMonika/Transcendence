@@ -69,23 +69,33 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { connect, disconnect, onWs } from '@/services/wsConnection.js'
 import { joinQuizSession, spectateQuizSession, leaveQuizSession, startQuiz } from '@/services/quizSocket.js'
-import { getQuizSession } from '@/services/quizSessionService.js'
+import { getQuizSession, getCurrentUser } from '@/services/quizSessionService.js'
 
 const router = useRouter()
 const route = useRoute()
 
 const sessionId = Number(route.params.sessionId)
-const isHost = route.query.isHost === 'true'
+const isHost = ref(false)
 const isSingleMode = route.query.mode === 'single'
-const joinRole = route.query.role === 'spectator' ? 'spectator' : 'player'
+const requestedRole = route.query.role === 'spectator' ? 'spectator' : 'player'
+const joinRole = ref(requestedRole)
 
-const players = ref([])
-const spectators = ref([])
-const hostId = ref(null)
+const session = ref(null)
+const currentUser = ref(null)
+const hostId = computed(() => session.value?.hostId)
+const players = computed(() => (session.value?.players ?? []).map((player) => ({
+  userId: player.userId,
+  username: player.user?.userName ?? `User ${player.userId}`,
+  score: player.score ?? 0,
+})))
+const spectators = computed(() => (session.value?.spectators ?? []).map((spectator) => ({
+  userId: spectator.userId,
+  username: spectator.user?.userName ?? `User ${spectator.userId}`,
+})))
 const isStarting = ref(false)
 const hasJoinedSession = ref(false)
 let wsUnsubscribers = []
@@ -101,19 +111,20 @@ const setupWsListeners = () => {
 
   wsUnsubscribers.push(onWs('ws:connected', () => {
     hasJoinedSession.value = false
-    if (joinRole === 'spectator') {
+    if (joinRole.value === 'spectator') {
       spectateQuizSession(sessionId)
       return
     }
     joinQuizSession(sessionId)
+    loadSession()
   }))
 
   wsUnsubscribers.push(onWs('quiz:join:ok', (data) => {
     if (Number(data.sessionId) !== sessionId) return
     hasJoinedSession.value = true
-    void loadSession()
+    loadSession()
 
-    if (joinRole === 'player' && isSingleMode && isHost && !isStarting.value) {
+    if (joinRole.value === 'player' && isSingleMode && isHost && !isStarting.value) {
       startGame()
     }
   }))
@@ -121,38 +132,32 @@ const setupWsListeners = () => {
   wsUnsubscribers.push(onWs('quiz:spectate:ok', (data) => {
     if (Number(data.sessionId) !== sessionId) return
     hasJoinedSession.value = true
-    void loadSession()
+    loadSession()
   }))
 
   wsUnsubscribers.push(onWs('quiz:player:joined', (data) => {
     if (Number(data.sessionId) !== sessionId) return
-    const exists = players.value.some((p) => p.userId === data.userId)
-    if (!exists) {
-      players.value.push({ userId: data.userId, username: data.username, score: 0 })
-    }
+    loadSession()
   }))
 
   wsUnsubscribers.push(onWs('quiz:spectator:joined', (data) => {
     if (Number(data.sessionId) !== sessionId) return
-    const exists = spectators.value.some((spectator) => spectator.userId === data.userId)
-    if (!exists) {
-      spectators.value.push({ userId: data.userId, username: data.username })
-    }
+    loadSession()
   }))
 
   wsUnsubscribers.push(onWs('quiz:state', (data) => {
     if (Number(data.sessionId) !== sessionId) return
     if (typeof data.playerCount === 'number' && players.value.length !== data.playerCount) {
-      void loadSession()
+      loadSession()
     }
     if (typeof data.spectatorCount === 'number' && spectators.value.length !== data.spectatorCount) {
-      void loadSession()
+      loadSession()
     }
   }))
 
   wsUnsubscribers.push(onWs('quiz:started', (data) => {
     if (Number(data.sessionId) !== sessionId) return
-    router.push({ name: 'Game', params: { sessionId }, query: { role: joinRole } })
+    router.push({ name: 'Game', params: { sessionId }, query: { role: joinRole.value } })
   }))
 
   wsUnsubscribers.push(onWs('error', (data) => {
@@ -167,18 +172,30 @@ const cleanupWsListeners = () => {
 }
 
 const loadSession = async () => {
-  const session = await getQuizSession(sessionId)
-  hostId.value = session.hostId
-  players.value = (session.players ?? []).map((player) => ({
-    userId: player.userId,
-    username: player.user?.userName ?? `User ${player.userId}`,
-    score: player.score ?? 0,
-  }))
-  spectators.value = (session.spectators ?? []).map((spectator) => ({
-    userId: spectator.userId,
-    username: spectator.user?.userName ?? `User ${spectator.userId}`,
-  }))
-  return session
+  const fetchedSession = await getQuizSession(sessionId)
+  session.value = fetchedSession
+
+  // Determine if current user is host and their role
+  if (currentUser.value) {
+    isHost.value = session.value.hostId === currentUser.value.id
+
+    // If the user is already a spectator, preserve that state.
+    const isSpectator = session.value.spectators?.some(spectator => spectator.userId === currentUser.value.id)
+    if (isSpectator) {
+      joinRole.value = 'spectator'
+    } else if (requestedRole === 'spectator') {
+      // Honor the initial spectator intent when first opening the lobby.
+      joinRole.value = 'spectator'
+    } else {
+      joinRole.value = 'player'
+    }
+  } else {
+    // Not authenticated, default to player
+    isHost.value = false
+    joinRole.value = 'player'
+  }
+
+  return fetchedSession
 }
 
 onMounted(async () => {
@@ -188,9 +205,15 @@ onMounted(async () => {
   }
 
   try {
+    currentUser.value = await getCurrentUser()
+  } catch (err) {
+    currentUser.value = null
+  }
+
+  try {
     const session = await loadSession()
     if (session.state !== 'lobby') {
-      router.push({ name: 'Game', params: { sessionId }, query: { role: joinRole } })
+      router.push({ name: 'Game', params: { sessionId }, query: { role: joinRole.value } })
       return
     }
   } catch (err) {

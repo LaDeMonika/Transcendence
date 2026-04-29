@@ -30,7 +30,7 @@
         <div v-if="!isFinal" class="fs-5 fw-bold" :class="timeLeft <= 1 ? 'text-danger' : 'text-primary'">
           Next Question in {{ timeLeft }}s...
         </div>
-        <button v-else class="btn btn-success px-4" @click="goToLobby">Back to Lobby</button>
+        <button v-else class="btn btn-success px-4" @click="goToHome">Back to Home</button>
       </div>
     </div>
   </div>
@@ -80,7 +80,7 @@ const nextQuestion = () => {
   router.push({ name: 'Game', params: { sessionId } })
 }
 
-const goToLobby = () => {
+const goToHome = () => {
   router.push('/home')
 }
 

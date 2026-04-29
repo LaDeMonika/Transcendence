@@ -12,7 +12,7 @@ import User from '#models/user'
 import { Secret } from '@poppinss/utils'
 
 router.group(() => {
-  router.get('/me', [ChatController, 'me'])
+  // router.get('/me', [ChatController, 'me']) // Moved to users.ts
 
   router.get('/conversations', [ChatController, 'indexConversations'])
   router.post('/conversations', [ChatController, 'createOrGetConversation'])
