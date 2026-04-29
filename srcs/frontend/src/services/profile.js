@@ -25,6 +25,11 @@ export const fetchStats = async (userId) => {
   return res.data
 }
 
+export const fetchLeaderboard = async () => {
+  const res = await client.get('/profile/leaderboard')
+  return res.data
+}
+
 export const uploadAvatar = async (file) => {
   const formData = new FormData()
   formData.append('file', file)

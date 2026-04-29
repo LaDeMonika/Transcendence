@@ -7,6 +7,7 @@ import QuizPlayer from '#models/quizsession/quiz_player'
 import Session from '#models/quizsession/quizsession'
 import Question from '#models/Question'
 import QuizAnswer from '#models/quizsession/quiz_answer'
+import db from '@adonisjs/lucid/services/db'
 
 export default class ProfilesController {
     /**
@@ -181,9 +182,8 @@ export default class ProfilesController {
             .first()
         const totalAnswers = await QuizPlayer.query()
             .join('quiz_sessions', (query) => {
-                query   // include session table
+                query
                     .on('quiz_players.session_id', '=', 'quiz_sessions.id')
-                    // .andOnVal('quiz_sessions.state', '=', 'finished') // comment out after tests
             })
             .join('quizzes', 'quizzes.id', '=', 'quiz_sessions.quiz_id')
             .join('questions', 'questions.quiz_id', '=', 'quizzes.id')
@@ -194,21 +194,50 @@ export default class ProfilesController {
                     .andOn('quiz_answers.user_id', '=', 'quiz_players.user_id')
             })
             .where('quiz_players.user_id', user.id)
-            .count({
-                'total': '*',
-                'correctAnswers': 'is_correct'
-            })
+            .count('* as total')
             .first()
-        // console.log(
-        //     'Sessions: ', gameSessions?.$extras.count,
-        //     '\nQuestions: ', totalQuestions?.$extras.count,
-        //     '\nTotal answers: ', totalAnswers?.$extras
-        // )
+        
+        const correctAnswers = await QuizPlayer.query()
+            .join('quiz_sessions', (query) => {
+                query
+                    .on('quiz_players.session_id', '=', 'quiz_sessions.id')
+            })
+            .join('quizzes', 'quizzes.id', '=', 'quiz_sessions.quiz_id')
+            .join('questions', 'questions.quiz_id', '=', 'quizzes.id')
+            .join('quiz_answers', (query) => {
+                query
+                    .on('quiz_answers.question_id', '=', 'questions.id')
+                    .andOn('quiz_sessions.id', '=', 'quiz_answers.session_id')
+                    .andOn('quiz_answers.user_id', '=', 'quiz_players.user_id')
+            })
+            .where('quiz_players.user_id', user.id)
+            .where('quiz_answers.is_correct', true)
+            .count('* as count')
+            .first()
+        
         return response.ok({
-            'playedSessions': Number(gameSessions?.$extras.count),
-            'totalQuestions': Number(totalQuestions?.$extras.count),
-            'totalAnswers': Number(totalAnswers?.$extras.total) ,
-            'totalCorrectAnswerd': Number(totalAnswers?.$extras.correctAnswers)
+            'playedSessions': Number(gameSessions?.$extras.count ?? 0),
+            'totalQuestions': Number(totalQuestions?.$extras.count ?? 0),
+            'totalAnswers': Number(totalAnswers?.$extras.total ?? 0),
+            'totalCorrectAnswers': Number(correctAnswers?.$extras.count ?? 0)
         })
+    }
+
+    async leaderboard({ request, response }:HttpContext) {
+        try {
+            const leaderboard = await db
+                .from('users')
+                .leftJoin('quiz_players', 'users.id', 'quiz_players.user_id')
+                .select('users.id', 'users.user_name')
+                .select(db.raw('COALESCE(SUM(quiz_players.score), 0) as total_score'))
+                .groupBy('users.id', 'users.user_name')
+                .orderBy('total_score', 'desc')
+                .limit(50) // Limit to top 50 players
+
+            return response.ok(leaderboard)
+        } catch (error) {
+            console.error('Leaderboard error:', error)
+            return response.internalServerError({ error: 'Failed to fetch leaderboard' })
+        }
     }
 }

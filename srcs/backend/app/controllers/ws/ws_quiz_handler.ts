@@ -44,6 +44,7 @@ export async function handleWsQuizMessage(ws: any, user: User, payload: any) {
 
     // Joining the socket room enables all future quiz broadcasts for this session.
     quizRooms.join(String(sessionId), ws)
+    console.log(`[quiz:join] User ${user.id} joined WS room for session ${sessionId}`)
     ws.send(JSON.stringify({ type: 'quiz:join:ok', sessionId, role: 'player' }))
     // Send the current quiz state right away so late joiners and reconnects can render the active round.
     await quizEngine.syncSocket(ws, quizSession, user.id, 'player')
@@ -220,7 +221,7 @@ export async function handleWsQuizMessage(ws: any, user: User, payload: any) {
       }
 
       // The ack returns scoring metadata so the client can confirm the submission result immediately.
-      ws.send(JSON.stringify({ type: 'quiz:answer:ack', points, isCorrect }))
+      ws.send(JSON.stringify({ type: 'quiz:answer:ack', points/*, isCorrect*/ }))
       return true
     } catch (error: any) {
       // Unique violation from concurrent duplicate submits.
