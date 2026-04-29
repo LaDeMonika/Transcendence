@@ -19,6 +19,7 @@ import '../app/routes/chat.js'
 import '../app/routes/quiz_session.js'
 import '../app/routes/users.js'
 import '../app/routes/public_api.js'
+import '../app/routes/friend.js'
 
 
 router.get('/', async () => {

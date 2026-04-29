@@ -50,7 +50,7 @@ const senderMap = computed(() => {
 
 const senderName = (senderId) => {
   if (currentUser.value && Number(senderId) === Number(currentUser.value.id)) return 'You'
-  return senderMap.value[senderId] ?? senderId
+  return senderMap.value[senderId] ?? 'former member'
 }
 
 const isOwnMessage = (senderId) => {

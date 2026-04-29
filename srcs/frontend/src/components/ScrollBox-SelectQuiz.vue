@@ -13,7 +13,7 @@
           <div
             v-for="item in items"
             :key="item.id"
-            class="card"
+            class="card quiz-card"
             :class="{ selected: selectedIds.includes(item.id) }"
             @click="toggleCard(item)"
           >
@@ -71,7 +71,7 @@ export default {
   gap: 20px;
 }
 
-.card {
+.quiz-card {
   aspect-ratio: 1 / 0.5;
   background: #f5f5f5;
   padding: 20px;
@@ -79,7 +79,7 @@ export default {
   border-radius: 6px;
 }
 
-.card.selected {
+.quiz-card.selected {
   border-color: blue;
   background-color: #e6f0ff;
 }

@@ -3,6 +3,7 @@ import Conversation from '#models/chatsystem/Conversation'
 import Message from '#models/chatsystem/Message'
 import User from '#models/user'
 import ConversationParticipant from '#models/chatsystem/ConversationParticipant'
+import { CHAT_MESSAGE_MAX_LENGTH, getChatMessageLengthError } from '#services/chat_message'
 import { createConversationValidator } from '#validators/conversation'
 import '#validators/conversation' // Ensure the validator is registered
 
@@ -41,11 +42,11 @@ returning the created message so the frontend can append it to the chat UI (ofte
 */
 
 export default class ChatController {
-    // GET /api/me
-    public async me({ auth }: HttpContext) {
-        const user = await auth.authenticate()
-        return user
-    }
+    // // GET /api/me
+    // public async me({ auth }: HttpContext) {
+    //     const user = await auth.authenticate()
+    //     return user
+    // }
 
     // POST /api/conversations/add-user
     public async addUserToConversation({auth, request, response }: HttpContext) {
@@ -79,7 +80,7 @@ export default class ChatController {
             .where('userId', otherUserId)
             .first()
         if (existingParticipant) {
-            return { error: 'User is already in the conversation' }
+            return response.badRequest({ error: 'User is already in the conversation' })
         }
 
         // Add the user to the conversation
@@ -231,11 +232,25 @@ export default class ChatController {
     }
 
     // POST /api/conversations/:id/messages
-    public async sendMessage({ params, request, auth }: HttpContext) {
+    public async sendMessage({ params, request, auth, response }: HttpContext) {
         const conversationId = params.id
         const user = (await auth.authenticate()) as User
         const userId = user.id
-        const text = request.input('text')  
+        const text = String(request.input('text') ?? '').trim()
+
+        if (!text) {
+            return response.badRequest({
+                error: 'Empty message',
+            })
+        }
+
+        if (text.length > CHAT_MESSAGE_MAX_LENGTH) {
+            return response.badRequest({
+                error: getChatMessageLengthError(),
+                code: 'CHAT_MESSAGE_TOO_LONG',
+                maxLength: CHAT_MESSAGE_MAX_LENGTH,
+            })
+        }
 
         const message = await Message.create({
             conversationId,

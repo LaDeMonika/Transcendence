@@ -19,6 +19,53 @@
           <div v-else class="avatar-placeholder rounded-circle mb-3">?</div>
           <h4 v-if="profile">{{ profile.userName }}</h4>
           <p v-if="profile" class="mb-0 text-muted">User ID: {{ profile.id }}</p>
+          <div v-if="!isPrivate && profile" class="mt-3">
+            <BButton
+              v-if="friendStatus === null"
+              variant="primary"
+              size="sm"
+              @click="handleAddFriend"
+              :disabled="loadingFriendAction"
+            >
+              Add Friend
+            </BButton>
+            <div v-else-if="friendStatus === 'pending'" class="d-flex gap-2 justify-content-center">
+              <BButton
+                variant="success"
+                size="sm"
+                @click="handleAcceptFriend"
+                :disabled="loadingFriendAction"
+              >
+                Accept Request
+              </BButton>
+              <BButton
+                variant="outline-danger"
+                size="sm"
+                @click="handleRemoveFriend"
+                :disabled="loadingFriendAction"
+              >
+                Decline
+              </BButton>
+            </div>
+            <BButton
+              v-else-if="friendStatus === 'requested'"
+              variant="outline-secondary"
+              size="sm"
+              @click="handleRemoveFriend"
+              :disabled="loadingFriendAction"
+            >
+              Cancel Request
+            </BButton>
+            <BButton
+              v-else-if="friendStatus === 'accepted'"
+              variant="outline-danger"
+              size="sm"
+              @click="handleRemoveFriend"
+              :disabled="loadingFriendAction"
+            >
+              Remove Friend
+            </BButton>
+          </div>
         </div>
       </BCardBody>
     </BCard>
@@ -38,7 +85,6 @@
             <BButton type="submit" variant="primary" :disabled="!selectedAvatarFile">Upload</BButton>
             <BButton variant="outline-secondary" @click="handleDeleteAvatar" v-if="isPrivate && profile?.avatarUrl">Delete avatar</BButton>
           </BForm>
-          <BAlert v-if="message" variant="success" show class="mt-3">{{ message }}</BAlert>
           <BAlert v-if="errors.length" variant="danger" show class="mt-3">
             <div v-for="(error, index) in errors" :key="index">{{ error }}</div>
           </BAlert>
@@ -61,6 +107,10 @@
             </BFormFloatingLabel>
             <BButton type="submit" variant="primary">Update password</BButton>
           </BForm>
+          <BAlert v-if="message" variant="success" show class="mt-3">{{ message }}</BAlert>
+          <BAlert v-if="errors.length" variant="danger" show class="mt-3">
+            <div v-for="(error, index) in errors" :key="index">{{ error }}</div>
+          </BAlert>
         </BCardBody>
       </BCard>
     </div>
@@ -110,7 +160,7 @@
                 <div class="stat-card p-3 rounded border bg-light">Answers<br /><strong>{{ stats.totalAnswers }}</strong></div>
               </div>
               <div class="col-sm-6 col-md-3 mb-3">
-                <div class="stat-card p-3 rounded border bg-light">Correct<br /><strong>{{ stats.totalCorrectAnswerd }}</strong></div>
+                <div class="stat-card p-3 rounded border bg-light">Correct<br /><strong>{{ stats.totalCorrectAnswers }}</strong></div>
               </div>
               <div class="col-12">
                 <div class="mt-3 text-muted">Accuracy: <strong>{{ accuracy }}%</strong></div>
@@ -118,6 +168,45 @@
             </div>
           </div>
           <div v-else class="text-muted">Statistics not available.</div>
+        </BCardBody>
+      </BCard>
+    </div>
+
+    <hr class="section-divider" />
+
+    <div id="leaderboard" class="mb-5 section-block">
+      <BCard>
+        <BCardBody>
+          <h4 class="mb-3">🏆 Leaderboard</h4>
+          <div v-if="loadingLeaderboard" class="text-center py-4">Loading leaderboard...</div>
+          <BAlert v-else-if="leaderboardError" variant="danger" show class="mb-3">{{ leaderboardError }}</BAlert>
+          <div v-else-if="leaderboard.length > 0">
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Total Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(player, index) in leaderboard" :key="player.id" 
+                      :class="{ 'table-warning': isPrivate && profile?.id === player.id }">
+                    <td>
+                      <strong>#{{ index + 1 }}</strong>
+                      <span v-if="index < 3" class="ms-2">
+                        🥇🥈🥉
+                      </span>
+                    </td>
+                    <td>{{ player.user_name }}</td>
+                    <td><strong>{{ player.total_score }}</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div v-else class="text-muted">No leaderboard data available.</div>
         </BCardBody>
       </BCard>
     </div>
@@ -145,31 +234,39 @@ import {
   fetchMyQuizzes,
   fetchOthersQuizzes,
   fetchStats,
+  fetchLeaderboard,
   uploadAvatar,
   deleteAvatar,
   changePassword,
   deleteAccount,
 } from '@/services/profile.js'
 import { setAuthToken } from '@/services/client.js'
+import { getFriendsPivot, addFriend, acceptFriend, removeFriend } from '@/services/friends.js'
 
 const route = useRoute()
 const router = useRouter()
 const profile = ref(null)
 const games = ref([])
 const stats = ref(null)
+const leaderboard = ref([])
 const loading = ref(false)
 const loadingGames = ref(false)
 const loadingStats = ref(false)
+const loadingLeaderboard = ref(false)
 const errors = ref([])
+const leaderboardError = ref('')
 const message = ref('')
 const selectedAvatarFile = ref(null)
 const passwordForm = ref({ oldPassword: '', newPassword: '' })
+const friendStatus = ref(null) // null | 'pending' | 'requested' | 'accepted'
+const loadingFriendAction = ref(false)
 
 const tabs = [
   { id: 'avatar', icon: '👤', label: 'Avatar' },
   { id: 'password', icon: '🔒', label: 'Password' },
   { id: 'history', icon: '🕘', label: 'History' },
   { id: 'stats', icon: '📊', label: 'Stats' },
+  { id: 'leaderboard', icon: '🏆', label: 'Leaderboard' },
   // { id: 'delete-account', icon: '❌', label: 'Delete' }, // add only if user is private
 ]
 
@@ -190,7 +287,7 @@ const avatarUrl = computed(() => {
 
 const accuracy = computed(() => {
   if (!stats.value || !stats.value.totalAnswers) return 0
-  return Math.round((stats.value.totalCorrectAnswerd / stats.value.totalAnswers) * 100)
+  return Math.round((stats.value.totalCorrectAnswers / stats.value.totalAnswers) * 100)
 })
 
 const setError = (error) => {
@@ -206,6 +303,56 @@ const setError = (error) => {
   }
 }
 
+const loadFriendStatus = async () => {
+  if (isPrivate.value) return
+  try {
+    const pivot = await getFriendsPivot()
+    const entry = pivot.find((f) => f.id === userId.value)
+    friendStatus.value = entry?.status ?? null
+  } catch {
+    friendStatus.value = null
+  }
+}
+
+const handleAddFriend = async () => {
+  loadingFriendAction.value = true
+  errors.value = []
+  try {
+    await addFriend(userId.value)
+    friendStatus.value = 'requested'
+  } catch (error) {
+    setError(error)
+  } finally {
+    loadingFriendAction.value = false
+  }
+}
+
+const handleAcceptFriend = async () => {
+  loadingFriendAction.value = true
+  errors.value = []
+  try {
+    await acceptFriend(userId.value)
+    friendStatus.value = 'accepted'
+  } catch (error) {
+    setError(error)
+  } finally {
+    loadingFriendAction.value = false
+  }
+}
+
+const handleRemoveFriend = async () => {
+  loadingFriendAction.value = true
+  errors.value = []
+  try {
+    await removeFriend(userId.value)
+    friendStatus.value = null
+  } catch (error) {
+    setError(error)
+  } finally {
+    loadingFriendAction.value = false
+  }
+}
+
 const loadProfile = async () => {
   loading.value = true
   errors.value = []
@@ -216,7 +363,7 @@ const loadProfile = async () => {
     } else {
       profile.value = await fetchPublicProfile(userId.value)
     }
-    await Promise.all([loadGames(), loadStats()])
+    await Promise.all([loadGames(), loadStats(), loadLeaderboard()])
   } catch (error) {
     setError(error)
   } finally {
@@ -255,6 +402,21 @@ const loadStats = async () => {
     setError(error)
   } finally {
     loadingStats.value = false
+  }
+}
+
+const loadLeaderboard = async () => {
+  loadingLeaderboard.value = true
+  leaderboardError.value = ''
+  try {
+    leaderboard.value = await fetchLeaderboard()
+  } catch (error) {
+    leaderboard.value = []
+    leaderboardError.value =
+      error?.response?.data?.error ||
+      (error?.message ? String(error.message) : 'Failed to fetch leaderboard.')
+  } finally {
+    loadingLeaderboard.value = false
   }
 }
 

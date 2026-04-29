@@ -12,7 +12,7 @@ import User from '#models/user'
 import { Secret } from '@poppinss/utils'
 
 router.group(() => {
-  router.get('/me', [ChatController, 'me'])
+  // router.get('/me', [ChatController, 'me']) // Moved to users.ts
 
   router.get('/conversations', [ChatController, 'indexConversations'])
   router.post('/conversations', [ChatController, 'createOrGetConversation'])
@@ -119,7 +119,13 @@ router.ws(
         if (!handled) {
           return ws.send(JSON.stringify({ type: 'error', error: 'Unknown event type' }))
         }
-      } catch {
+      } catch (error: any) {
+        console.error(`[WebSocket] Error handling message for user ${user.id}:`, {
+          type: payload?.type,
+          errorMessage: error?.message,
+          errorCode: error?.code,
+          errorStack: error?.stack,
+        })
         return ws.send(JSON.stringify({ type: 'error', error: 'Internal server error' }))
       }
     })

@@ -128,7 +128,6 @@ const router = useRouter();
 const route = useRoute();
 
 const sessionId = route.params.sessionId
-const fallbackRole = route.query.role === 'spectator' ? 'spectator' : 'player'
 
 // State
 const currentQuestion = ref(null);
@@ -140,7 +139,7 @@ const standings = ref([]);
 const alreadyAnswered = ref(false);
 const correctAnswer = ref(null);
 const isLoadingNextQuestion = ref(false);
-const quizRole = ref(fallbackRole);
+const quizRole = ref(null); // Will be determined from server
 let timerInterval = null;
 let transitionTimeout = null;
 let questionEndTime = null;
@@ -231,7 +230,7 @@ const connectWebSocket = () => {
     connect();
     console.log('WebSocket connecting for session:', sessionId);
 
-    if (getIsConnected()) {
+    if (getIsConnected() && quizRole.value) {
       if (quizRole.value === 'spectator') {
         spectateQuizSession(sessionId);
       } else {
@@ -253,7 +252,9 @@ const setupWebSocketListeners = () => {
       spectateQuizSession(sessionId);
       return
     }
-    joinQuizSession(sessionId);
+    if (quizRole.value === 'player') {
+      joinQuizSession(sessionId);
+    }
   }));
 
   wsUnsubscribers.push(onWs('quiz:join:ok', (data) => {
@@ -334,9 +335,11 @@ const updateQuizState = (data) => {
   }
 
   sessionState.value = data.state;
-  quizRole.value = data.role ?? quizRole.value;
+  if (data.role) {
+    quizRole.value = data.role;
+  }
   currentQuestion.value = normalizeQuestion(data.question);
-  alreadyAnswered.value = quizRole.value === 'player' ? (data.alreadyAnswered ?? false) : true;
+  alreadyAnswered.value = quizRole.value === 'spectator' || (quizRole.value === 'player' && (data.alreadyAnswered ?? false));
   isLoadingNextQuestion.value = false;
   isFlipped.value = data.state === 'reveal';
 
@@ -368,7 +371,7 @@ const handleQuestionStart = (data) => {
   currentQuestion.value = normalizeQuestion(data.question);
   selectedAnswer.value = null;
   isFlipped.value = false;
-  alreadyAnswered.value = quizRole.value === 'spectator';
+  alreadyAnswered.value = quizRole.value === 'spectator' || (quizRole.value === 'player' && false); // Reset for new question
   isLoadingNextQuestion.value = false;
   questionEndTime = new Date(data.endsAt).getTime();
   startTimer();
@@ -377,9 +380,14 @@ const handleQuestionStart = (data) => {
 const handleQuestionClosed = (data) => {
   clearInterval(timerInterval);
   timeLeft.value = 0;
+  sessionState.value = 'reveal';
 };
 
 const handleQuestionReveal = (data) => {
+  sessionState.value = 'reveal';
+  if (data.question) {
+    currentQuestion.value = normalizeQuestion(data.question);
+  }
   isFlipped.value = true;
   correctAnswer.value = data.correctAnswer;
   standings.value = data.standings;

@@ -1,9 +1,9 @@
 <template>
   <BCard title="Create new account" class="signup-card text-center">
     <span>Already a member? <BLink to="/login">Login</BLink></span>
-    <BButton variant="outline-primary" class="w-100 mt-2">Sign up with Google</BButton>
+    <!-- <BButton variant="outline-primary" class="w-100 mt-2">Sign up with Google</BButton>
     <BButton variant="outline-primary" class="w-100 mt-2">Sign up with Github</BButton>
-    <span>or</span>
+    <span>or</span> -->
     <BAlert v-if="errors.length > 0" variant="danger" show class="my-3">
       <div v-for="(error, index) in errors" :key="index">{{ error.message }}</div>
     </BAlert>
@@ -22,7 +22,7 @@
         <span v-else>Create account</span>
       </BButton>
     </BForm>
-    <span>By logging in, you agree to our <BLink to="/privacy_policy">Privacy Policy</BLink></span>
+    <span>By signing up, you agree to our <BLink to="/privacy_policy">Privacy Policy</BLink></span>
   </BCard>
 </template>
 

@@ -7,7 +7,7 @@
     <div class="row">
       <div class="px-2 px-md-0 w-100">
         <BCard class="w-100 px-2 px-md-3">
-        <p>At PROJECT, we value your privacy. This policy explains what data we collect, how we use it, and what rights you have when using our services.</p>
+        <p>At Transcendence, we value your privacy. This policy explains what data we collect, how we use it, and what rights you have when using our services.</p>
         <h2>Information We Collect</h2>
         <ul>
           <li>Name and email address (during registration)</li>
@@ -24,9 +24,9 @@
         </ul>
         <h2>Email Communications</h2>
         <p>By signing up, you agree to receive essential email updates about the product.</p>
-        <p>If you do not wish to receive productivity tips or announcement emails, please send an email to PROJECT@gmail.com with the subject line unsubscribe. Your request will be processed as soon as possible.</p>
+        <p>If you do not wish to receive productivity tips or announcement emails, please send an email to transcendence@gmail.com with the subject line unsubscribe. Your request will be processed as soon as possible.</p>
         <h2>Data Sharing</h2>
-        <p>PROJECT does not share your data with any third parties.</p>
+        <p>Transcendence does not share your data with any third parties.</p>
         <h2>Security</h2>
         <p>Passwords are stored using secure hashing algorithms. We prioritize the protection of your data.</p>
         <h2>Changes to This Privacy Policy</h2>
@@ -38,7 +38,7 @@
           <li>You may delete your account and request permanent removal of your data</li>
         </ul>
         <h2>Acceptance of This Policy</h2>
-        <p>By registering for PROJECT, you acknowledge that you have read, understood, and agreed to this Privacy Policy.</p>
+        <p>By registering for Transcendence, you acknowledge that you have read, understood, and agreed to this Privacy Policy.</p>
         </BCard>
       </div>
     </div>

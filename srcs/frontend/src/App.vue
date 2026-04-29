@@ -24,6 +24,7 @@ body {
   min-height: 100%;
   width: 100%;
   padding-top: 2rem;
+  flex: 1 1 auto;
 }
 
 .bg-lobby {
