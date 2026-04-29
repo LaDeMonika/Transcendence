@@ -105,7 +105,7 @@ export default class ChatController {
             .where('userId', userId)
             .first()
         if (!isUserInConversation) {
-            return response.unauthorized({
+            return response.forbidden({
                 message: 'You are not part of this conversation',
             })
         }
