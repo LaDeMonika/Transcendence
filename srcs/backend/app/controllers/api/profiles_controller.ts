@@ -1,8 +1,6 @@
 import User from '#models/user'
 import { cuid } from '@adonisjs/core/helpers'
 import type { HttpContext } from '@adonisjs/core/http'
-import app from '@adonisjs/core/services/app'
-import env from '#start/env'
 import fs from 'fs'
 import Quiz from '#models/Quiz'
 import QuizPlayer from '#models/quizsession/quiz_player'
@@ -63,7 +61,7 @@ export default class ProfilesController {
         if (!file.isValid) return response.badRequest({
             error: file.errors
         })
-        await file.move(app.makePath(env.get('IMAGES_PATH')), {
+        await file.move('/images', {
             name: `${cuid()}.${file.extname}`
         })
 
@@ -71,7 +69,7 @@ export default class ProfilesController {
 
         if (user.avatarUrl)
         {
-            const path = app.makePath(env.get('IMAGES_PATH'), user.avatarUrl)
+            const path = '/images' + user.avatarUrl
             fs.unlink(path, (err) => console.log('old file deleted: ', user.avatarUrl, err))
         }
         user.avatarUrl = file.fileName
@@ -83,15 +81,15 @@ export default class ProfilesController {
      * @getAvatar
      * @tag profile
      * @description download profile avatar
-     * NOTE: sometimes it does not update new avatars possibly due to catching system
      */
     async getAvatar({ request, response }: HttpContext) {
         const targetUserId = Number(request.param('userid'));
         if (isNaN(targetUserId)) return response.badRequest({ message: 'Invalid user id' })
         const user = await User.find(targetUserId)
         if (!user) return response.badRequest({ message: 'User not found' })
-        const absolutePath = app.makePath(env.get('IMAGES_PATH'), user.avatarUrl || 'default.png')
-        return response.download(absolutePath, false)
+        const absolutePath = '/images/' + (user.avatarUrl || 'default.png') 
+        //console.log('Avatar path: ', absolutePath)
+        return response.download(absolutePath)
     }
 
     /**
@@ -102,7 +100,7 @@ export default class ProfilesController {
     async deleteAvatar({ response, auth }: HttpContext) {
         const user = auth.user as User
         if (!user.avatarUrl) return response.badRequest({ message: 'No custom avatar picture'})
-        const absolutePath = app.makePath(env.get('IMAGES_PATH'), user.avatarUrl)
+        const absolutePath = '/images/' + user.avatarUrl
         fs.unlink(absolutePath, () => null)
         user.avatarUrl = null
         await user.save()
