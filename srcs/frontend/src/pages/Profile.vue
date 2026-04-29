@@ -421,7 +421,7 @@ const loadLeaderboard = async () => {
 }
 
 const onAvatarFileChange = (event) => {
-  selectedAvatarFile.value = event.target.files?.[0] ?? null
+  selectedAvatarFile.value = event.files?.[0] ?? null
 }
 
 const handleAvatarUpload = async () => {
