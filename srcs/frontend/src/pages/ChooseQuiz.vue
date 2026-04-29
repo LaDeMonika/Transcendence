@@ -1,37 +1,38 @@
 <template>
-  <div class="container d-flex flex-column" style="min-height: 100%">
+  <div class="choose-quiz-page">
 
-    <!-- TITLE -->
-    <div class="row align-items-center justify-content-center border">
-      <div class="col-sm d-flex justify-content-center">
-        <h1>Choose Quiz!</h1>
-      </div>
+    <!-- Hero Header -->
+    <div class="hero-header">
+      <div class="hero-badge">🧠 SELECT QUIZ</div>
+      <h1 class="hero-title">Choose Your Quiz</h1>
+      <p class="hero-subtitle">Pick a quiz to start the session</p>
     </div>
 
-    <ScrollBoxSelectQuiz :items="quizzes" @update:selectedItems="updateSelectedItems"/>
+    <!-- Quiz Scroll List -->
+    <ScrollBoxSelectQuiz :items="quizzes" @update:selectedItems="updateSelectedItems" />
 
-    <div class="row align-items-center justify-content-center border">
-      <div class="col-sm d-flex flex-wrap justify-content-center gap-2 py-3">
-        <BButton variant="outline-secondary" @click="showImportModal = true">
-          Import Quiz
-        </BButton>
-        <BButton
-          variant="outline-primary"
-          :disabled="selectedItems.length !== 1"
-          @click="doExportJson"
-        >
-          Export JSON
-        </BButton>
-        <BButton
-          variant="outline-primary"
-          :disabled="selectedItems.length !== 1"
-          @click="doExportCsv"
-        >
-          Export CSV
-        </BButton>
-      </div>
+    <!-- Import / Export Actions -->
+    <div class="action-bar">
+      <button class="btn-action btn-action--secondary" @click="showImportModal = true">
+        📥 Import Quiz
+      </button>
+      <button
+        class="btn-action btn-action--outline"
+        :disabled="selectedItems.length !== 1"
+        @click="doExportJson"
+      >
+        📤 Export JSON
+      </button>
+      <button
+        class="btn-action btn-action--outline"
+        :disabled="selectedItems.length !== 1"
+        @click="doExportCsv"
+      >
+        📊 Export CSV
+      </button>
     </div>
 
+    <!-- Import Modal -->
     <BModal
       v-model="showImportModal"
       title="Import Quiz"
@@ -73,13 +74,13 @@
       <pre class="bg-dark text-light rounded p-3" style="white-space: pre-wrap; word-break: break-word; max-height: 60vh; overflow: auto;">{{ exportPreview }}</pre>
     </BModal>
 
-    <div class="row align-items-center justify-content-center border">
-      <div class="back-start-buttons d-flex justify-content-center">
-        <button class="btn btn-primary mx-3" @click="goBack('/home')">Back</button>
-        <button class="btn btn-primary mx-3" @click="startGame" :disabled="!canStart">Start</button>
-      </div>
+    <!-- Back / Start -->
+    <div class="nav-buttons">
+      <button class="btn-game btn-game--back" @click="goBack('/home')">← Back</button>
+      <button class="btn-game btn-game--start" @click="startGame" :disabled="!canStart">
+        Start →
+      </button>
     </div>
-
 
   </div>
 </template>
@@ -205,8 +206,141 @@ export default {
 }
 </script>
 
-<style>
-.back-start-buttons {
-  padding: 25px;
+<style scoped>
+/* ─── Page Shell ─────────────────────────────────────────── */
+.choose-quiz-page {
+  flex: 1;
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0f0c29 0%, #302b63 45%, #24243e 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1.25rem;
+  padding: 3rem 1.5rem;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+/* ─── Hero Header ─────────────────────────────────────────── */
+.hero-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero-badge {
+  display: inline-block;
+  background: linear-gradient(90deg, #ff6fd8, #3813c2);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.35rem 1.1rem;
+  border-radius: 100px;
+  box-shadow: 0 0 18px rgba(255, 111, 216, 0.5);
+}
+
+.hero-title {
+  font-size: clamp(1.6rem, 4vw, 2.5rem);
+  font-weight: 900;
+  color: #fff;
+  margin: 0;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
+}
+
+.hero-subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+/* ─── Action Bar ──────────────────────────────────────────── */
+.action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.btn-action {
+  padding: 0.5rem 1.4rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-action:hover:not(:disabled) {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+.btn-action:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-action--secondary {
+  background: linear-gradient(90deg, #ff6fd8, #3813c2);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(255, 111, 216, 0.4);
+}
+
+.btn-action--outline {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ─── Nav Buttons (Back / Start) ─────────────────────────── */
+.nav-buttons {
+  display: flex;
+  gap: 1.25rem;
+  justify-content: center;
+}
+
+.btn-game {
+  padding: 0.7rem 2.2rem;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-game:hover:not(:disabled) {
+  transform: scale(1.07);
+  filter: brightness(1.12);
+}
+
+.btn-game:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.btn-game:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-game--back {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-game--start {
+  background: linear-gradient(90deg, #f43f5e, #fb923c, #fbbf24);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(244, 63, 94, 0.6);
 }
 </style>

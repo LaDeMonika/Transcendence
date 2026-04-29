@@ -30,4 +30,12 @@ body {
 .bg-lobby {
   background-color: azure;
 }
+
+.bg-lobby.main-wrapper,
+.no-padding.main-wrapper {
+  padding-top: 0;
+  align-items: stretch;
+  flex: 1;
+  height: 100%;
+}
 </style>

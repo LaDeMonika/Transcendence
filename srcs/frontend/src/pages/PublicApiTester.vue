@@ -1,176 +1,138 @@
 <template>
-  <div class="container-xl py-4">
-    <!-- Hero -->
-    <div class="card mb-4">
-      <div class="card-body">
-        <h1 class="h2 mb-2">Public API Tester</h1>
-        <p class="text-muted mb-1">
-          This page sends requests directly to the backend and includes the
-          <code>x-api-key</code> header automatically.
-        </p>
-        <p class="text-muted mb-0">
-          There is a rate limit applied to the public API. If you test several endpoints quickly,
-          expect a <code>429 Rate limit exceeded</code> response.
-        </p>
-      </div>
-    </div>
-
-    <!-- Connection Panel -->
-    <div class="card mb-4">
-      <div class="card-body">
-        <h2 class="h5 mb-3">Connection</h2>
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label text-muted">Base URL</label>
-            <input v-model="baseUrl" type="text" class="form-control" />
-          </div>
-          <div class="col-md-6">
-            <label class="form-label text-muted">API Key</label>
-            <input v-model="apiKey" type="text" class="form-control" />
-          </div>
+  <div class="api-tester-page">
+    <div class="tester-container">
+      
+      <!-- Hero -->
+      <div class="hero-header mb-5">
+        <div class="hero-badge">🛠️ DEV TOOLS</div>
+        <h1 class="hero-title">Public API Tester</h1>
+        <p class="hero-subtitle text-muted">Send requests directly to the backend with automatic API key injection.</p>
+        <div class="alert-info-game mt-3">
+          <span class="icon">💡</span>
+          <span>Rate limits are active. <strong>429 Rate limit exceeded</strong> may occur if requests are sent too rapidly.</span>
         </div>
       </div>
-    </div>
 
-    <!-- Endpoints Grid -->
-    <div class="row g-3 mb-4">
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <div class="card-body d-flex flex-column">
-            <span class="badge bg-success align-self-start mb-2">GET</span>
-            <h3 class="h6">List Quizzes</h3>
-            <p class="text-muted small flex-grow-1">
-              Returns quiz IDs and titles. Good first endpoint to confirm the API key works.
-            </p>
-            <button class="btn btn-dark mt-auto" @click="sendRequest('listQuizzes')">
-              Send Request
-            </button>
+      <!-- Connection Panel -->
+      <div class="glass-card mb-4">
+        <div class="card-glow"></div>
+        <h2 class="section-title">Connection Settings</h2>
+        <div class="settings-grid">
+          <div class="form-group">
+            <label class="form-label">Base URL</label>
+            <input v-model="baseUrl" type="text" class="game-input" placeholder="http://localhost:3333" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">API Key</label>
+            <input v-model="apiKey" type="text" class="game-input" placeholder="your-api-key" />
           </div>
         </div>
       </div>
 
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <div class="card-body d-flex flex-column">
-            <span class="badge bg-success align-self-start mb-2">GET</span>
-            <h3 class="h6">Show Quiz</h3>
-            <p class="text-muted small">
-              Returns one quiz and its questions, but leaves out the correct answers.
-            </p>
-            <div class="mb-3">
-              <label class="form-label text-muted">Quiz ID</label>
-              <input v-model.number="quizId" type="number" min="1" class="form-control" />
-            </div>
-            <button class="btn btn-dark mt-auto" @click="sendRequest('showQuiz')">
-              Send Request
-            </button>
+      <!-- Endpoints Grid -->
+      <div class="endpoints-grid mb-5">
+        <div class="endpoint-card">
+          <div class="card-glow"></div>
+          <span class="method-badge get">GET</span>
+          <h3 class="endpoint-title">List Quizzes</h3>
+          <p class="endpoint-desc">Returns quiz IDs and titles. Use this to verify connection.</p>
+          <button class="btn-game btn-game--start w-100" @click="sendRequest('listQuizzes')">
+            Send Request
+          </button>
+        </div>
+
+        <div class="endpoint-card">
+          <div class="card-glow"></div>
+          <span class="method-badge get">GET</span>
+          <h3 class="endpoint-title">Show Quiz</h3>
+          <p class="endpoint-desc">Returns one quiz and its questions (without answers).</p>
+          <div class="input-group mb-3">
+            <label class="form-label small">Quiz ID</label>
+            <input v-model.number="quizId" type="number" min="1" class="game-input" />
           </div>
+          <button class="btn-game btn-game--start w-100" @click="sendRequest('showQuiz')">
+            Send Request
+          </button>
+        </div>
+
+        <div class="endpoint-card">
+          <div class="card-glow"></div>
+          <span class="method-badge get">GET</span>
+          <h3 class="endpoint-title">Show User</h3>
+          <p class="endpoint-desc">Returns a public user profile with basic details.</p>
+          <div class="input-group mb-3">
+            <label class="form-label small">User ID</label>
+            <input v-model.number="userId" type="number" min="1" class="game-input" />
+          </div>
+          <button class="btn-game btn-game--start w-100" @click="sendRequest('showUser')">
+            Send Request
+          </button>
+        </div>
+
+        <div class="endpoint-card">
+          <div class="card-glow"></div>
+          <span class="method-badge post">POST</span>
+          <h3 class="endpoint-title">Create Session</h3>
+          <p class="endpoint-desc">Creates a quiz session. Requires quizId and hostId.</p>
+          <div class="input-group mb-3">
+            <label class="form-label small">JSON Body</label>
+            <textarea v-model="createSessionBody" class="game-input game-textarea" rows="4"></textarea>
+          </div>
+          <button class="btn-game btn-game--post w-100" @click="sendRequest('createSession')">
+            Send Request
+          </button>
+        </div>
+
+        <div class="endpoint-card">
+          <div class="card-glow"></div>
+          <span class="method-badge put">PUT</span>
+          <h3 class="endpoint-title">Update User</h3>
+          <p class="endpoint-desc">Changes a username. Name must be unique.</p>
+          <div class="input-group mb-3">
+            <label class="form-label small">User ID</label>
+            <input v-model.number="updateUserId" type="number" min="1" class="game-input" />
+            <label class="form-label small mt-2">JSON Body</label>
+            <textarea v-model="updateUserBody" class="game-input game-textarea" rows="3"></textarea>
+          </div>
+          <button class="btn-game btn-game--put w-100" @click="sendRequest('updateUser')">
+            Send Request
+          </button>
+        </div>
+
+        <div class="endpoint-card">
+          <div class="card-glow"></div>
+          <span class="method-badge delete">DELETE</span>
+          <h3 class="endpoint-title">Delete Session</h3>
+          <p class="endpoint-desc">Deletes an existing quiz session by ID.</p>
+          <div class="input-group mb-3">
+            <label class="form-label small">Session ID</label>
+            <input v-model.number="deleteSessionId" type="number" min="1" class="game-input" />
+          </div>
+          <button class="btn-game btn-game--danger w-100" @click="sendRequest('deleteSession')">
+            Send Request
+          </button>
         </div>
       </div>
 
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <div class="card-body d-flex flex-column">
-            <span class="badge bg-success align-self-start mb-2">GET</span>
-            <h3 class="h6">Show User</h3>
-            <p class="text-muted small">
-              Returns a public user profile with <code>id</code>, <code>userName</code>, and
-              <code>avatarUrl</code>.
-            </p>
-            <div class="mb-3">
-              <label class="form-label text-muted">User ID</label>
-              <input v-model.number="userId" type="number" min="1" class="form-control" />
-            </div>
-            <button class="btn btn-dark mt-auto" @click="sendRequest('showUser')">
-              Send Request
-            </button>
+      <!-- Response Panel -->
+      <div class="glass-card response-card">
+        <div class="card-glow"></div>
+        <div class="response-header d-flex justify-content-between align-items-center mb-4">
+          <h2 class="section-title mb-0">Response</h2>
+          <div class="response-meta">
+            <span class="status-pill" :class="responseOk ? 'success' : 'error'">{{ responseStatus }}</span>
+            <span class="url-pill">{{ responseUrl }}</span>
           </div>
         </div>
-      </div>
-
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <div class="card-body d-flex flex-column">
-            <span class="badge bg-warning text-dark align-self-start mb-2">POST</span>
-            <h3 class="h6">Create Quiz Session</h3>
-            <p class="text-muted small">
-              Creates a quiz session. Required body fields are <code>quizId</code> and
-              <code>hostId</code>.
-            </p>
-            <div class="mb-3">
-              <label class="form-label text-muted">JSON Body</label>
-              <textarea
-                v-model="createSessionBody"
-                class="form-control font-monospace"
-                rows="4"
-              ></textarea>
-            </div>
-            <button class="btn btn-dark mt-auto" @click="sendRequest('createSession')">
-              Send Request
-            </button>
+        <div class="code-editor">
+          <div class="editor-header">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="filename">response.json</span>
           </div>
+          <pre class="response-pre">{{ responseBody }}</pre>
         </div>
-      </div>
-
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <div class="card-body d-flex flex-column">
-            <span class="badge bg-warning text-dark align-self-start mb-2">PUT</span>
-            <h3 class="h6">Update User</h3>
-            <p class="text-muted small">
-              Changes a username. The name must be unique or the API returns a <code>400</code>.
-            </p>
-            <div class="mb-3">
-              <label class="form-label text-muted">User ID</label>
-              <input v-model.number="updateUserId" type="number" min="1" class="form-control" />
-            </div>
-            <div class="mb-3">
-              <label class="form-label text-muted">JSON Body</label>
-              <textarea
-                v-model="updateUserBody"
-                class="form-control font-monospace"
-                rows="3"
-              ></textarea>
-            </div>
-            <button class="btn btn-dark mt-auto" @click="sendRequest('updateUser')">
-              Send Request
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <div class="card-body d-flex flex-column">
-            <span class="badge bg-danger align-self-start mb-2">DELETE</span>
-            <h3 class="h6">Delete Quiz Session</h3>
-            <p class="text-muted small flex-grow-1">Deletes an existing quiz session by ID.</p>
-            <div class="mb-3">
-              <label class="form-label text-muted">Session ID</label>
-              <input
-                v-model.number="deleteSessionId"
-                type="number"
-                min="1"
-                class="form-control"
-              />
-            </div>
-            <button class="btn btn-dark mt-auto" @click="sendRequest('deleteSession')">
-              Send Request
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Response Panel -->
-    <div class="card">
-      <div class="card-body">
-        <h2 class="h5 mb-3">Response</h2>
-        <div class="d-flex flex-wrap gap-2 mb-3">
-          <span class="badge" :class="responseStatusClass">{{ responseStatus }}</span>
-          <span class="badge bg-secondary">{{ responseUrl }}</span>
-        </div>
-        <pre class="bg-dark text-light rounded p-3 mb-0 response-pre">{{ responseBody }}</pre>
       </div>
     </div>
   </div>
@@ -279,10 +241,264 @@ async function sendRequest(endpoint) {
 </script>
 
 <style scoped>
-.response-pre {
-  white-space: pre-wrap;
-  word-break: break-word;
-  min-height: 80px;
-  overflow: auto;
+/* ─── Page Shell ─────────────────────────────────────────── */
+.api-tester-page {
+  flex: 1;
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f0c29 0%, #302b63 45%, #24243e 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 1.5rem;
+  font-family: 'Segoe UI', system-ui, sans-serif;
 }
+
+.tester-container {
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* ─── Hero ────────────────────────────────────────────────── */
+.hero-header {
+  text-align: center;
+}
+
+.hero-badge {
+  display: inline-block;
+  background: linear-gradient(90deg, #94a3b8, #475569);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.4rem 1.2rem;
+  border-radius: 100px;
+  box-shadow: 0 0 20px rgba(148, 163, 184, 0.3);
+  margin-bottom: 1rem;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 900;
+  color: #fff;
+  margin: 0;
+}
+
+.alert-info-game {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(14, 165, 233, 0.1);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  color: #7dd3fc;
+  font-size: 0.9rem;
+}
+
+/* ─── Cards ───────────────────────────────────────────────── */
+.glass-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 2rem;
+  overflow: hidden;
+}
+
+.card-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.05), transparent 70%);
+  pointer-events: none;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .settings-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ─── Endpoints ────────────────────────────────────────────── */
+.endpoints-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.endpoint-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow: hidden;
+}
+
+.method-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 900;
+  width: fit-content;
+}
+
+.method-badge.get { background: #22c55e; color: #1a1a2e; }
+.method-badge.post { background: #eab308; color: #1a1a2e; }
+.method-badge.put { background: #8b5cf6; color: #fff; }
+.method-badge.delete { background: #f43f5e; color: #fff; }
+
+.endpoint-title {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.endpoint-desc {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+  flex: 1;
+}
+
+/* ─── Form Elements ───────────────────────────────────────── */
+.form-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.game-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  color: #fff !important;
+  padding: 0.6rem 1rem !important;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.9rem;
+}
+
+.game-textarea {
+  resize: vertical;
+}
+
+/* ─── Response ────────────────────────────────────────────── */
+.response-card {
+  background: rgba(15, 12, 41, 0.6);
+}
+
+.response-meta {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.status-pill {
+  padding: 0.4rem 1rem;
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.status-pill.success { background: #22c55e; color: #1a1a2e; }
+.status-pill.error { background: #f43f5e; color: #fff; }
+
+.url-pill {
+  color: rgba(255, 255, 255, 0.4);
+  font-family: monospace;
+  font-size: 0.85rem;
+}
+
+.code-editor {
+  background: #1e1e2e;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.editor-header {
+  background: #313244;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.dot:nth-child(1) { background: #f38ba8; }
+.dot:nth-child(2) { background: #f9e2af; }
+.dot:nth-child(3) { background: #a6e3a1; }
+
+.filename {
+  margin-left: 0.5rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  font-family: monospace;
+}
+
+.response-pre {
+  margin: 0;
+  padding: 1.5rem;
+  color: #cdd6f4;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+/* ─── Buttons ─────────────────────────────────────────────── */
+.btn-game {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-game:hover:not(:disabled) {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+.btn-game--start { background: linear-gradient(90deg, #6366f1, #8b5cf6); color: #fff; }
+.btn-game--post { background: #eab308; color: #1a1a2e; }
+.btn-game--put { background: #8b5cf6; color: #fff; }
+.btn-game--danger { background: #f43f5e; color: #fff; }
 </style>

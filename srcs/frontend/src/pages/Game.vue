@@ -1,114 +1,102 @@
 <template>
-  <div class="container d-flex flex-column py-4" style="min-height: 100%">
-    <div class="row align-items-center justify-content-center border">
-      <div class="col-sm justify-content-center">
-
-        <div class="row align-items-center justify-content-center border">
-          <h4 class="m-0">
-            {{ sessionState === 'finished' ? 'Quiz Complete' : currentQuestion ? 'Question' : 'Waiting...' }}
-          </h4>
+  <div class="game-page">
+    <!-- Header Status -->
+    <div class="game-header">
+      <div class="header-main">
+        <div class="status-badge" :class="{ 'status-badge--reveal': sessionState === 'reveal' }">
+          {{ sessionState === 'finished' ? '🏁 Quiz Complete' : currentQuestion ? '❓ Question' : '⏳ Waiting...' }}
         </div>
-
-        <div class="row align-items-center justify-content-center border">
-          <span :class="{ 'text-danger': timeLeft <= 5 }">
-            {{ sessionState === 'question' ? `Time Remaining: ${timeLeft}s` : '' }}
-          </span>
+        
+        <div v-if="sessionState === 'question'" class="timer-display" :class="{ 'timer-display--urgent': timeLeft <= 5 }">
+          <span class="timer-icon">⏱️</span>
+          <span class="timer-value">{{ timeLeft }}s</span>
         </div>
-
-        <div class="row align-items-center justify-content-center border">
-          <span class="text-muted">
-            {{ quizRole === 'spectator' ? 'Spectator Mode: read-only live view' : 'Player Mode' }}
-          </span>
-        </div>
-
+      </div>
+      
+      <div class="header-meta">
+        <span class="role-badge" :class="quizRole === 'spectator' ? 'role-badge--spectator' : 'role-badge--player'">
+          {{ quizRole === 'spectator' ? '👁️ Spectator Mode' : '🎮 Player Mode' }}
+        </span>
       </div>
     </div>
 
+    <!-- Main Content Area -->
+    <div class="game-content">
+      <div v-if="sessionState === 'connecting'" class="loader-view">
+        <div class="spinner-game"></div>
+        <h3>Connecting to quiz...</h3>
+      </div>
 
-    <div class="row align-items-center justify-content-center border flex-grow-1">
-      <div :class="contentColumnClass">
-        <div v-if="sessionState === 'connecting'" class="text-center py-5">
-          <h3>Connecting to quiz...</h3>
-          <div class="spinner-border" role="status">
-            <span class="visually-hidden">Loading...</span>
+      <div v-else-if="sessionState === 'lobby'" class="loader-view">
+        <div class="spinner-game"></div>
+        <h3>Waiting for host to start...</h3>
+      </div>
+
+      <div v-else-if="isLoadingNextQuestion" class="loader-view">
+        <div class="spinner-game spinner-game--next"></div>
+        <h3>Loading next question...</h3>
+      </div>
+
+      <!-- Reveal State -->
+      <div v-else-if="sessionState === 'reveal' && currentQuestion" class="reveal-view">
+        <div class="reveal-card" :class="isCorrect ? 'reveal-card--correct' : 'reveal-card--wrong'">
+          <div class="card-glow"></div>
+          <div class="reveal-icon">{{ isCorrect ? '✅' : '❌' }}</div>
+          <h2 class="reveal-headline">{{ revealHeadline }}</h2>
+          <p class="reveal-sub">
+            The correct answer was:<br />
+            <span class="reveal-answer">{{ correctAnswerText }}</span>
+          </p>
+        </div>
+
+        <div class="leaderboard-panel">
+          <div class="panel-header">
+            <h3>Leaderboard</h3>
+          </div>
+          <div class="panel-body">
+            <div v-if="rankedStandings.length === 0" class="empty-standings">
+              No standings available yet.
+            </div>
+            <div v-else class="leaderboard-list">
+              <LeaderboardRow
+                v-for="(player, index) in rankedStandings"
+                :key="player.id"
+                :player="player"
+                :rank="index + 1"
+              />
+            </div>
           </div>
         </div>
+      </div>
 
-        <div v-else-if="sessionState === 'lobby'" class="text-center py-5">
-          <h3>Waiting for quiz to start...</h3>
-        </div>
-
-        <div v-else-if="isLoadingNextQuestion" class="text-center py-5">
-          <h3>Loading next question...</h3>
-          <div class="spinner-border" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
-        </div>
-
-        <div v-else-if="sessionState === 'reveal' && currentQuestion" class="row g-4 align-items-stretch">
-          <div class="col-lg-6">
-            <div
-              class="card p-4 shadow-sm text-center h-100"
-              :class="revealCardClass"
+      <!-- Question State -->
+      <div v-else class="question-view" :class="{ 'is-flipped': isFlipped }">
+        <div v-if="currentQuestion" class="question-card">
+          <div class="card-glow"></div>
+          <h2 class="question-text">{{ currentQuestion.text }}</h2>
+          
+          <div class="options-grid">
+            <button
+              v-for="(option, index) in currentQuestion.options"
+              :key="index"
+              @click="selectAnswer(index)"
+              class="option-btn"
+              :class="{ 
+                'option-btn--selected': selectedAnswer === index,
+                'option-btn--disabled': alreadyAnswered || quizRole === 'spectator'
+              }"
+              :disabled="alreadyAnswered || quizRole === 'spectator'"
             >
-              <h2>{{ revealHeadline }}</h2>
-              <p class="mt-3 mb-0">
-                The correct answer was:
-                <strong>{{ correctAnswerText }}</strong>
-              </p>
-            </div>
+              <span class="option-letter">{{ String.fromCharCode(65 + index) }}</span>
+              <span class="option-text">{{ option }}</span>
+            </button>
           </div>
 
-          <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-              <div class="card-header bg-dark text-white">
-                <h5 class="mb-0">Current Leaderboard</h5>
-              </div>
-              <div class="card-body p-0">
-                <div v-if="rankedStandings.length === 0" class="p-4 text-center text-muted">
-                  No standings available yet.
-                </div>
-                <div v-else>
-                  <LeaderboardRow
-                    v-for="(player, index) in rankedStandings"
-                    :key="player.id"
-                    :player="player"
-                    :rank="index + 1"
-                  />
-                </div>
-              </div>
-            </div>
+          <div v-if="alreadyAnswered && quizRole === 'player'" class="status-footer">
+            <span class="status-icon">🚀</span> Answer submitted! Wait for the reveal...
           </div>
-        </div>
-
-        <div v-else class="quiz-card-wrapper" :class="{ 'is-flipped': isFlipped }">
-          <div class="quiz-card-inner">
-
-            <div
-              v-if="currentQuestion"
-              class="card bg-light p-4 shadow-sm quiz-card-front"
-            >
-              <h3>{{ currentQuestion.text }}</h3>
-              <div class="list-group mt-3 text-start">
-                <button
-                  v-for="(option, index) in currentQuestion.options"
-                  :key="index"
-                  @click="selectAnswer(index)"
-                  class="list-group-item list-group-item-action"
-                  :class="{ active: selectedAnswer === index }"
-                  :disabled="alreadyAnswered || quizRole === 'spectator'"
-                >
-                  {{ option }}
-                </button>
-              </div>
-              <div v-if="alreadyAnswered && quizRole === 'player'" class="mt-3 text-muted">
-                Answer submitted!
-              </div>
-              <div v-else-if="quizRole === 'spectator'" class="mt-3 text-muted">
-                Spectators receive live updates but cannot submit answers.
-              </div>
-            </div>
-
+          <div v-else-if="quizRole === 'spectator'" class="status-footer">
+            <span class="status-icon">👁️</span> Spectating live...
           </div>
         </div>
       </div>
@@ -186,7 +174,7 @@ const correctAnswerText = computed(() => {
 
 const buildAvatar = (username) => {
   const initial = String(username ?? '?').trim().charAt(0).toUpperCase() || '?';
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"><rect width="96" height="96" rx="48" fill="#0d6efd"/><text x="50%" y="50%" dy=".35em" text-anchor="middle" font-family="Arial, sans-serif" font-size="40" fill="#ffffff">${initial}</text></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"><rect width="96" height="96" rx="48" fill="#6366f1"/><text x="50%" y="50%" dy=".35em" text-anchor="middle" font-family="Arial, sans-serif" font-size="40" fill="#ffffff">${initial}</text></svg>`;
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 };
 
@@ -462,16 +450,354 @@ onUnmounted(() => {
 });
 </script>
 
-<style>
-.quiz-card-wrapper {
-  height: 400px;
+<style scoped>
+/* ─── Page Shell ─────────────────────────────────────────── */
+.game-page {
+  flex: 1;
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f0c29 0%, #302b63 45%, #24243e 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  overflow-x: hidden;
 }
 
-.quiz-card-inner {
-  height: 100%;
+/* ─── Game Header ────────────────────────────────────────── */
+.game-header {
+  width: 100%;
+  max-width: 1000px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
 }
 
-.quiz-card-inner > div {
-  transition: opacity 0.3s ease;
+.header-main {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.status-badge {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 100px;
+  padding: 0.4rem 1.2rem;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+}
+
+.status-badge--reveal {
+  background: rgba(251, 191, 36, 0.2);
+  border-color: #fbbf24;
+  color: #fbbf24;
+}
+
+.timer-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1.5px solid rgba(99, 102, 241, 0.3);
+  border-radius: 100px;
+  padding: 0.4rem 1.2rem;
+  color: #818cf8;
+  font-weight: 800;
+  transition: all 0.3s ease;
+}
+
+.timer-display--urgent {
+  background: rgba(244, 63, 94, 0.2);
+  border-color: #f43f5e;
+  color: #f43f5e;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.role-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.3rem 0.9rem;
+  border-radius: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.role-badge--player {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.role-badge--spectator {
+  background: rgba(6, 182, 212, 0.15);
+  color: #22d3ee;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+}
+
+/* ─── Content Area ───────────────────────────────────────── */
+.game-content {
+  flex: 1;
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  color: #fff;
+}
+
+.spinner-game {
+  width: 4rem;
+  height: 4rem;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Question Card ──────────────────────────────────────── */
+.question-view {
+  width: 100%;
+  max-width: 800px;
+  perspective: 1000px;
+}
+
+.question-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 3rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.card-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.2), transparent 70%);
+  pointer-events: none;
+}
+
+.question-text {
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  font-weight: 800;
+  color: #fff;
+  text-align: center;
+  margin: 0;
+  line-height: 1.3;
+  z-index: 1;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1rem;
+  z-index: 1;
+}
+
+@media (min-width: 768px) {
+  .options-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.option-btn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.option-btn:hover:not(.option-btn--disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.option-btn--selected {
+  background: rgba(99, 102, 241, 0.25) !important;
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.3) !important;
+}
+
+.option-letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
+}
+
+.option-btn--selected .option-letter {
+  background: #6366f1;
+  color: #fff;
+}
+
+.status-footer {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+  font-size: 0.95rem;
+}
+
+/* ─── Reveal View ────────────────────────────────────────── */
+.reveal-view {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.reveal-card {
+  position: relative;
+  flex: 1 1 400px;
+  max-width: 500px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1.5rem;
+  overflow: hidden;
+}
+
+.reveal-card--correct {
+  border-color: #22c55e;
+  box-shadow: 0 20px 50px rgba(34, 197, 94, 0.2);
+}
+
+.reveal-card--correct .card-glow {
+  background: radial-gradient(circle at 50% 0%, rgba(34, 197, 94, 0.3), transparent 70%);
+}
+
+.reveal-card--wrong {
+  border-color: #f43f5e;
+  box-shadow: 0 20px 50px rgba(244, 63, 94, 0.2);
+}
+
+.reveal-card--wrong .card-glow {
+  background: radial-gradient(circle at 50% 0%, rgba(244, 63, 94, 0.3), transparent 70%);
+}
+
+.reveal-icon {
+  font-size: 4rem;
+  line-height: 1;
+}
+
+.reveal-headline {
+  font-size: 3rem;
+  font-weight: 900;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.reveal-card--correct .reveal-headline { color: #4ade80; }
+.reveal-card--wrong .reveal-headline { color: #fb7185; }
+
+.reveal-sub {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.reveal-answer {
+  display: block;
+  margin-top: 0.5rem;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.5rem;
+}
+
+.leaderboard-panel {
+  flex: 1 1 400px;
+  max-width: 500px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-header {
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.06);
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.panel-header h3 {
+  color: #fff;
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.panel-body {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+.empty-standings {
+  padding: 3rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.3);
+  font-style: italic;
 }
 </style>
