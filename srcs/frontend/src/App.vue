@@ -31,7 +31,8 @@ body {
   background-color: azure;
 }
 
-.bg-lobby.main-wrapper {
+.bg-lobby.main-wrapper,
+.no-padding.main-wrapper {
   padding-top: 0;
 }
 </style>

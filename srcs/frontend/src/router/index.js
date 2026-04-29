@@ -4,7 +4,6 @@ import SignUp from '@/pages/SignUp.vue'
 import PrivacyPolicy from '@/pages/PrivacyPolicy.vue'
 import TermsOfService from '@/pages/TermsOfService.vue'
 import Chat from '@/pages/Chat.vue'
-//** LOBBY **
 import Lobby from '@/pages/Lobby.vue'
 import ChooseQuiz from '@/pages/ChooseQuiz.vue'
 import Game from '@/pages/Game.vue'
@@ -28,12 +27,12 @@ const router = createRouter({
     { path: '/terms_of_service', component: TermsOfService, meta: { layout: 'public' } },
     { path: '/home', component: Home, meta: { bodyClass: 'bg-lobby', layout: 'auth' } },
     { path: '/chat', component: Chat, meta: { layout: 'auth' } },
-    { path: '/choose-quiz', component: ChooseQuiz, meta: { layout: 'auth' } },
+    { path: '/choose-quiz', component: ChooseQuiz, meta: { bodyClass: 'no-padding', layout: 'auth' } },
     { path: '/game/:sessionId?', name: 'Game', component: Game, meta: { layout: 'auth' } },
     { path: '/leaderboard', component: GameLeaderboard, meta: { layout: 'auth' } },
-    { path: '/multiplayer-create-join-room', component: CreateJoinRoom, meta: { layout: 'auth' } },
+    { path: '/multiplayer-create-join-room', component: CreateJoinRoom, meta: { bodyClass: 'no-padding', layout: 'auth' } },
     { path: '/join-room', component: JoinRoom, meta: { layout: 'auth' } },
-    { path: '/lobby/:sessionId', name: 'Lobby', component: Lobby, meta: { layout: 'auth' } },
+    { path: '/lobby/:sessionId', name: 'Lobby', component: Lobby, meta: { bodyClass: 'no-padding', layout: 'auth' } },
     { path: '/profile', component: Profile, meta: { layout: 'auth' } },
     { path: '/profile/:userId', component: Profile, meta: { layout: 'auth' } },
     { path: '/friends', component: Friends, meta: { layout: 'auth' } },
