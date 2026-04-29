@@ -65,7 +65,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   gap: 2rem;
-  padding: 1.5rem;
+  padding: 3rem 1.5rem;
   font-family: 'Segoe UI', system-ui, sans-serif;
 }
 

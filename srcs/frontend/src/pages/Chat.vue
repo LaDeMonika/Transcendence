@@ -79,11 +79,10 @@
           </template>
 
           <div v-else class="empty-window">
-            <div class="empty-glow"></div>
-            <div class="empty-content text-center">
+            <div class="empty-content">
               <span class="empty-icon">💬</span>
               <h4>{{ chatListRef?.conversations?.length === 0 ? 'Start your first conversation' : 'Select a chat to begin' }}</h4>
-              <p class="text-muted">Chat with friends and other players in real-time.</p>
+              <p class="empty-desc">Chat with friends and other players in real-time.</p>
             </div>
           </div>
         </div>
@@ -364,16 +363,9 @@ const closeConversation = () => {
   display: flex;
   justify-content: center;
   align-items: center;
+  padding-top: 5rem;
   position: relative;
   overflow: hidden;
-}
-
-.empty-glow {
-  position: absolute;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.15), transparent 70%);
-  animation: float 6s ease-in-out infinite;
 }
 
 @keyframes float {
@@ -381,14 +373,31 @@ const closeConversation = () => {
   50% { transform: translate(20px, -20px); }
 }
 
+.empty-content {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .empty-content h4 {
   color: #fff;
   font-weight: 800;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.empty-desc {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+  max-width: 300px;
+  line-height: 1.4;
 }
 
 .empty-icon {
-  font-size: 4rem;
+  font-size: 4.5rem;
   display: block;
 }
 

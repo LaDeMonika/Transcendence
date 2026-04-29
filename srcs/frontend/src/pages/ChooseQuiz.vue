@@ -218,7 +218,7 @@ export default {
   align-items: center;
   justify-content: flex-start;
   gap: 1.25rem;
-  padding: 1.5rem;
+  padding: 3rem 1.5rem;
   font-family: 'Segoe UI', system-ui, sans-serif;
 }
 
