@@ -162,7 +162,7 @@
           </div>
           <div
             v-else
-            v-for="user in searchResults"
+            v-for="user in filteredSearchResults"
             :key="user.id"
             class="friend-row d-flex align-items-center justify-content-between p-3 rounded border mb-2"
           >
@@ -238,10 +238,15 @@ const activeTab = ref('friends')
 const searchQuery = ref('')
 const searchResults = ref(null)
 const searchLoading = ref(false)
+const currentUser = ref(null)
 
 const friends = computed(() => allFriends.value.filter((f) => f.status === 'accepted'))
 const requests = computed(() => allFriends.value.filter((f) => f.status === 'pending'))
 const sent = computed(() => allFriends.value.filter((f) => f.status === 'requested'))
+const filteredSearchResults = computed(() => {
+  if (!searchResults.value) return null
+  return searchResults.value.filter((user) => user.id !== currentUser.value?.id)
+})
 const friendStatusMap = computed(() => {
   const map = {}
   allFriends.value.forEach((f) => { map[f.friend_id] = f.status })
@@ -291,6 +296,11 @@ const handleSearch = async () => {
 }
 
 const handleAdd = async (friendId) => {
+  if (currentUser.value?.id === friendId) {
+    errors.value = ['Cannot add yourself as a friend.']
+    return
+  }
+
   actionLoading.value = friendId
   errors.value = []
   try {
@@ -328,6 +338,10 @@ const handleRemove = async (friendId) => {
     actionLoading.value = null
   }
 }
+
+chatService.getMe().then((me) => {
+  currentUser.value = me
+}).catch(() => {})
 
 loadFriends()
 </script>
