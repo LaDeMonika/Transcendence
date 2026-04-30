@@ -50,7 +50,7 @@ export default class FriendsController {
     // check friend status
     const isFriend = await user.related('friends').query().where('friend_id', data.friendId).first()
     if (isFriend)
-      return response.status(400).send({ error: [{ messages: 'Can not add to friends list' }] })
+      return response.status(400).send({ error: [{ messages: 'Already friends, silly (or requested)' }] })
 
     const friend = await User.find(data.friendId)
     if (!friend)
@@ -153,7 +153,9 @@ export default class FriendsController {
     const authenticatedUser = auth.user as User
     const user = await User.find(authenticatedUser.id)
 
-    const friendsTable = await user?.related('friends').pivotQuery()
-    return friendsTable
+    const friendsTable = await user?.related('friends').query()
+    const result = friendsTable.map((f) => f.serialize())
+    //console.log(result)
+    return result
   }
 }

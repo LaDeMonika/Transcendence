@@ -119,7 +119,13 @@ router.ws(
         if (!handled) {
           return ws.send(JSON.stringify({ type: 'error', error: 'Unknown event type' }))
         }
-      } catch {
+      } catch (error: any) {
+        console.error(`[WebSocket] Error handling message for user ${user.id}:`, {
+          type: payload?.type,
+          errorMessage: error?.message,
+          errorCode: error?.code,
+          errorStack: error?.stack,
+        })
         return ws.send(JSON.stringify({ type: 'error', error: 'Internal server error' }))
       }
     })

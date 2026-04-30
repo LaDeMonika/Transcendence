@@ -11,6 +11,7 @@ router
     router.get('/myQuizs', [ProfilesController, 'myQuizzes'])
     router.get('/stats/:userid', [ProfilesController, 'stats'])
     router.get('/othersQuizs/:userid', [ProfilesController, 'othersQuizzes'])
+    router.get('/leaderboard', [ProfilesController, 'leaderboard'])
     router.get('/:userId', [ProfilesController, 'publicProfile'])
   })
   .prefix('/api/profile')

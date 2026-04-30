@@ -1,62 +1,64 @@
 <template>
-  <header>
-    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
+  <header class="game-header-wrapper">
+    <nav class="navbar navbar-expand-lg navbar-dark game-navbar">
       <div class="container-fluid">
-        <div class="col-sm d-flex justify-content-start">
-          <router-link class="navbar-brand" to="/">
-            Transcendence
+        <!-- Logo -->
+        <div class="navbar-brand-col">
+          <router-link class="game-logo" to="/">
+            <span class="logo-icon">✨</span>
+            <span class="logo-text">Transcendence</span>
           </router-link>
         </div>
 
-        <div class="col-sm d-flex justify-content-center collapse navbar-collapse">
-          <ul class="navbar-nav mr-auto">
+        <!-- Mobile Toggle -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Main Nav -->
+        <div class="collapse navbar-collapse" id="navbarContent">
+          <ul class="navbar-nav mx-auto">
             <template v-if="isPublicLayout">
               <li class="nav-item">
-                <router-link class="nav-link" to="/privacy_policy">Privacy Policy</router-link>
+                <router-link class="nav-link-game" to="/privacy_policy">Privacy Policy</router-link>
               </li>
               <li class="nav-item">
-                <router-link class="nav-link" to="/terms_of_service">Terms of Service</router-link>
+                <router-link class="nav-link-game" to="/terms_of_service">Terms of Service</router-link>
               </li>
             </template>
 
              <template v-else>
               <li class="nav-item">
-                <router-link class="nav-link" to="/home">Home</router-link>
+                <router-link class="nav-link-game" to="/home">Home</router-link>
               </li>
               <li class="nav-item">
-                <router-link class="nav-link" to="/chat">Chat</router-link>
+                <router-link class="nav-link-game" to="/chat">Chat</router-link>
               </li>
               <li class="nav-item">
-                <router-link class="nav-link" to="/friends">Friends</router-link>
+                <router-link class="nav-link-game" to="/friends">Friends</router-link>
               </li>
               <li class="nav-item">
-                <router-link class="nav-link" to="/profile">My Profile</router-link>
+                <router-link class="nav-link-game" to="/profile">Profile</router-link>
+              </li>
+              <li class="nav-item">
+                <router-link class="nav-link-game" to="/choose-quiz">Quiz Manager</router-link>
+              </li>
+              <li class="nav-item">
+                <router-link class="nav-link-game" to="/api-tester">Public API</router-link>
               </li>
             </template>
           </ul>
-        </div>
 
-        <div class="col-sm d-flex justify-content-end gap-2 align-items-center">
-          <template v-if="isPublicLayout">
-            <router-link to="/login" class="btn btn-outline-success mx-1">Login</router-link>
-            <router-link to="/sign_up" class="btn btn-success mx-1">Sign Up</router-link>
-          </template>
+          <div class="auth-actions-col">
+            <template v-if="isPublicLayout">
+              <router-link to="/login" class="btn-game btn-game--outline">Login</router-link>
+              <router-link to="/sign_up" class="btn-game btn-game--primary">Sign Up</router-link>
+            </template>
 
-          <template v-else>
-            <button class="btn btn-outline-secondary" @click="isDropdownOpen = !isDropdownOpen">More</button>
-            <ul class="dropdown-menu" :class="{ show: isDropdownOpen }">
-              <li>
-                <router-link class="dropdown-item" to="/privacy_policy" @click="isDropdownOpen = false">Privacy Policy</router-link>
-              </li>
-              <li>
-                <router-link class="dropdown-item" to="/terms_of_service" @click="isDropdownOpen = false">Terms of Service</router-link>
-              </li>
-              <li>
-                <router-link class="dropdown-item" to="/api-tester" @click="isDropdownOpen = false">Public API tester</router-link>
-              </li>
-            </ul>
-            <button class="btn btn-outline-danger" type="button" @click="logout">Logout</button>
-          </template>
+            <template v-else>
+              <button class="btn-game btn-game--danger" type="button" @click="logout">Logout</button>
+            </template>
+          </div>
         </div>
       </div>
     </nav>
@@ -99,55 +101,139 @@ function logout() {
 </script>
 
 <style scoped>
-.header-dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.header-dropdown summary {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.header-dropdown summary::-webkit-details-marker {
-  display: none;
-}
-
-.dropdown-menu {
-  display: none;
-  position: absolute;
-  right: 0;
-  top: calc(100% + 0.25rem);
-  min-width: 11rem;
-  background-color: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 0.25rem;
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
-  padding: 0.25rem 0;
+.game-header-wrapper {
+  position: sticky;
+  top: 0;
   z-index: 1000;
-  list-style: none;
-  margin: 0;
-}
-
-.dropdown-menu.show {
-  display: block;
-}
-
-.header-dropdown[open] .dropdown-menu {
-  display: block;
-}
-
-.dropdown-item {
-  display: block;
   width: 100%;
-  padding: 0.35rem 1rem;
-  color: #212529;
+}
+
+.game-navbar {
+  background: rgba(15, 12, 41, 0.85) !important;
+  backdrop-filter: blur(12px);
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.08);
+  padding: 0.75rem 1.5rem;
+}
+
+/* Logo */
+.game-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.game-logo:hover {
+  transform: scale(1.05);
+}
+
+.logo-icon {
+  font-size: 1.5rem;
+  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.6));
+}
+
+.logo-text {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.02em;
+  background: linear-gradient(90deg, #fff, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Nav Links */
+.nav-link-game {
+  color: rgba(255, 255, 255, 0.65) !important;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0.5rem 1rem !important;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.nav-link-game:hover, .router-link-active {
+  color: #fff !important;
+}
+
+.router-link-active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 1rem;
+  right: 1rem;
+  height: 2px;
+  background: #6366f1;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.8);
+  border-radius: 2px;
+}
+
+/* Buttons */
+.auth-actions-col {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.btn-game {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
   text-decoration: none;
 }
 
-.dropdown-item:hover,
-.dropdown-item:focus {
-  background-color: #f8f9fa;
+.btn-game:hover {
+  transform: scale(1.05);
+}
+
+.btn-game--primary {
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+.btn-game--outline {
+  background: transparent;
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-game--danger {
+  background: rgba(244, 63, 94, 0.15);
+  color: #fb7185;
+  border: 1.5px solid rgba(244, 63, 94, 0.3);
+}
+
+.btn-game--danger:hover {
+  background: #f43f5e;
+  color: #fff;
+}
+
+@media (max-width: 991px) {
+  .navbar-collapse {
+    background: rgba(15, 12, 41, 0.95);
+    margin: 1rem -1.5rem -0.75rem;
+    padding: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .auth-actions-col {
+    margin-top: 1rem;
+    justify-content: center;
+  }
+  
+  .nav-link-game {
+    text-align: center;
+  }
+  
+  .router-link-active::after {
+    display: none;
+  }
 }
 </style>

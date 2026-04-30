@@ -1,14 +1,13 @@
 import User from '#models/user'
 import { cuid } from '@adonisjs/core/helpers'
 import type { HttpContext } from '@adonisjs/core/http'
-import app from '@adonisjs/core/services/app'
-import env from '#start/env'
 import fs from 'fs'
 import Quiz from '#models/Quiz'
 import QuizPlayer from '#models/quizsession/quiz_player'
 import Session from '#models/quizsession/quizsession'
 import Question from '#models/Question'
 import QuizAnswer from '#models/quizsession/quiz_answer'
+import db from '@adonisjs/lucid/services/db'
 
 export default class ProfilesController {
     /**
@@ -63,7 +62,7 @@ export default class ProfilesController {
         if (!file.isValid) return response.badRequest({
             error: file.errors
         })
-        await file.move(app.makePath(env.get('IMAGES_PATH')), {
+        await file.move('/images', {
             name: `${cuid()}.${file.extname}`
         })
 
@@ -71,7 +70,7 @@ export default class ProfilesController {
 
         if (user.avatarUrl)
         {
-            const path = app.makePath(env.get('IMAGES_PATH'), user.avatarUrl)
+            const path = '/images' + user.avatarUrl
             fs.unlink(path, (err) => console.log('old file deleted: ', user.avatarUrl, err))
         }
         user.avatarUrl = file.fileName
@@ -83,15 +82,18 @@ export default class ProfilesController {
      * @getAvatar
      * @tag profile
      * @description download profile avatar
-     * NOTE: sometimes it does not update new avatars possibly due to catching system
      */
-    async getAvatar({ request, response }: HttpContext) {
+    async getAvatar({ request, response }: HttpContext) { // userid is avatarUrl 30.04.2026
+        /*
         const targetUserId = Number(request.param('userid'));
         if (isNaN(targetUserId)) return response.badRequest({ message: 'Invalid user id' })
         const user = await User.find(targetUserId)
         if (!user) return response.badRequest({ message: 'User not found' })
-        const absolutePath = app.makePath(env.get('IMAGES_PATH'), user.avatarUrl || 'default.png')
-        return response.download(absolutePath, false)
+        const absolutePath = '/images/' + (user.avatarUrl || 'default.png') 
+        */
+        const absolutePath = '/images/' + request.param('userid')
+        console.log('Avatar path: ', absolutePath)
+        return response.download(absolutePath)
     }
 
     /**
@@ -102,7 +104,7 @@ export default class ProfilesController {
     async deleteAvatar({ response, auth }: HttpContext) {
         const user = auth.user as User
         if (!user.avatarUrl) return response.badRequest({ message: 'No custom avatar picture'})
-        const absolutePath = app.makePath(env.get('IMAGES_PATH'), user.avatarUrl)
+        const absolutePath = '/images/' + user.avatarUrl
         fs.unlink(absolutePath, () => null)
         user.avatarUrl = null
         await user.save()
@@ -183,9 +185,8 @@ export default class ProfilesController {
             .first()
         const totalAnswers = await QuizPlayer.query()
             .join('quiz_sessions', (query) => {
-                query   // include session table
+                query
                     .on('quiz_players.session_id', '=', 'quiz_sessions.id')
-                    // .andOnVal('quiz_sessions.state', '=', 'finished') // comment out after tests
             })
             .join('quizzes', 'quizzes.id', '=', 'quiz_sessions.quiz_id')
             .join('questions', 'questions.quiz_id', '=', 'quizzes.id')
@@ -196,21 +197,50 @@ export default class ProfilesController {
                     .andOn('quiz_answers.user_id', '=', 'quiz_players.user_id')
             })
             .where('quiz_players.user_id', user.id)
-            .count({
-                'total': '*',
-                'correctAnswers': 'is_correct'
-            })
+            .count('* as total')
             .first()
-        // console.log(
-        //     'Sessions: ', gameSessions?.$extras.count,
-        //     '\nQuestions: ', totalQuestions?.$extras.count,
-        //     '\nTotal answers: ', totalAnswers?.$extras
-        // )
+        
+        const correctAnswers = await QuizPlayer.query()
+            .join('quiz_sessions', (query) => {
+                query
+                    .on('quiz_players.session_id', '=', 'quiz_sessions.id')
+            })
+            .join('quizzes', 'quizzes.id', '=', 'quiz_sessions.quiz_id')
+            .join('questions', 'questions.quiz_id', '=', 'quizzes.id')
+            .join('quiz_answers', (query) => {
+                query
+                    .on('quiz_answers.question_id', '=', 'questions.id')
+                    .andOn('quiz_sessions.id', '=', 'quiz_answers.session_id')
+                    .andOn('quiz_answers.user_id', '=', 'quiz_players.user_id')
+            })
+            .where('quiz_players.user_id', user.id)
+            .where('quiz_answers.is_correct', true)
+            .count('* as count')
+            .first()
+        
         return response.ok({
-            'playedSessions': Number(gameSessions?.$extras.count),
-            'totalQuestions': Number(totalQuestions?.$extras.count),
-            'totalAnswers': Number(totalAnswers?.$extras.total) ,
-            'totalCorrectAnswerd': Number(totalAnswers?.$extras.correctAnswers)
+            'playedSessions': Number(gameSessions?.$extras.count ?? 0),
+            'totalQuestions': Number(totalQuestions?.$extras.count ?? 0),
+            'totalAnswers': Number(totalAnswers?.$extras.total ?? 0),
+            'totalCorrectAnswers': Number(correctAnswers?.$extras.count ?? 0)
         })
+    }
+
+    async leaderboard({ request, response }:HttpContext) {
+        try {
+            const leaderboard = await db
+                .from('users')
+                .leftJoin('quiz_players', 'users.id', 'quiz_players.user_id')
+                .select('users.id', 'users.user_name')
+                .select(db.raw('COALESCE(SUM(quiz_players.score), 0) as total_score'))
+                .groupBy('users.id', 'users.user_name')
+                .orderBy('total_score', 'desc')
+                .limit(50) // Limit to top 50 players
+
+            return response.ok(leaderboard)
+        } catch (error) {
+            console.error('Leaderboard error:', error)
+            return response.internalServerError({ error: 'Failed to fetch leaderboard' })
+        }
     }
 }
