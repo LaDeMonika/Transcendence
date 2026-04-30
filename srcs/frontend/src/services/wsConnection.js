@@ -1,4 +1,6 @@
 
+import { logRecoverable } from './logger.js'
+
 function buildWebSocketUrl() {
   let wsUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3333'
 
@@ -34,7 +36,7 @@ function dispatch(payload) {
     try {
       fn(payload)
     } catch (error) {
-      console.error('Error in WebSocket event handler:', error, payload)
+      logRecoverable('WebSocket event handler failed', error, payload)
     }
   })
 }
@@ -58,7 +60,7 @@ function openSocket() {
     try {
       payload = JSON.parse(e.data)
     } catch (error) {
-      console.error('Failed to parse WebSocket message:', error, e.data)
+      logRecoverable('Failed to parse WebSocket message', error, e.data)
       return
     }
     dispatch(payload)
@@ -73,7 +75,7 @@ function openSocket() {
   })
 
   ws.addEventListener('error', (error) => {
-    console.error('WebSocket error:', error)
+    logRecoverable('WebSocket transport error', error)
     dispatch({ type: 'ws:error', error })
   })
 }

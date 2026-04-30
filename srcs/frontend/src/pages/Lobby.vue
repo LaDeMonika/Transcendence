@@ -87,9 +87,10 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { connect, disconnect, onWs } from '@/services/wsConnection.js'
+import { connect, disconnect, getIsConnected, onWs } from '@/services/wsConnection.js'
 import { joinQuizSession, spectateQuizSession, leaveQuizSession, startQuiz } from '@/services/quizSocket.js'
 import { getQuizSession, getCurrentUser } from '@/services/quizSessionService.js'
+import { logRecoverable } from '@/services/logger.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -122,17 +123,21 @@ const startGame = () => {
   startQuiz(sessionId)
 }
 
+const joinCurrentSession = () => {
+  hasJoinedSession.value = false
+  if (joinRole.value === 'spectator') {
+    spectateQuizSession(sessionId)
+    return
+  }
+  joinQuizSession(sessionId)
+  loadSession()
+}
+
 const setupWsListeners = () => {
   cleanupWsListeners()
 
   wsUnsubscribers.push(onWs('ws:connected', () => {
-    hasJoinedSession.value = false
-    if (joinRole.value === 'spectator') {
-      spectateQuizSession(sessionId)
-      return
-    }
-    joinQuizSession(sessionId)
-    loadSession()
+    joinCurrentSession()
   }))
 
   wsUnsubscribers.push(onWs('quiz:join:ok', (data) => {
@@ -140,7 +145,7 @@ const setupWsListeners = () => {
     hasJoinedSession.value = true
     loadSession()
 
-    if (joinRole.value === 'player' && isSingleMode && isHost && !isStarting.value) {
+    if (joinRole.value === 'player' && isSingleMode && isHost.value && !isStarting.value) {
       startGame()
     }
   }))
@@ -177,7 +182,7 @@ const setupWsListeners = () => {
   }))
 
   wsUnsubscribers.push(onWs('error', (data) => {
-    console.error('WS error in lobby:', data.error)
+    logRecoverable('Lobby websocket error', data.error)
     isStarting.value = false
   }))
 }
@@ -233,10 +238,13 @@ onMounted(async () => {
       return
     }
   } catch (err) {
-    console.error('Failed to load session:', err)
+    logRecoverable('Failed to load lobby session', err)
   }
 
   setupWsListeners()
+  if (getIsConnected()) {
+    joinCurrentSession()
+  }
   connect()
 })
 

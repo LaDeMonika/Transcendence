@@ -89,6 +89,7 @@
 import ScrollBoxSelectQuiz from '@/components/ScrollBox-SelectQuiz.vue'
 import { listQuizzes, importCsv, importJson, exportQuizJson, exportQuizCsv } from '@/services/quizzes.js'
 import { createQuizSession } from '@/services/quizSessionService.js'
+import { logRecoverable } from '@/services/logger.js'
 
 export default {
   data() {
@@ -122,7 +123,7 @@ export default {
       try {
         this.quizzes = await listQuizzes()
       } catch (error) {
-        console.error('Failed to load quizzes', error)
+        logRecoverable('Failed to load quizzes', error)
         this.quizzes = []
       }
     },
@@ -154,7 +155,7 @@ export default {
         await this.fetchQuizzes()
         setTimeout(() => { this.showImportModal = false }, 1200)
       } catch (error) {
-        console.error(`Failed to import ${label}`, error)
+        logRecoverable(`Failed to import ${label}`, error)
         this.importMessage = error.response?.data?.message || error.response?.data?.error || `Failed to import ${label}`
         this.importSuccess = false
       } finally {
@@ -169,7 +170,7 @@ export default {
         this.exportPreview = JSON.stringify(data, null, 2)
         this.showExportModal = true
       } catch (error) {
-        console.error('Failed to export JSON', error)
+        logRecoverable('Failed to export JSON', error)
       }
     },
     async doExportCsv() {
@@ -184,7 +185,7 @@ export default {
         a.click()
         URL.revokeObjectURL(url)
       } catch (error) {
-        console.error('Failed to export CSV', error)
+        logRecoverable('Failed to export CSV', error)
       }
     },
     async createAndStartSession(quizId) {
@@ -194,7 +195,7 @@ export default {
         if (this.$route.query.mode) query.mode = this.$route.query.mode
         this.$router.push({ name: 'Lobby', params: { sessionId: session.id }, query })
       } catch (error) {
-        console.error('Failed to create quiz session', error)
+        logRecoverable('Failed to create quiz session', error)
       }
     },
   },
