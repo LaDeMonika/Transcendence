@@ -155,7 +155,7 @@ export default class FriendsController {
 
     const friendsTable = await user?.related('friends').query()
     const result = friendsTable.map((f) => f.serialize())
-    console.log(result)
+    //console.log(result)
     return result
   }
 }
