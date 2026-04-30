@@ -291,7 +291,9 @@ if (isPrivate.value) {
 const avatarUrl = computed(() => {
   if (!profile.value) return ''
   // return '../public/host.jpg'
-  return `/api/profile/getAvatar/${profile.value.id}`
+  const path = '/api/profile/getAvatar/' + (profile.value.avatarUrl || 'default.png')
+  return path;
+  // return `/api/profile/getAvatar/${profile.value.id}`
 })
 
 const accuracy = computed(() => {
