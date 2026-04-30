@@ -21,8 +21,8 @@ ARG IMAGE=node:22.22.0-bullseye-slim
 
 
 FROM $IMAGE
-RUN mkdir -p tmp
-RUN mkdir -p /home/node/app && chown 777 /home/node/app
+RUN mkdir -p tmp /images
+RUN mkdir -p /home/node/app && chown 777 /home/node/app /images
 WORKDIR /home/node/app
 COPY srcs/backend/package*.json ./
 RUN npm install

@@ -83,13 +83,16 @@ export default class ProfilesController {
      * @tag profile
      * @description download profile avatar
      */
-    async getAvatar({ request, response }: HttpContext) {
+    async getAvatar({ request, response }: HttpContext) { // userid is avatarUrl 30.04.2026
+        /*
         const targetUserId = Number(request.param('userid'));
         if (isNaN(targetUserId)) return response.badRequest({ message: 'Invalid user id' })
         const user = await User.find(targetUserId)
         if (!user) return response.badRequest({ message: 'User not found' })
         const absolutePath = '/images/' + (user.avatarUrl || 'default.png') 
-        //console.log('Avatar path: ', absolutePath)
+        */
+        const absolutePath = '/images/' + request.param('userid')
+        console.log('Avatar path: ', absolutePath)
         return response.download(absolutePath)
     }
 

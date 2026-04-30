@@ -290,7 +290,9 @@ if (isPrivate.value) {
 
 const avatarUrl = computed(() => {
   if (!profile.value) return ''
-  return '../public/host.jpg'
+  // return '../public/host.jpg'
+  const path = '/api/profile/getAvatar/' + (profile.value.avatarUrl || 'default.png')
+  return path;
   // return `/api/profile/getAvatar/${profile.value.id}`
 })
 
@@ -431,7 +433,7 @@ const loadLeaderboard = async () => {
 }
 
 const onAvatarFileChange = (event) => {
-  selectedAvatarFile.value = event.target.files?.[0] ?? null
+  selectedAvatarFile.value = event.files?.[0] ?? null
 }
 
 const handleAvatarUpload = async () => {
