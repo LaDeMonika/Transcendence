@@ -36,15 +36,17 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { client } from '../services/client.js'
+import { getCurrentUser } from '@/services/quizSessionService.js'
+import { showError } from '@/services/notifications.js'
 
 const username = ref('')
 
 onMounted(async () => {
   try {
-    const res = await client.get('/me')
-    username.value = res.data.userName ?? res.data.username ?? ''
-  } catch {
+    const currentUser = await getCurrentUser()
+    username.value = currentUser.userName || ''
+  } catch (error) {
+    showError(error?.message || 'Failed to load current user')
   }
 })
 </script>

@@ -296,11 +296,6 @@ const handleSearch = async () => {
 }
 
 const handleAdd = async (friendId) => {
-  if (currentUser.value?.id === friendId) {
-    errors.value = ['Cannot add yourself as a friend.']
-    return
-  }
-
   actionLoading.value = friendId
   errors.value = []
   try {

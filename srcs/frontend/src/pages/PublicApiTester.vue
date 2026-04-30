@@ -179,7 +179,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 
-const baseUrl = ref(import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3333')
+const baseUrl = ref(import.meta.env.VITE_BACKEND_URL)
 const apiKey = ref('transc-public-demo-key-2026')
 
 const quizId = ref(1)

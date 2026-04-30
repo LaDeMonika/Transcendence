@@ -27,17 +27,14 @@
       </div>
 
       <div class="card-footer bg-light text-center py-3">
-        <div v-if="!isFinal" class="fs-5 fw-bold" :class="timeLeft <= 1 ? 'text-danger' : 'text-primary'">
-          Next Question in {{ timeLeft }}s...
-        </div>
-        <button v-else class="btn btn-success px-4" @click="goToHome">Back to Home</button>
+        <button class="btn btn-success px-4" @click="goToHome">Back to Home</button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import LeaderboardRow from '@/components/LeaderboardRow.vue'
 import { getQuizSessionStandings } from '@/services/quizSessionService.js'
@@ -47,12 +44,9 @@ const router = useRouter()
 const route = useRoute()
 
 const isFinal = computed(() => route.query.isFinal === 'true')
-const nextIndex = computed(() => route.query.nextIndex || 0)
 const sessionId = route.query.sessionId
 
-const timeLeft = ref(3)
 const isLoading = ref(true)
-let timerInterval = null
 
 const players = ref([])
 
@@ -76,33 +70,12 @@ const loadStandings = async () => {
   }
 }
 
-const nextQuestion = () => {
-  if (!sessionId) return
-  router.push({ name: 'Game', params: { sessionId } })
-}
-
 const goToHome = () => {
   router.push('/home')
 }
 
 onMounted(async () => {
   await loadStandings()
-
-  // If not final leaderboard, wait with a live countdown
-  if (!isFinal.value) {
-    timerInterval = setInterval(() => {
-      if (timeLeft.value > 0) {
-        timeLeft.value--
-      } else {
-        clearInterval(timerInterval)
-        nextQuestion()
-      }
-    }, 1000)
-  }
-})
-
-onUnmounted(() => {
-  if (timerInterval) clearInterval(timerInterval)
 })
 </script>
 
