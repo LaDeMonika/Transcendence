@@ -19,15 +19,17 @@ export default class UserController {
     // GET /api/user/:id
     public async show({ params }: HttpContext) {
         const { id } = params
-        const user = await User.query().where('id', id).select('id', 'userName').firstOrFail()
-        return user
+        const user = await User.query().where('id', id).select('*').firstOrFail()
+        // console.log('Fetched user:', user)
+        return user.serialize()
     }
 
     // GET /api/search-users?query=someName
     public async search({ request }: HttpContext) {
         const { query } = request.only(['query'])
-        const users = await User.query().select('id', 'userName').where('userName', 'like', `%${query}%`)
-        return users
+        const users = await User.query().select('*').where('userName', 'like', `%${query}%`)
+        // console.log(`Search for "${query}" returned:`, users.map(user => user.serialize()))
+        return users.map(user => user.serialize())
     }
 
     // POST /api/update-username
