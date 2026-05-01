@@ -77,7 +77,7 @@
             >
               <div class="friend-info">
                 <div class="avatar-wrap">
-                  <img :src="avatarUrl(user.id)" class="friend-avatar" alt="Avatar" />
+                  <img :src="avatarUrl(user.avatarUrl)" class="friend-avatar" alt="Avatar" />
                   <div class="status-dot online"></div>
                 </div>
                 <router-link :to="`/profile/${user.id}`" class="friend-name">
@@ -106,7 +106,7 @@
               class="friend-card"
             >
               <div class="friend-info">
-                <img :src="avatarUrl(user.id)" class="friend-avatar" alt="Avatar" />
+                <img :src="avatarUrl(user.avatarUrl)" class="friend-avatar" alt="Avatar" />
                 <router-link :to="`/profile/${user.id}`" class="friend-name">
                   {{ user.userName }}
                 </router-link>
@@ -142,7 +142,7 @@
               class="friend-card"
             >
               <div class="friend-info">
-                <img :src="avatarUrl(user.id)" class="friend-avatar" alt="Avatar" />
+                <img :src="avatarUrl(user.avatarUrl)" class="friend-avatar" alt="Avatar" />
                 <router-link :to="`/profile/${user.id}`" class="friend-name">
                   {{ user.userName }}
                 </router-link>
@@ -187,7 +187,7 @@
                 class="friend-card"
               >
                 <div class="friend-info">
-                  <img :src="avatarUrl(user.id)" class="friend-avatar" alt="Avatar" />
+                  <img :src="avatarUrl(user.avatarUrl)" class="friend-avatar" alt="Avatar" />
                   <router-link :to="`/profile/${user.id}`" class="friend-name">
                     {{ user.userName }}
                   </router-link>
@@ -269,7 +269,7 @@ const friendStatusMap = computed(() => {
   return map
 })
 
-const avatarUrl = (userId) => `/api/profile/getAvatar/${userId}`
+const avatarUrl = (userId) => '/api/profile/getAvatar/' + (userId || 'default.png') // userId is avatarUrl in this case
 
 const setError = (error) => {
   if (error?.response?.data?.errors) {
