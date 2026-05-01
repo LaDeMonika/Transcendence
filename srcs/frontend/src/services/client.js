@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { showError } from './notifications.js'
+import { setAuthTokenValue } from '@/services/authState.js'
 
 const baseURL = import.meta.env.VITE_BACKEND_URL
 
@@ -16,6 +17,8 @@ export function setAuthToken(token) {
       delete client.defaults.headers.common['Authorization']
       localStorage.removeItem('token')
     }
+
+    setAuthTokenValue(token)
   } catch (e) {
     showError('Failed to manage authentication token.')
   }

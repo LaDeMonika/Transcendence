@@ -66,21 +66,12 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { setAuthToken } from '@/services/client.js'
+import { isAuthenticated } from '@/services/authState.js'
 
 const router = useRouter()
-const isDropdownOpen = ref(false)
-
-// Check if user is authenticated by looking for auth token in localStorage
-const isAuthenticated = computed(() => {
-  try {
-    return !!localStorage.getItem('token')
-  } catch (e) {
-    return false
-  }
-})
 
 const isPublicLayout = computed(() => {
   const routeLayout = router.currentRoute.value.meta.layout
