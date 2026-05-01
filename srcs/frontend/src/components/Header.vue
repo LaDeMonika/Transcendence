@@ -20,31 +20,31 @@
           <ul class="navbar-nav mx-auto">
             <template v-if="isPublicLayout">
               <li class="nav-item">
-                <router-link class="nav-link-game" to="/privacy_policy">Privacy Policy</router-link>
+                <router-link class="nav-link-game" to="/privacy_policy" @click="closeMobileNav">Privacy Policy</router-link>
               </li>
               <li class="nav-item">
-                <router-link class="nav-link-game" to="/terms_of_service">Terms of Service</router-link>
+                <router-link class="nav-link-game" to="/terms_of_service" @click="closeMobileNav">Terms of Service</router-link>
               </li>
             </template>
 
              <template v-else>
               <li class="nav-item">
-                <router-link class="nav-link-game" to="/home">Home</router-link>
+                <router-link class="nav-link-game" to="/home" @click="closeMobileNav">Home</router-link>
               </li>
               <li class="nav-item">
-                <router-link class="nav-link-game" to="/chat">Chat</router-link>
+                <router-link class="nav-link-game" to="/chat" @click="closeMobileNav">Chat</router-link>
               </li>
               <li class="nav-item">
-                <router-link class="nav-link-game" to="/friends">Friends</router-link>
+                <router-link class="nav-link-game" to="/friends" @click="closeMobileNav">Friends</router-link>
               </li>
               <li class="nav-item">
-                <router-link class="nav-link-game" to="/profile">Profile</router-link>
+                <router-link class="nav-link-game" to="/profile" @click="closeMobileNav">Profile</router-link>
               </li>
               <li class="nav-item">
-                <router-link class="nav-link-game" to="/choose-quiz">Quiz Manager</router-link>
+                <router-link class="nav-link-game" to="/choose-quiz" @click="closeMobileNav">Quiz Manager</router-link>
               </li>
               <li class="nav-item">
-                <router-link class="nav-link-game" to="/api-tester">Public API</router-link>
+                <router-link class="nav-link-game" to="/api-tester" @click="closeMobileNav">Public API</router-link>
               </li>
             </template>
           </ul>
@@ -84,6 +84,16 @@ const isPublicLayout = computed(() => {
 
   return !isAuthenticated.value
 })
+
+function closeMobileNav() {
+  const navbarContent = document.getElementById('navbarContent')
+  if (!navbarContent) {
+    return
+  }
+
+  navbarContent.classList.remove('show')
+  navbarContent.setAttribute('aria-expanded', 'false')
+}
 
 function logout() {
   setAuthToken(null)

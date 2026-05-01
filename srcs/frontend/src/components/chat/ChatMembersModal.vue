@@ -15,15 +15,18 @@
         class="d-flex justify-content-between align-items-center"
       >
         {{ member.userName }}
-        <BButton
-          size="sm"
-          variant="outline-danger"
-          :disabled="removing === member.id"
-          @click="removeMember(member)"
-        >
-          <BSpinner v-if="removing === member.id" small />
-          <span v-else>Remove</span>
-        </BButton>
+        <template v-if="!isCurrentUser(member.id)">
+          <BButton
+            size="sm"
+            variant="outline-danger"
+            :disabled="removing === member.id"
+            @click="removeMember(member)"
+          >
+            <BSpinner v-if="removing === member.id" small />
+            <span v-else>Remove</span>
+          </BButton>
+        </template>
+        <span v-else class="text-muted small">You</span>
       </BListGroupItem>
       <BListGroupItem v-if="members.length === 0" class="text-muted">
         No members found.
@@ -118,6 +121,7 @@ const onOpen = async () => {
 }
 
 const isMember = (userId) => members.value.some((m) => m.id === userId)
+const isCurrentUser = (userId) => userId === me.value?.id
 
 const removeMember = async (member) => {
   removing.value = member.id

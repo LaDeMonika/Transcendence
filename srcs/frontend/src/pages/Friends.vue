@@ -1,15 +1,13 @@
 <template>
   <div class="friends-page">
     <div class="friends-container">
-      
-      <!-- Hero Header -->
+
       <div class="hero-header text-center mb-5">
         <div class="hero-badge">👥 SOCIAL HUB</div>
         <h1 class="hero-title">Friends</h1>
         <p class="hero-subtitle text-muted">Manage your connections and find new players.</p>
       </div>
 
-      <!-- Navigation Tabs -->
       <div class="friends-nav-wrapper mb-5">
         <div class="friends-nav">
           <button
@@ -50,12 +48,10 @@
         </div>
       </div>
 
-      <!-- Error Alerts -->
       <BAlert v-if="errors.length" variant="danger" show class="mb-4 auth-alert">
         <div v-for="(error, index) in errors" :key="index">{{ error }}</div>
       </BAlert>
 
-      <!-- Main Content Area -->
       <div class="friends-content">
         <div v-if="loading" class="loader-view">
           <div class="spinner-game"></div>
@@ -64,7 +60,6 @@
 
         <div v-else class="content-fade">
           
-          <!-- Friends Tab -->
           <div v-if="activeTab === 'friends'" class="friend-list">
             <div v-if="friends.length === 0" class="empty-state">
               <span class="empty-icon">🌵</span>
@@ -77,7 +72,7 @@
             >
               <div class="friend-info">
                 <div class="avatar-wrap">
-                  <img :src="avatarUrl(user.id)" class="friend-avatar" alt="Avatar" />
+                  <img :src="avatarUrl(user.avatarUrl)" class="friend-avatar" alt="Avatar" />
                   <div class="status-dot online"></div>
                 </div>
                 <router-link :to="`/profile/${user.id}`" class="friend-name">
@@ -94,7 +89,6 @@
             </div>
           </div>
 
-          <!-- Requests Tab -->
           <div v-if="activeTab === 'requests'" class="friend-list">
             <div v-if="requests.length === 0" class="empty-state">
               <span class="empty-icon">📭</span>
@@ -106,7 +100,7 @@
               class="friend-card"
             >
               <div class="friend-info">
-                <img :src="avatarUrl(user.id)" class="friend-avatar" alt="Avatar" />
+                <img :src="avatarUrl(user.avatarUrl)" class="friend-avatar" alt="Avatar" />
                 <router-link :to="`/profile/${user.id}`" class="friend-name">
                   {{ user.userName }}
                 </router-link>
@@ -130,7 +124,6 @@
             </div>
           </div>
 
-          <!-- Sent Tab -->
           <div v-if="activeTab === 'sent'" class="friend-list">
             <div v-if="sent.length === 0" class="empty-state">
               <span class="empty-icon">✈️</span>
@@ -142,7 +135,7 @@
               class="friend-card"
             >
               <div class="friend-info">
-                <img :src="avatarUrl(user.id)" class="friend-avatar" alt="Avatar" />
+                <img :src="avatarUrl(user.avatarUrl)" class="friend-avatar" alt="Avatar" />
                 <router-link :to="`/profile/${user.id}`" class="friend-name">
                   {{ user.userName }}
                 </router-link>
@@ -157,7 +150,6 @@
             </div>
           </div>
 
-          <!-- Find Tab -->
           <div v-if="activeTab === 'find'" class="search-view">
             <div class="search-box mb-4">
               <BForm @submit.prevent="handleSearch" class="search-form">
@@ -187,7 +179,7 @@
                 class="friend-card"
               >
                 <div class="friend-info">
-                  <img :src="avatarUrl(user.id)" class="friend-avatar" alt="Avatar" />
+                  <img :src="avatarUrl(user.avatarUrl)" class="friend-avatar" alt="Avatar" />
                   <router-link :to="`/profile/${user.id}`" class="friend-name">
                     {{ user.userName }}
                   </router-link>
@@ -269,7 +261,7 @@ const friendStatusMap = computed(() => {
   return map
 })
 
-const avatarUrl = (userId) => `/api/profile/getAvatar/${userId}`
+const avatarUrl = (avatarUrl) => '/api/profile/getAvatar/' + (avatarUrl || 'default.png')
 
 const setError = (error) => {
   if (error?.response?.data?.errors) {
@@ -561,6 +553,7 @@ loadFriends()
   font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
+  text-align: center;
 }
 
 .status-pill--success { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
@@ -627,5 +620,27 @@ loadFriends()
   border: 1px solid rgba(244, 63, 94, 0.2) !important;
   color: #fb7185 !important;
   border-radius: 12px !important;
+}
+
+@media (max-width: 767px) {
+  .friends-nav {
+    flex-direction: column;
+    gap: 0.4rem;
+    border-radius: 30px;
+  }
+
+  .nav-pill {
+    justify-content: center;
+    padding: 0.7rem 1rem;
+  }
+
+  .pill-icon {
+    font-size: 1.2rem;
+  }
+
+  .friend-card {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
 }
 </style>

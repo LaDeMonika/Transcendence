@@ -27,7 +27,7 @@
             :key="player.userId"
             class="player-item"
           >
-            <span class="player-avatar">{{ player.username[0]?.toUpperCase() }}</span>
+            <img :src="'/api/profile/getAvatar/' + (player.avatarUrl || 'default.png')" class="player-avatar" :alt="player.username + ' avatar'" />
             <span class="player-name">{{ player.username }}</span>
             <span v-if="player.userId === hostId" class="player-badge player-badge--host">👑 Host</span>
           </li>
@@ -51,7 +51,7 @@
             :key="spectator.userId"
             class="player-item"
           >
-            <span class="player-avatar player-avatar--spectator">{{ spectator.username[0]?.toUpperCase() }}</span>
+            <img :src="'/api/profile/getAvatar/' + (spectator.avatarUrl || 'default.png')" class="player-avatar player-avatar--spectator" :alt="spectator.username + ' avatar'" />
             <span class="player-name">{{ spectator.username }}</span>
             <span class="player-badge player-badge--spectator">Watching</span>
           </li>
@@ -108,10 +108,12 @@ const players = computed(() => (session.value?.players ?? []).map((player) => ({
   userId: player.userId,
   username: player.user?.userName ?? `User ${player.userId}`,
   score: player.score ?? 0,
+  avatarUrl: player.user?.avatarUrl
 })))
 const spectators = computed(() => (session.value?.spectators ?? []).map((spectator) => ({
   userId: spectator.userId,
   username: spectator.user?.userName ?? `User ${spectator.userId}`,
+  avatarUrl: spectator.user?.avatarUrl
 })))
 const isStarting = ref(false)
 const hasJoinedSession = ref(false)
@@ -412,18 +414,8 @@ onBeforeUnmount(() => {
   width: 2rem;
   height: 2rem;
   border-radius: 50%;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 0.85rem;
-  color: #fff;
+  object-fit: cover;
   flex-shrink: 0;
-}
-
-.player-avatar--spectator {
-  background: linear-gradient(135deg, #06b6d4, #0284c7);
 }
 
 .player-name {

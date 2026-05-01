@@ -290,10 +290,8 @@ if (isPrivate.value) {
 
 const avatarUrl = computed(() => {
   if (!profile.value) return ''
-  // return '../public/host.jpg'
   const path = '/api/profile/getAvatar/' + (profile.value.avatarUrl || 'default.png')
   return path;
-  // return `/api/profile/getAvatar/${profile.value.id}`
 })
 
 const accuracy = computed(() => {
@@ -582,6 +580,19 @@ watch(() => route.params.userId, loadProfile, { immediate: true })
 
 .nav-pill:hover {
   background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 767px) {
+  .profile-nav {
+    flex-direction: column;
+    gap: 0.4rem;
+    border-radius: 30px;
+  }
+
+  .nav-pill {
+    justify-content: center;
+    padding: 0.7rem 1rem;
+  }
 }
 
 /* ─── Main Card ───────────────────────────────────────────── */

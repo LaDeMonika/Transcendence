@@ -20,24 +20,29 @@
             placeholder="00000"
             maxlength="10"
             required
+            :disabled="isLoading"
           />
+        </div>
+
+        <div v-if="error" class="error-message mt-3">
+          {{ error }}
         </div>
 
         <div class="auth-actions mt-4">
           <button
             type="submit"
             class="btn-game btn-game--start w-100"
-            :disabled="!roomId"
+            :disabled="!roomId || isLoading"
           >
-            Join As Player
+            {{ isLoading ? 'Validating...' : 'Join As Player' }}
           </button>
           <button
             type="button"
             class="btn-game btn-game--secondary w-100 mt-3"
-            :disabled="!roomId"
+            :disabled="!roomId || isLoading"
             @click="handleSpectate"
           >
-            Watch As Spectator
+            {{ isLoading ? 'Validating...' : 'Watch As Spectator' }}
           </button>
         </div>
 
@@ -52,16 +57,53 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { getQuizSession } from '../services/quizSessionService.js';
 
 const router = useRouter();
 const roomId = ref('');
+const isLoading = ref(false);
+const error = ref('');
+
+const validateAndJoin = async (role) => {
+    if (!roomId.value) {
+        error.value = 'Room ID is required';
+        return;
+    }
+
+    isLoading.value = true;
+    error.value = '';
+
+    try {
+        const session = await getQuizSession(roomId.value);
+        
+        if (!session) {
+            error.value = 'Room not found';
+            return;
+        }
+
+        if (session.state !== 'lobby') {
+            error.value = `Room is not available (state: ${session.state})`;
+            return;
+        }
+
+        router.push({ path: `/lobby/${roomId.value}`, query: { role } });
+    } catch (err) {
+        if (err?.response?.status === 404) {
+            error.value = 'Room does not exist';
+        } else {
+            error.value = `Failed to join room: ${err?.response?.data?.message || err.message || 'Unknown error'}`;
+        }
+    } finally {
+        isLoading.value = false;
+    }
+};
 
 const handleJoin = () => {
-    router.push({ path: `/lobby/${roomId.value}`, query: { role: 'player' } });
+    validateAndJoin('player');
 };
 
 const handleSpectate = () => {
-    router.push({ path: `/lobby/${roomId.value}`, query: { role: 'spectator' } });
+    validateAndJoin('spectator');
 };
 </script>
 
@@ -214,6 +256,17 @@ const handleSpectate = () => {
 .legal-text {
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.error-message {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1.5px solid rgba(239, 68, 68, 0.4);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  color: #fca5a5;
+  font-size: 0.9rem;
   text-align: center;
   line-height: 1.4;
 }

@@ -22,7 +22,7 @@
               <span class="icon">⬅️</span>
             </button>
             <div class="header-info">
-              <h6>{{ activeConversation.otherParticipants?.map(p => p.userName).join(', ') || activeConversation.id }}</h6>
+              <h6>{{ activeConversation.otherParticipants?.length ? activeConversation.otherParticipants.map(p => p.userName).join(', ') : currentUser?.userName || activeConversation.id }}</h6>
             </div>
             <div class="header-actions">
               <button class="action-icon" @click="showMembersModal = true">⚙️</button>
@@ -57,7 +57,7 @@
             <div class="window-header">
               <div class="participant-info">
                 <span class="status-dot online"></span>
-                <h6 class="mb-0">{{ activeConversation.otherParticipants?.map(p => p.userName).join(', ') || activeConversation.id }}</h6>
+                <h6 class="mb-0">{{ activeConversation.otherParticipants?.length ? activeConversation.otherParticipants.map(p => p.userName).join(', ') : currentUser?.userName }}</h6>
               </div>
               <div class="window-actions">
                 <button class="btn-game btn-game--secondary btn-sm" @click="showMembersModal = true">
@@ -112,13 +112,15 @@ const showMembersModal = ref(false)
 const leaving = ref(false)
 const chatListRef = ref(null)
 const isMobile = ref(window.innerWidth < 768)
+const currentUser = ref(null)
 
 const updateIsMobile = () => {
   isMobile.value = window.innerWidth < 768
 }
 
-onMounted(() => {
+onMounted(async () => {
   connectSocket()
+  currentUser.value = await chatService.getMe()
   window.addEventListener('resize', updateIsMobile)
   
   // CRITICAL: Disable parent scrolling for the chat page
@@ -295,7 +297,6 @@ const closeConversation = () => {
 /* ─── Mobile View ────────────────────────────────────────── */
 .mobile-chat {
   width: 100%;
-  height: 100%;
 }
 
 .chat-list-view {
