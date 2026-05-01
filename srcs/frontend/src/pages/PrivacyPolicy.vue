@@ -1,7 +1,7 @@
 <template>
   <div class="doc-page">
     <div class="doc-container">
-      
+
       <div class="hero-header text-center mb-5">
         <div class="hero-badge">📜 LEGAL</div>
         <h1 class="hero-title">Privacy Policy</h1>
@@ -12,7 +12,7 @@
         <div class="card-glow"></div>
         <div class="doc-content">
           <p class="lead">At Transcendence, we value your privacy. This policy explains what data we collect, how we use it, and what rights you have when using our services.</p>
-          
+
           <div class="doc-section">
             <h2><span class="icon">🔍</span> Information We Collect</h2>
             <ul>
@@ -86,7 +86,6 @@ import Footer from "@/components/Footer.vue";
 .doc-page {
   flex: 1;
   width: 100%;
-  min-height: 100vh;
   background: linear-gradient(135deg, #0f0c29 0%, #302b63 45%, #24243e 100%);
   display: flex;
   flex-direction: column;

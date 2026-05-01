@@ -2,7 +2,7 @@
   <div class="join-room-page">
     <div class="auth-card">
       <div class="card-glow"></div>
-      
+
       <div class="hero-header">
         <div class="hero-badge">🚀 JOIN GAME</div>
         <h1 class="hero-title">Enter Room</h1>
@@ -12,11 +12,11 @@
       <form @submit.prevent="handleJoin" class="auth-form">
         <div class="form-group text-center">
           <label for="roomId" class="form-label">Room ID</label>
-          <input 
+          <input
             v-model="roomId"
-            type="text" 
-            id="roomId" 
-            class="game-input text-center fs-2" 
+            type="text"
+            id="roomId"
+            class="game-input text-center fs-2"
             placeholder="00000"
             maxlength="10"
             required
@@ -75,7 +75,7 @@ const validateAndJoin = async (role) => {
 
     try {
         const session = await getQuizSession(roomId.value);
-        
+
         if (!session) {
             error.value = 'Room not found';
             return;
@@ -112,7 +112,6 @@ const handleSpectate = () => {
 .join-room-page {
   flex: 1;
   width: 100%;
-  min-height: 100vh;
   background: linear-gradient(135deg, #0f0c29 0%, #302b63 45%, #24243e 100%);
   display: flex;
   flex-direction: column;

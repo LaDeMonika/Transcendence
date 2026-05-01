@@ -46,6 +46,19 @@
               <li class="nav-item">
                 <router-link class="nav-link-game" to="/api-tester" @click="closeMobileNav">Public API</router-link>
               </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link-game dropdown-toggle" :class="{ 'nav-link-game--active': isLegalRoute }" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Legal
+                </a>
+                <ul class="dropdown-menu legal-dropdown">
+                  <li>
+                    <router-link class="legal-dropdown-item" to="/privacy_policy" @click="closeMobileNav">Privacy Policy</router-link>
+                  </li>
+                  <li>
+                    <router-link class="legal-dropdown-item" to="/terms_of_service" @click="closeMobileNav">Terms of Service</router-link>
+                  </li>
+                </ul>
+              </li>
             </template>
           </ul>
 
@@ -67,11 +80,14 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { setAuthToken } from '@/services/client.js'
 import { isAuthenticated } from '@/services/authState.js'
 
 const router = useRouter()
+const route = useRoute()
+
+const isLegalRoute = computed(() => ['/privacy_policy', '/terms_of_service'].includes(route.path))
 
 const isPublicLayout = computed(() => {
   const routeLayout = router.currentRoute.value.meta.layout
@@ -216,6 +232,40 @@ function logout() {
   color: #fff;
 }
 
+.legal-dropdown {
+  background: rgba(15, 12, 41, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 0.4rem 0;
+  min-width: 170px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.legal-dropdown-item {
+  display: block;
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0.5rem 1.25rem;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.legal-dropdown-item:hover,
+.legal-dropdown-item.router-link-active {
+  color: #fff;
+  background: rgba(99, 102, 241, 0.2);
+}
+
+.nav-link-game--active {
+  color: #fff !important;
+}
+
+/* suppress underline indicator on the dropdown toggle */
+.dropdown-toggle.nav-link-game::after {
+  display: none;
+}
+
 @media (max-width: 991px) {
   .navbar-collapse {
     background: rgba(15, 12, 41, 0.95);
@@ -223,18 +273,30 @@ function logout() {
     padding: 1.5rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
-  
+
   .auth-actions-col {
     margin-top: 1rem;
     justify-content: center;
   }
-  
+
   .nav-link-game {
     text-align: center;
   }
-  
+
   .router-link-active::after {
     display: none;
+  }
+
+  .legal-dropdown {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    text-align: center;
+  }
+
+  .legal-dropdown-item {
+    padding: 0.4rem 1rem;
   }
 }
 </style>

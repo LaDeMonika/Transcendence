@@ -1,7 +1,7 @@
 <template>
   <div class="doc-page">
     <div class="doc-container">
-      
+
       <div class="hero-header text-center mb-5">
         <div class="hero-badge">⚖️ LEGAL</div>
         <h1 class="hero-title">Terms of Service</h1>
@@ -12,7 +12,7 @@
         <div class="card-glow"></div>
         <div class="doc-content">
           <p class="lead">Welcome to Transcendence, a real-time multiplayer trivia platform. By accessing or using our service, you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, please do not use our service.</p>
-          
+
           <div class="doc-section">
             <h2><span class="icon">📜</span> Acceptance of Terms</h2>
             <p>By creating an account or using Transcendence, you acknowledge that you have read, understood, and agree to be bound by these Terms and our Privacy Policy.</p>
@@ -104,7 +104,6 @@ import Footer from "@/components/Footer.vue";
 .doc-page {
   flex: 1;
   width: 100%;
-  min-height: 100vh;
   background: linear-gradient(135deg, #0f0c29 0%, #302b63 45%, #24243e 100%);
   display: flex;
   flex-direction: column;

@@ -2,7 +2,7 @@
   <div class="leaderboard-page">
     <div class="leaderboard-card">
       <div class="card-glow"></div>
-      
+
       <div class="hero-header">
         <div class="hero-badge">🏆 STANDINGS</div>
         <h1 class="hero-title">{{ isFinal ? 'Match Finished' : 'Current Progress' }}</h1>
@@ -46,7 +46,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import LeaderboardRow from '@/components/LeaderboardRow.vue'
 import { getQuizSessionStandings } from '@/services/quizSessionService.js'
-import { showError } from '@/services/notifications.js' 
+import { showError } from '@/services/notifications.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -92,7 +92,6 @@ onMounted(async () => {
 .leaderboard-page {
   flex: 1;
   width: 100%;
-  min-height: 100vh;
   background: linear-gradient(135deg, #0f0c29 0%, #302b63 45%, #24243e 100%);
   display: flex;
   flex-direction: column;

@@ -1,7 +1,7 @@
 <template>
   <div class="chat-page">
     <div class="chat-container">
-      
+
       <!-- Mobile View -->
       <div v-if="isMobile" class="mobile-chat">
         <div v-if="!activeConversation" class="chat-list-view">
@@ -122,21 +122,11 @@ onMounted(async () => {
   connectSocket()
   currentUser.value = await chatService.getMe()
   window.addEventListener('resize', updateIsMobile)
-  
-  // CRITICAL: Disable parent scrolling for the chat page
-  document.body.style.overflow = 'hidden'
-  const scrollableContent = document.querySelector('.scrollable-content')
-  if (scrollableContent) scrollableContent.style.overflow = 'hidden'
 })
 
 onUnmounted(() => {
   disconnectSocket()
   window.removeEventListener('resize', updateIsMobile)
-  
-  // Re-enable parent scrolling
-  document.body.style.overflow = ''
-  const scrollableContent = document.querySelector('.scrollable-content')
-  if (scrollableContent) scrollableContent.style.overflow = ''
 })
 
 const activeConversation = ref(null)
@@ -190,7 +180,6 @@ const closeConversation = () => {
 .chat-page {
   flex: 1;
   width: 100%;
-  /* We use height: 100% since we're disabling parent scroll */
   height: 100%;
   background: linear-gradient(135deg, #0f0c29 0%, #302b63 45%, #24243e 100%);
   display: flex;
@@ -203,13 +192,16 @@ const closeConversation = () => {
 .chat-container {
   width: 100%;
   display: flex;
-  flex: 1 1 auto;
+  flex: 1;
+  min-height: 0;
 }
 
 /* ─── Desktop View ───────────────────────────────────────── */
 .desktop-chat {
   display: flex;
   width: 100%;
+  height: 100%;
+  min-height: 0;
 }
 
 .chat-sidebar {
@@ -249,6 +241,7 @@ const closeConversation = () => {
   flex-direction: column;
   position: relative;
   background: rgba(0, 0, 0, 0.1);
+  min-height: 0;
 }
 
 .window-header {
@@ -297,6 +290,10 @@ const closeConversation = () => {
 /* ─── Mobile View ────────────────────────────────────────── */
 .mobile-chat {
   width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .chat-list-view {
@@ -325,7 +322,8 @@ const closeConversation = () => {
 .chat-active-view {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
 }
 
 .chat-header {

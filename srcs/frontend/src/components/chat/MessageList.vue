@@ -79,19 +79,23 @@ const scrollToBottom = () => {
 
 const loadMessages = async (id) => {
   if (!id) { messages.value = []; seenIds.clear(); return }
+  let success = false
   try {
     loading.value = true
     error.value = null
     messages.value = await chatService.getMessages(id)
     seenIds.clear()
     messages.value.forEach((m) => seenIds.add(m.id))
-    await nextTick()
-    scrollToBottom()
+    success = true
   } catch (err) {
     error.value = 'Failed to load messages: ' + err.message
     showError('Error loading messages.')
   } finally {
     loading.value = false
+  }
+  if (success) {
+    await nextTick()
+    scrollToBottom()
   }
 }
 
