@@ -72,22 +72,22 @@
             </div>
             <div
               v-for="user in friends"
-              :key="user.friend_id"
+              :key="user.id"
               class="friend-card"
             >
               <div class="friend-info">
                 <div class="avatar-wrap">
-                  <img :src="avatarUrl(user.friend_id)" class="friend-avatar" alt="Avatar" />
+                  <img :src="avatarUrl(user.id)" class="friend-avatar" alt="Avatar" />
                   <div class="status-dot online"></div>
                 </div>
-                <router-link :to="`/profile/${user.friend_id}`" class="friend-name">
+                <router-link :to="`/profile/${user.id}`" class="friend-name">
                   {{ user.userName }}
                 </router-link>
               </div>
               <button
                 class="btn-game btn-game--danger btn-sm"
-                @click="handleRemove(user.friend_id)"
-                :disabled="actionLoading === user.friend_id"
+                @click="handleRemove(user.id)"
+                :disabled="actionLoading === user.id"
               >
                 Remove
               </button>
@@ -102,27 +102,27 @@
             </div>
             <div
               v-for="user in requests"
-              :key="user.friend_id"
+              :key="user.id"
               class="friend-card"
             >
               <div class="friend-info">
-                <img :src="avatarUrl(user.friend_id)" class="friend-avatar" alt="Avatar" />
-                <router-link :to="`/profile/${user.friend_id}`" class="friend-name">
+                <img :src="avatarUrl(user.id)" class="friend-avatar" alt="Avatar" />
+                <router-link :to="`/profile/${user.id}`" class="friend-name">
                   {{ user.userName }}
                 </router-link>
               </div>
               <div class="friend-actions">
                 <button
                   class="btn-game btn-game--success btn-sm"
-                  @click="handleAccept(user.friend_id)"
-                  :disabled="actionLoading === user.friend_id"
+                  @click="handleAccept(user.id)"
+                  :disabled="actionLoading === user.id"
                 >
                   Accept
                 </button>
                 <button
                   class="btn-game btn-game--danger btn-sm"
-                  @click="handleRemove(user.friend_id)"
-                  :disabled="actionLoading === user.friend_id"
+                  @click="handleRemove(user.id)"
+                  :disabled="actionLoading === user.id"
                 >
                   Decline
                 </button>
@@ -138,19 +138,19 @@
             </div>
             <div
               v-for="user in sent"
-              :key="user.friend_id"
+              :key="user.id"
               class="friend-card"
             >
               <div class="friend-info">
-                <img :src="avatarUrl(user.friend_id)" class="friend-avatar" alt="Avatar" />
-                <router-link :to="`/profile/${user.friend_id}`" class="friend-name">
+                <img :src="avatarUrl(user.id)" class="friend-avatar" alt="Avatar" />
+                <router-link :to="`/profile/${user.id}`" class="friend-name">
                   {{ user.userName }}
                 </router-link>
               </div>
               <button
                 class="btn-game btn-game--secondary btn-sm"
-                @click="handleRemove(user.friend_id)"
-                :disabled="actionLoading === user.friend_id"
+                @click="handleRemove(user.id)"
+                :disabled="actionLoading === user.id"
               >
                 Cancel
               </button>
@@ -265,7 +265,7 @@ const filteredSearchResults = computed(() => {
 })
 const friendStatusMap = computed(() => {
   const map = {}
-  allFriends.value.forEach((f) => { map[f.friend_id] = f.status })
+  allFriends.value.forEach((f) => { map[f.id] = f.status })
   return map
 })
 
