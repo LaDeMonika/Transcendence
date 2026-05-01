@@ -1,5 +1,6 @@
 import axios from 'axios'
-import { logRecoverable } from './logger.js'
+import { showError } from './notifications.js'
+import { setAuthTokenValue } from '@/services/authState.js'
 
 const baseURL = import.meta.env.VITE_BACKEND_URL
 
@@ -16,8 +17,10 @@ export function setAuthToken(token) {
       delete client.defaults.headers.common['Authorization']
       localStorage.removeItem('token')
     }
+
+    setAuthTokenValue(token)
   } catch (e) {
-    logRecoverable('Failed to persist auth token', e)
+    showError('Failed to manage authentication token.')
   }
 }
 
@@ -26,7 +29,7 @@ try {
   const stored = localStorage.getItem('token')
   if (stored) setAuthToken(stored)
 } catch (e) {
-  logRecoverable('Failed to restore stored auth token', e)
+  showError('Failed to initialize authentication.')
 }
 
 let unauthorizedHandler = null
@@ -41,7 +44,7 @@ client.interceptors.response.use(
         unauthorizedHandler()
       }
     } catch (e) {
-      logRecoverable('Unauthorized handler failed', e)
+      showError('Authentication error occurred.')
     }
     return Promise.reject(error)
   }

@@ -141,7 +141,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 
-const baseUrl = ref(import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3333')
+const baseUrl = ref(import.meta.env.VITE_BACKEND_URL)
 const apiKey = ref('transc-public-demo-key-2026')
 
 const quizId = ref(1)
@@ -165,29 +165,29 @@ function buildRequestConfig(endpoint) {
   const base = baseUrl.value.trim().replace(/\/$/, '')
   switch (endpoint) {
     case 'listQuizzes':
-      return { method: 'GET', url: `${base}/api/public/quizzes` }
+      return { method: 'GET', url: `${base}/public/quizzes` }
     case 'showQuiz':
-      return { method: 'GET', url: `${base}/api/public/quiz/${quizId.value || 1}` }
+      return { method: 'GET', url: `${base}/public/quiz/${quizId.value || 1}` }
     case 'showUser':
-      return { method: 'GET', url: `${base}/api/public/users/${userId.value || 1}` }
+      return { method: 'GET', url: `${base}/public/users/${userId.value || 1}` }
     case 'createSession':
       return {
         method: 'POST',
-        url: `${base}/api/public/quiz-sessions`,
+        url: `${base}/public/quiz-sessions`,
         headers: { 'Content-Type': 'application/json' },
         body: createSessionBody.value,
       }
     case 'updateUser':
       return {
         method: 'PUT',
-        url: `${base}/api/public/users/${updateUserId.value || 1}`,
+        url: `${base}/public/users/${updateUserId.value || 1}`,
         headers: { 'Content-Type': 'application/json' },
         body: updateUserBody.value,
       }
     case 'deleteSession':
       return {
         method: 'DELETE',
-        url: `${base}/api/public/quiz-sessions/${deleteSessionId.value || 1}`,
+        url: `${base}/public/quiz-sessions/${deleteSessionId.value || 1}`,
       }
   }
 }

@@ -42,22 +42,19 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import LeaderboardRow from '@/components/LeaderboardRow.vue'
 import { getQuizSessionStandings } from '@/services/quizSessionService.js'
-import { logRecoverable } from '@/services/logger.js'
+import { showError } from '@/services/notifications.js' 
 
 const router = useRouter()
 const route = useRoute()
 
 const isFinal = computed(() => route.query.isFinal === 'true')
-const nextIndex = computed(() => route.query.nextIndex || 0)
 const sessionId = route.query.sessionId
 
-const timeLeft = ref(3)
 const isLoading = ref(true)
-let timerInterval = null
 
 const players = ref([])
 
@@ -75,15 +72,10 @@ const loadStandings = async () => {
       score: entry.score,
     }))
   } catch (err) {
-    logRecoverable('Failed to load standings', err)
+    showError('Failed to load standings')
   } finally {
     isLoading.value = false
   }
-}
-
-const nextQuestion = () => {
-  if (!sessionId) return
-  router.push({ name: 'Game', params: { sessionId } })
 }
 
 const goToHome = () => {
@@ -92,22 +84,6 @@ const goToHome = () => {
 
 onMounted(async () => {
   await loadStandings()
-
-  // If not final leaderboard, wait with a live countdown
-  if (!isFinal.value) {
-    timerInterval = setInterval(() => {
-      if (timeLeft.value > 0) {
-        timeLeft.value--
-      } else {
-        clearInterval(timerInterval)
-        nextQuestion()
-      }
-    }, 1000)
-  }
-})
-
-onUnmounted(() => {
-  if (timerInterval) clearInterval(timerInterval)
 })
 </script>
 

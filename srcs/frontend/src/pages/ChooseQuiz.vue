@@ -89,7 +89,7 @@
 import ScrollBoxSelectQuiz from '@/components/ScrollBox-SelectQuiz.vue'
 import { listQuizzes, importCsv, importJson, exportQuizJson, exportQuizCsv } from '@/services/quizzes.js'
 import { createQuizSession } from '@/services/quizSessionService.js'
-import { logRecoverable } from '@/services/logger.js'
+import { showError } from '@/services/notifications.js' 
 
 export default {
   data() {
@@ -123,7 +123,7 @@ export default {
       try {
         this.quizzes = await listQuizzes()
       } catch (error) {
-        logRecoverable('Failed to load quizzes', error)
+        showError('Failed to load quizzes')
         this.quizzes = []
       }
     },
@@ -212,7 +212,6 @@ export default {
 .choose-quiz-page {
   flex: 1;
   width: 100%;
-  overflow: hidden;
   background: linear-gradient(135deg, #0f0c29 0%, #302b63 45%, #24243e 100%);
   display: flex;
   flex-direction: column;

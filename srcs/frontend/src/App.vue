@@ -1,5 +1,5 @@
 <template>
-  <BApp class="app-root">
+  <BApp class="app-root" append-toast>
     <Layout>
       <div :class="$route.meta.bodyClass" class="main-wrapper">
         <router-view />
@@ -7,6 +7,14 @@
     </Layout>
   </BApp>
 </template>
+
+<script setup>
+import { useToast } from 'bootstrap-vue-next'
+import { setToastInstance } from '@/services/notifications.js'
+
+const toast = useToast()
+setToastInstance(toast)
+</script>
 
 <style>
 html,

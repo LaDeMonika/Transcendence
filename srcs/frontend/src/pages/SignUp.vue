@@ -67,12 +67,8 @@ const onSubmit = async (event) => {
   errors.value = []
   loading.value = true
   try {
-    const response = await register(form.email, form.password, form.userName)
-    if (response?.value?.errors) {
-      errors.value = response.value.errors
-    } else {
-      await router.push('/login')
-    }
+    await register(form.email, form.password, form.userName)
+    await router.push('/login')
   } catch (error) {
     if (error.response?.data?.errors) {
       errors.value = error.response.data.errors

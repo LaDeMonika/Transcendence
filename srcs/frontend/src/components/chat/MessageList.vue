@@ -34,7 +34,7 @@
 import { ref, watch, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { chatService } from '@/services/chat.js'
 import { onWs, offWs } from '@/services/chatSocket.js'
-import { logRecoverable } from '@/services/logger.js'
+import { showError } from '@/services/notifications.js'
 
 const props = defineProps({
   conversationId: { type: [Number, String], default: null },
@@ -89,7 +89,7 @@ const loadMessages = async (id) => {
     scrollToBottom()
   } catch (err) {
     error.value = 'Failed to load messages: ' + err.message
-    logRecoverable('Failed to load messages', err)
+    showError('Error loading messages.')
   } finally {
     loading.value = false
   }

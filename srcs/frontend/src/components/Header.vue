@@ -18,7 +18,7 @@
         <!-- Main Nav -->
         <div class="collapse navbar-collapse" id="navbarContent">
           <ul class="navbar-nav mx-auto">
-            <template v-if="$route.meta.layout === 'public'">
+            <template v-if="isPublicLayout">
               <li class="nav-item">
                 <router-link class="nav-link-game" to="/privacy_policy">Privacy Policy</router-link>
               </li>
@@ -49,9 +49,8 @@
             </template>
           </ul>
 
-          <!-- Auth Actions -->
           <div class="auth-actions-col">
-            <template v-if="$route.meta.layout === 'public'">
+            <template v-if="isPublicLayout">
               <router-link to="/login" class="btn-game btn-game--outline">Login</router-link>
               <router-link to="/sign_up" class="btn-game btn-game--primary">Sign Up</router-link>
             </template>
@@ -67,10 +66,24 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { setAuthToken } from '@/services/client.js'
+import { isAuthenticated } from '@/services/authState.js'
 
 const router = useRouter()
+
+const isPublicLayout = computed(() => {
+  const routeLayout = router.currentRoute.value.meta.layout
+  if (routeLayout === 'public') {
+    return !isAuthenticated.value
+  }
+  if (routeLayout === 'auth') {
+    return false
+  }
+
+  return !isAuthenticated.value
+})
 
 function logout() {
   setAuthToken(null)

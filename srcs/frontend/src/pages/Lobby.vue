@@ -90,7 +90,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { connect, disconnect, getIsConnected, onWs } from '@/services/wsConnection.js'
 import { joinQuizSession, spectateQuizSession, leaveQuizSession, startQuiz } from '@/services/quizSocket.js'
 import { getQuizSession, getCurrentUser } from '@/services/quizSessionService.js'
-import { logRecoverable } from '@/services/logger.js'
+import { showError } from '@/services/notifications.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -182,7 +182,7 @@ const setupWsListeners = () => {
   }))
 
   wsUnsubscribers.push(onWs('error', (data) => {
-    logRecoverable('Lobby websocket error', data.error)
+    showError('WebSocket error in lobby.')
     isStarting.value = false
   }))
 }
@@ -238,7 +238,7 @@ onMounted(async () => {
       return
     }
   } catch (err) {
-    logRecoverable('Failed to load lobby session', err)
+    showError('Failed to load session.')
   }
 
   setupWsListeners()
@@ -262,7 +262,6 @@ onBeforeUnmount(() => {
 .lobby-page {
   flex: 1;
   width: 100%;
-  overflow: hidden;
   background: linear-gradient(135deg, #0f0c29 0%, #302b63 45%, #24243e 100%);
   display: flex;
   flex-direction: column;

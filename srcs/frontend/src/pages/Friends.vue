@@ -174,15 +174,15 @@
             </div>
 
             <div class="friend-list">
-              <div v-if="searchResults === null" class="empty-state">
+              <div v-if="filteredSearchResults === null" class="empty-state">
                 <p>Enter a username to find people.</p>
               </div>
-              <div v-else-if="searchResults.length === 0" class="empty-state">
+              <div v-else-if="filteredSearchResults.length === 0" class="empty-state">
                 <p>No users found matching "{{ searchQuery }}".</p>
               </div>
               <div
                 v-else
-                v-for="user in searchResults"
+                v-for="user in filteredSearchResults"
                 :key="user.id"
                 class="friend-card"
               >
@@ -254,10 +254,15 @@ const activeTab = ref('friends')
 const searchQuery = ref('')
 const searchResults = ref(null)
 const searchLoading = ref(false)
+const currentUser = ref(null)
 
 const friends = computed(() => allFriends.value.filter((f) => f.status === 'accepted'))
 const requests = computed(() => allFriends.value.filter((f) => f.status === 'pending'))
 const sent = computed(() => allFriends.value.filter((f) => f.status === 'requested'))
+const filteredSearchResults = computed(() => {
+  if (!searchResults.value) return null
+  return searchResults.value.filter((user) => user.id !== currentUser.value?.id)
+})
 const friendStatusMap = computed(() => {
   const map = {}
   allFriends.value.forEach((f) => { map[f.id] = f.status })
@@ -344,6 +349,10 @@ const handleRemove = async (friendId) => {
     actionLoading.value = null
   }
 }
+
+chatService.getMe().then((me) => {
+  currentUser.value = me
+}).catch(() => {})
 
 loadFriends()
 </script>
