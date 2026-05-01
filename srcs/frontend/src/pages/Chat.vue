@@ -200,15 +200,14 @@ const closeConversation = () => {
 
 .chat-container {
   width: 100%;
-  height: 100%;
   display: flex;
+  flex: 1 1 auto;
 }
 
 /* ─── Desktop View ───────────────────────────────────────── */
 .desktop-chat {
   display: flex;
   width: 100%;
-  height: 100%;
 }
 
 .chat-sidebar {

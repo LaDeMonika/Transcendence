@@ -30,10 +30,10 @@
           <button type="submit" class="btn-game btn-game--start w-100">Login</button>
         </div>
 
-        <div class="forgot-link mt-3">
+        <!-- <div class="forgot-link mt-3">
           <ForgotPasswordModal @show-reset-password-modal="resetPasswordModal = true"/>
           <ResetPasswordModal v-model="resetPasswordModal" />
-        </div>
+        </div> -->
 
         <div class="legal-text mt-4">
           By logging in, you agree to our <router-link to="/privacy_policy" class="auth-link">Privacy Policy.</router-link>

@@ -262,7 +262,6 @@ onBeforeUnmount(() => {
 .lobby-page {
   flex: 1;
   width: 100%;
-  overflow: hidden;
   background: linear-gradient(135deg, #0f0c29 0%, #302b63 45%, #24243e 100%);
   display: flex;
   flex-direction: column;
