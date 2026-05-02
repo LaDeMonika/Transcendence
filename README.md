@@ -3,13 +3,12 @@ of the 42 curriculum by [**Monika Simic** - PO & Full-stack](https://profile.int
 # Transcendence
 
 ## Description
-A real-time multiplayer trivia platform where players pick categories, battle through quick rounds, and advance across tournaments. We are building a web-first experience for 3+ players with matchmaking, gamified rewards, and progression. Live leaderboards, achievements, and an analytics dashboard will keep competition lively and help us tune questions and balance over time.
+A real-time multiplayer trivia platform where players pick categories and battle through quick rounds. We are building a web-first experience for 3+ players. A points-based award system, live leaderboards, achievements, and an analytics dashboard will keep competition lively and help us tune questions and balance over time.
 
 ### Key Features
 - **Real-Time Multiplayer:** Engage in trivia battles with 3 or more players simultaneously.
-- **Matchmaking & Tournaments:** Advanced matchmaking to pair players of similar skills, and tournament progression.
-- **Gamified Rewards & Progression:** Earn rewards, unlock achievements, and progress through levels.
-- **Live Leaderboards:** Real-time updates to see where you stand globally.
+- **Gamified Points System:** Earn points as rewards for winning and participating in trivia rounds.
+- **Live Leaderboards:** Real-time updates to see where you stand.
 - **Analytics Dashboard:** Insights to tune questions and maintain game balance.
 
 ## Instructions
