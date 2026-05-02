@@ -5,6 +5,6 @@ cd build
 npm ci --omit="dev"
 cat /home/node/app/.env >> /home/node/app/build/.env
 node ace migration:run
-node ace db:seed
+#node ace db:seed
 node bin/server.js
 
