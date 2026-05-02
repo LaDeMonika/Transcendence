@@ -191,7 +191,7 @@
       </div>
 
       <div class="muted">REST sends: Authorization: Bearer &lt;token&gt;</div>
-      <div class="muted">WS connects to: /ws?token=&lt;token&gt;</div>
+      <div class="muted">WS connects to: /ws with token auth</div>
     </div>
 
     <div class="card">
@@ -475,7 +475,7 @@
 
       intentionalClose = false
       const finalWsUrl = buildWsUrl()
-      log('WS CONNECT', finalWsUrl)
+      log('WS CONNECT', 'Opening websocket connection')
 
       socket = new WebSocket(finalWsUrl)
 

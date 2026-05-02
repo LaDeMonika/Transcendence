@@ -45,7 +45,7 @@ function openSocket() {
   intentionalClose = false
 
   const wsUrl = buildWebSocketUrl()
-  console.log(`WebSocket connecting to: ${wsUrl}`)
+  console.log('WebSocket connecting')
 
   ws = new WebSocket(wsUrl)
 
