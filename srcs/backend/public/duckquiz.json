@@ -1,0 +1,105 @@
+{
+  "title": "Duck Quiz Showcase",
+  "questions": [
+    {
+      "question": "What type of animal is a duck?",
+      "answers": {
+        "A": "Mammal",
+        "B": "Bird",
+        "C": "Fish",
+        "D": "Reptile"
+      },
+      "correctAnswer": "B"
+    },
+    {
+      "question": "What helps ducks swim efficiently in water?",
+      "answers": {
+        "A": "Sharp claws",
+        "B": "Long tails",
+        "C": "Webbed feet",
+        "D": "Large ears"
+      },
+      "correctAnswer": "C"
+    },
+    {
+      "question": "What sound is most commonly associated with ducks?",
+      "answers": {
+        "A": "Roar",
+        "B": "Quack",
+        "C": "Buzz",
+        "D": "Howl"
+      },
+      "correctAnswer": "B"
+    },
+    {
+      "question": "Where do many ducks build their nests?",
+      "answers": {
+        "A": "In deserts",
+        "B": "On roads",
+        "C": "Near water and reeds",
+        "D": "Inside caves"
+      },
+      "correctAnswer": "C"
+    },
+    {
+      "question": "What covers a duck's body and helps keep it warm?",
+      "answers": {
+        "A": "Scales",
+        "B": "Feathers",
+        "C": "Fur",
+        "D": "Shell"
+      },
+      "correctAnswer": "B"
+    },
+    {
+      "question": "Why do ducks often spread oil on their feathers?",
+      "answers": {
+        "A": "To change color",
+        "B": "To become heavier",
+        "C": "To stay waterproof",
+        "D": "To attract insects"
+      },
+      "correctAnswer": "C"
+    },
+    {
+      "question": "What is a baby duck called?",
+      "answers": {
+        "A": "Duckling",
+        "B": "Chicklet",
+        "C": "Pup",
+        "D": "Calf"
+      },
+      "correctAnswer": "A"
+    },
+    {
+      "question": "Which of these foods do wild ducks commonly eat?",
+      "answers": {
+        "A": "Seaweed, insects, and seeds",
+        "B": "Only meat",
+        "C": "Only tree bark",
+        "D": "Only cheese"
+      },
+      "correctAnswer": "A"
+    },
+    {
+      "question": "What is a male duck commonly called?",
+      "answers": {
+        "A": "Buck",
+        "B": "Drake",
+        "C": "Ram",
+        "D": "Stallion"
+      },
+      "correctAnswer": "B"
+    },
+    {
+      "question": "Why do some ducks migrate seasonally?",
+      "answers": {
+        "A": "To find warmer weather and food",
+        "B": "To learn new songs",
+        "C": "To avoid swimming",
+        "D": "To sleep underground"
+      },
+      "correctAnswer": "A"
+    }
+  ]
+}

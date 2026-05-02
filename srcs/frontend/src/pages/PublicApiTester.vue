@@ -142,7 +142,8 @@
 import { ref, computed } from 'vue'
 
 const baseUrl = ref(import.meta.env.VITE_BACKEND_URL)
-const apiKey = ref('transc-public-demo-key-2026')
+//const apiKey = ref('transc-public-demo-key-2026')
+const apiKey = ref('your-api-key-here')
 
 const quizId = ref(1)
 const userId = ref(1)

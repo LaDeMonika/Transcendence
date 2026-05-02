@@ -424,7 +424,7 @@
 
       const url = `${getWsBase()}?token=${encodeURIComponent(token)}`
       replaceEmptyLog('socketLog')
-      appendLog('socketLog', 'WS CONNECT', url)
+      appendLog('socketLog', 'WS CONNECT', 'Opening websocket connection')
 
       ws = new WebSocket(url)
       setWsStatus('Connecting', false)
