@@ -8,7 +8,7 @@
         <span class="hero-username">{{ username || 'Player' }}</span>
         <span class="hero-wave">👋</span>
       </h1>
-      <p class="hero-subtitle">Choose your battle mode and prove your knowledge!</p>
+      <p class="hero-subtitle">Prove your knowledge!</p>
     </div>
 
     <!-- Game Mode Cards -->
@@ -28,7 +28,7 @@
       <div class="mode-card mode-card--multi">
         <div class="mode-card__icon">⚡</div>
         <div class="mode-card__glow"></div>
-        <h2 class="mode-card__title">MULTIPLAYER</h2>
+        <h2 class="mode-card__title">PLAY!</h2>
         <p class="mode-card__desc">Play with others</p>
         <router-link to="/multiplayer-create-join-room" class="mode-card__link">
           <button class="btn-game btn-game--multi">LET'S GO!</button>
