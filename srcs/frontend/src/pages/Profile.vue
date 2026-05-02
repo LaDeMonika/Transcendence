@@ -82,8 +82,8 @@
       <!-- Sections Grid -->
       <div class="sections-grid">
 
-        <!-- Avatar Upload -->
-        <section id="avatar" class="profile-section">
+        <!-- Avatar Upload (Private Only) -->
+        <section v-if="isPrivate" id="avatar" class="profile-section">
           <div class="section-card">
             <h4 class="section-title"><span class="icon">🖼️</span> Avatar Settings</h4>
             <p class="section-desc">Upload a new profile picture (PNG/JPG, max 5MB).</p>
@@ -221,7 +221,7 @@
           </div>
         </section>
 
-        <!-- Danger Zone -->
+        <!-- Danger Zone (Private Only) -->
         <section v-if="isPrivate" id="delete-account" class="profile-section full-width">
           <div class="section-card section-card--danger">
             <h4 class="section-title text-danger"><span class="icon">⚠️</span> Danger Zone</h4>
@@ -272,8 +272,6 @@ const friendStatus = ref(null) // null | 'pending' | 'requested' | 'accepted'
 const loadingFriendAction = ref(false)
 
 const tabs = [
-  { id: 'avatar', icon: '👤', label: 'Avatar' },
-  { id: 'password', icon: '🔒', label: 'Password' },
   { id: 'history', icon: '🕘', label: 'History' },
   { id: 'stats', icon: '📊', label: 'Stats' },
   { id: 'leaderboard', icon: '🏆', label: 'Leaderboard' },
@@ -287,6 +285,8 @@ const isPrivate = computed(() => !route.params.userId)
 
 if (isPrivate.value) {
   tabs.push({ id: 'delete-account', icon: '❌', label: 'Delete' })
+  tabs.unshift({ id: 'password', icon: '🔒', label: 'Password' })
+  tabs.unshift({ id: 'avatar', icon: '👤', label: 'Avatar' })
 }
 
 const avatarUrl = computed(() => {
