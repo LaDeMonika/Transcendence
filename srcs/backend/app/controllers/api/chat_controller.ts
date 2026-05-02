@@ -3,6 +3,7 @@ import Conversation from '#models/chatsystem/Conversation'
 import Message from '#models/chatsystem/Message'
 import User from '#models/user'
 import ConversationParticipant from '#models/chatsystem/ConversationParticipant'
+import { chatRooms } from '#services/chatroom'
 import { CHAT_MESSAGE_MAX_LENGTH, getChatMessageLengthError } from '#services/chat_message'
 import { createConversationValidator } from '#validators/conversation'
 import '#validators/conversation' // Ensure the validator is registered
@@ -121,7 +122,25 @@ export default class ChatController {
             })
         }
 
+        const remainingParticipants = await ConversationParticipant.query()
+            .where('conversationId', conversationId)
+            .whereNot('userId', otherUserId)
+            .select('userId')
+
         await participant.delete()
+
+        const payload = {
+            type: 'chat:conversation:left',
+            conversationId,
+            leftUserId: otherUserId,
+        }
+
+        // Notify remaining participants and the removed user
+        for (const row of remainingParticipants) {
+            chatRooms.broadcastToUser(row.userId, payload)
+        }
+        chatRooms.broadcastToUser(otherUserId, payload)
+
         return { message: 'User removed from conversation' }
     }
 
@@ -219,6 +238,19 @@ export default class ChatController {
         await ConversationParticipant.create({
             conversationId: newConversation.id,
             userId: otherUserId,
+        })
+
+        chatRooms.broadcastToUser(otherUserId, {
+            type: 'chat:conversation:created',
+            conversation: {
+                id: newConversation.id,
+                otherParticipants: [{
+                    id: user.id,
+                    email: user.email,
+                    userName: user.userName,
+                }],
+                updatedAt: newConversation.updatedAt,
+            },
         })
         
         return newConversation

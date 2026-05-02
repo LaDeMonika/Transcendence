@@ -94,6 +94,8 @@ router.ws(
 
   console.log('WS authed user', user.id)
 
+  chatRooms.addUser(user.id, ws)
+
   ws.send(JSON.stringify({ type: 'ws:connected', userId: user.id, socketId: ws.id }))
     // Auto-join all conversation rooms the user is part of:
     const convIds = await ConversationParticipant.query()

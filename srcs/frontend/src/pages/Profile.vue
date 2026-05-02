@@ -1,7 +1,7 @@
 <template>
   <div class="profile-page">
     <div class="profile-container">
-      
+
       <!-- Hero Header -->
       <div class="hero-header text-center mb-5">
         <div class="hero-badge">{{ isPrivate ? '👤 MY ACCOUNT' : '🌐 PUBLIC PROFILE' }}</div>
@@ -28,11 +28,11 @@
             <div v-else class="avatar-placeholder">?</div>
             <div class="avatar-glow"></div>
           </div>
-          
+
           <div class="info-text">
             <h2 v-if="profile" class="profile-name">{{ profile.userName }}</h2>
             <p v-if="profile" class="profile-id">ID: {{ profile.id }}</p>
-            
+
             <div v-if="!isPrivate && profile" class="social-actions mt-3">
               <button
                 v-if="friendStatus === null"
@@ -81,7 +81,7 @@
 
       <!-- Sections Grid -->
       <div class="sections-grid">
-        
+
         <!-- Avatar Upload -->
         <section id="avatar" class="profile-section">
           <div class="section-card">
@@ -141,13 +141,14 @@
           <div class="section-card">
             <h4 class="section-title"><span class="icon">🔒</span> Security</h4>
             <BForm @submit.prevent="handlePasswordChange" class="auth-form">
+              <input type="text" autocomplete="username" :value="profile?.userName" style="display:none" aria-hidden="true" />
               <div class="form-group mb-3">
                 <label class="form-label">Current Password</label>
-                <BFormInput type="password" required v-model="passwordForm.oldPassword" class="game-input" />
+                <BFormInput type="password" required v-model="passwordForm.oldPassword" class="game-input" autocomplete="current-password" />
               </div>
               <div class="form-group mb-3">
                 <label class="form-label">New Password</label>
-                <BFormInput type="password" required v-model="passwordForm.newPassword" class="game-input" />
+                <BFormInput type="password" required v-model="passwordForm.newPassword" class="game-input" autocomplete="new-password" />
               </div>
               <button type="submit" class="btn-game btn-game--start w-100">Update Password</button>
             </BForm>
@@ -201,7 +202,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(player, index) in leaderboard" :key="player.id" 
+                  <tr v-for="(player, index) in leaderboard" :key="player.id"
                       :class="{ 'row-current': isPrivate && profile?.id === player.id }">
                     <td>
                       <span class="rank-badge" :class="`rank-${index + 1}`">#{{ index + 1 }}</span>
@@ -290,10 +291,8 @@ if (isPrivate.value) {
 
 const avatarUrl = computed(() => {
   if (!profile.value) return ''
-  // return '../public/host.jpg'
   const path = '/api/profile/getAvatar/' + (profile.value.avatarUrl || 'default.png')
   return path;
-  // return `/api/profile/getAvatar/${profile.value.id}`
 })
 
 const accuracy = computed(() => {
@@ -502,7 +501,6 @@ watch(() => route.params.userId, loadProfile, { immediate: true })
 .profile-page {
   flex: 1;
   width: 100%;
-  min-height: 100vh;
   background: linear-gradient(135deg, #0f0c29 0%, #302b63 45%, #24243e 100%);
   display: flex;
   flex-direction: column;
@@ -582,6 +580,19 @@ watch(() => route.params.userId, loadProfile, { immediate: true })
 
 .nav-pill:hover {
   background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 767px) {
+  .profile-nav {
+    flex-direction: column;
+    gap: 0.4rem;
+    border-radius: 30px;
+  }
+
+  .nav-pill {
+    justify-content: center;
+    padding: 0.7rem 1rem;
+  }
 }
 
 /* ─── Main Card ───────────────────────────────────────────── */

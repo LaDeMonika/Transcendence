@@ -2,7 +2,7 @@
   <div class="auth-page">
     <div class="auth-card">
       <div class="card-glow"></div>
-      
+
       <div class="hero-badge">🎮 QUIZ GAME</div>
       <h1 class="hero-title">Join the Game</h1>
       <p class="hero-subtitle">Create an account to start competing</p>
@@ -18,17 +18,17 @@
       <BForm @submit="onSubmit" class="auth-form">
         <div class="form-group">
           <label class="form-label">Nickname</label>
-          <BFormInput id="floatingNickname" type="text" required v-model="form.userName" placeholder="CoolPlayer42" class="game-input" />
+          <BFormInput id="floatingNickname" type="text" required v-model="form.userName" placeholder="CoolPlayer42" class="game-input" autocomplete="username" />
         </div>
 
         <div class="form-group mt-3">
           <label class="form-label">Email address</label>
-          <BFormInput id="floatingEmail" type="email" required v-model="form.email" placeholder="email@example.com" class="game-input" />
+          <BFormInput id="floatingEmail" type="email" required v-model="form.email" placeholder="email@example.com" class="game-input" autocomplete="email" />
         </div>
-        
+
         <div class="form-group mt-3">
           <label class="form-label">Password</label>
-          <BFormInput id="floatingPassword" type="password" required v-model="form.password" placeholder="••••••••" class="game-input" />
+          <BFormInput id="floatingPassword" type="password" required v-model="form.password" placeholder="••••••••" class="game-input" autocomplete="new-password" />
         </div>
 
         <div class="auth-actions mt-4">
@@ -86,7 +86,6 @@ const onSubmit = async (event) => {
 .auth-page {
   flex: 1;
   width: 100%;
-  min-height: 100vh;
   background: linear-gradient(135deg, #0f0c29 0%, #302b63 45%, #24243e 100%);
   display: flex;
   flex-direction: column;
@@ -110,7 +109,6 @@ const onSubmit = async (event) => {
   flex-direction: column;
   align-items: center;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
 }
 
 .card-glow {

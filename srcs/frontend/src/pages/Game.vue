@@ -6,13 +6,13 @@
         <div class="status-badge" :class="{ 'status-badge--reveal': sessionState === 'reveal' }">
           {{ sessionState === 'finished' ? '🏁 Quiz Complete' : currentQuestion ? '❓ Question' : '⏳ Waiting...' }}
         </div>
-        
+
         <div v-if="sessionState === 'question'" class="timer-display" :class="{ 'timer-display--urgent': timeLeft <= 5 }">
           <span class="timer-icon">⏱️</span>
           <span class="timer-value">{{ timeLeft }}s</span>
         </div>
       </div>
-      
+
       <div class="header-meta">
         <span class="role-badge" :class="quizRole === 'spectator' ? 'role-badge--spectator' : 'role-badge--player'">
           {{ quizRole === 'spectator' ? '👁️ Spectator Mode' : '🎮 Player Mode' }}
@@ -74,14 +74,14 @@
         <div v-if="currentQuestion" class="question-card">
           <div class="card-glow"></div>
           <h2 class="question-text">{{ currentQuestion.text }}</h2>
-          
+
           <div class="options-grid">
             <button
               v-for="(option, index) in currentQuestion.options"
               :key="index"
               @click="selectAnswer(index)"
               class="option-btn"
-              :class="{ 
+              :class="{
                 'option-btn--selected': selectedAnswer === index,
                 'option-btn--disabled': alreadyAnswered || quizRole === 'spectator'
               }"
@@ -456,7 +456,6 @@ onUnmounted(() => {
 .game-page {
   flex: 1;
   width: 100%;
-  min-height: 100vh;
   background: linear-gradient(135deg, #0f0c29 0%, #302b63 45%, #24243e 100%);
   display: flex;
   flex-direction: column;

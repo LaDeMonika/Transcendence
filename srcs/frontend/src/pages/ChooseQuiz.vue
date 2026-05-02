@@ -69,11 +69,6 @@
       </template>
     </BModal>
 
-    <!-- Export JSON preview modal -->
-    <BModal v-model="showExportModal" title="Quiz JSON Export" size="lg" :hide-footer="true">
-      <pre class="bg-dark text-light rounded p-3" style="white-space: pre-wrap; word-break: break-word; max-height: 60vh; overflow: auto;">{{ exportPreview }}</pre>
-    </BModal>
-
     <!-- Back / Start -->
     <div class="nav-buttons">
       <button class="btn-game btn-game--back" @click="goBack('/home')">← Back</button>
@@ -101,8 +96,6 @@ export default {
       importMessage: '',
       importSuccess: false,
       importFormat: 'csv',
-      showExportModal: false,
-      exportPreview: '',
     }
   },
   async mounted() {
@@ -167,8 +160,14 @@ export default {
       if (!id) return
       try {
         const data = await exportQuizJson(id)
-        this.exportPreview = JSON.stringify(data, null, 2)
-        this.showExportModal = true
+        const json = JSON.stringify(data, null, 2)
+        const blob = new Blob([json], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `quiz-${id}.json`
+        a.click()
+        URL.revokeObjectURL(url)
       } catch (error) {
         logRecoverable('Failed to export JSON', error)
       }

@@ -88,14 +88,16 @@ export default {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
   gap: 14px;
+
+  @media screen and (min-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 /* ─── Quiz Card ───────────────────────────────────────────── */
 .quiz-card {
   position: relative;
-  aspect-ratio: 1 / 0.5;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -110,6 +112,10 @@ export default {
   cursor: pointer;
   overflow: hidden;
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+
+  @media screen and (min-width: 768px) {
+    aspect-ratio: 1 / 0.5;
+  }
 }
 
 .quiz-card:hover {

@@ -9,9 +9,8 @@
         <span v-else class="text-muted fw-bold fs-5">{{ rank }}</span>
       </div>
       
-      <!-- Circular Photo -->
       <img 
-        :src="player.avatar" 
+        :src="avatarUrl" 
         :alt="player.name + ' avatar'" 
         class="rounded-circle me-3 border" 
         style="width: 48px; height: 48px; object-fit: cover;"
@@ -29,7 +28,9 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue';
+
+const props = defineProps({
   player: {
     type: Object,
     required: true
@@ -39,6 +40,8 @@ defineProps({
     required: true
   }
 })
+
+const avatarUrl = computed(() => '/api/profile/getAvatar/' + (props.player.avatarUrl || 'default.png'))
 </script>
 
 <style scoped>

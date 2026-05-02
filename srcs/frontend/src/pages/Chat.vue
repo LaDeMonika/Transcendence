@@ -1,7 +1,7 @@
 <template>
   <div class="chat-page">
     <div class="chat-container">
-      
+
       <!-- Mobile View -->
       <div v-if="isMobile" class="mobile-chat">
         <div v-if="!activeConversation" class="chat-list-view">
@@ -12,7 +12,7 @@
             </button>
           </div>
           <div class="list-wrapper">
-            <ChatList ref="chatListRef" :selected-id="activeConversation?.id" @select="openConversation" />
+            <ChatList ref="chatListRef" :selected-id="activeConversation?.id" :current-user="currentUser" @select="openConversation" />
           </div>
         </div>
 
@@ -22,7 +22,7 @@
               <span class="icon">⬅️</span>
             </button>
             <div class="header-info">
-              <h6>{{ activeConversation.otherParticipants?.map(p => p.userName).join(', ') || activeConversation.id }}</h6>
+              <h6>{{ activeConversation.otherParticipants?.length ? activeConversation.otherParticipants.map(p => p.userName).join(', ') : currentUser?.userName || activeConversation.id }}</h6>
             </div>
             <div class="header-actions">
               <button class="action-icon" @click="showMembersModal = true">⚙️</button>
@@ -47,7 +47,7 @@
             </button>
           </div>
           <div class="sidebar-content">
-            <ChatList ref="chatListRef" :selected-id="activeConversation?.id" @select="openConversation" />
+            <ChatList ref="chatListRef" :selected-id="activeConversation?.id" :current-user="currentUser" @select="openConversation" />
           </div>
         </div>
 
@@ -57,7 +57,7 @@
             <div class="window-header">
               <div class="participant-info">
                 <span class="status-dot online"></span>
-                <h6 class="mb-0">{{ activeConversation.otherParticipants?.map(p => p.userName).join(', ') || activeConversation.id }}</h6>
+                <h6 class="mb-0">{{ activeConversation.otherParticipants?.length ? activeConversation.otherParticipants.map(p => p.userName).join(', ') : currentUser?.userName }}</h6>
               </div>
               <div class="window-actions">
                 <button class="btn-game btn-game--secondary btn-sm" @click="showMembersModal = true">
@@ -104,7 +104,7 @@ import ChatMembersModal from "@/components/chat/ChatMembersModal.vue";
 import ChatList from "@/components/chat/ChatList.vue";
 import MessageForm from "@/components/chat/MessageForm.vue";
 import MessageList from "@/components/chat/MessageList.vue";
-import { connectSocket, disconnectSocket, sendWs } from '@/services/chatSocket.js'
+import { connectSocket, disconnectSocket, sendWs, onWs, offWs } from '@/services/chatSocket.js'
 import { chatService } from '@/services/chat.js'
 
 const showCreateModal = ref(false)
@@ -112,29 +112,28 @@ const showMembersModal = ref(false)
 const leaving = ref(false)
 const chatListRef = ref(null)
 const isMobile = ref(window.innerWidth < 768)
+const currentUser = ref(null)
 
 const updateIsMobile = () => {
   isMobile.value = window.innerWidth < 768
 }
 
-onMounted(() => {
+onMounted(async () => {
   connectSocket()
+  currentUser.value = await chatService.getMe()
   window.addEventListener('resize', updateIsMobile)
-  
-  // CRITICAL: Disable parent scrolling for the chat page
-  document.body.style.overflow = 'hidden'
-  const scrollableContent = document.querySelector('.scrollable-content')
-  if (scrollableContent) scrollableContent.style.overflow = 'hidden'
+
+  onWs('chat:conversation:created', handleNewConversation)
+  onWs('chat:conversation:left', handleConversationLeft)
+  onWs('chat:message:created', handleMessageInUnknownConversation)
 })
 
 onUnmounted(() => {
   disconnectSocket()
   window.removeEventListener('resize', updateIsMobile)
-  
-  // Re-enable parent scrolling
-  document.body.style.overflow = ''
-  const scrollableContent = document.querySelector('.scrollable-content')
-  if (scrollableContent) scrollableContent.style.overflow = ''
+
+  offWs('chat:conversation:created', handleNewConversation)
+  offWs('chat:conversation:left', handleConversationLeft)
 })
 
 const activeConversation = ref(null)
@@ -178,8 +177,35 @@ const leaveConversation = async () => {
   }
 }
 
-const closeConversation = () => {
-  activeConversation.value = null
+const handleNewConversation = (payload) => {
+  chatListRef.value?.loadConversations()
+}
+
+const handleConversationLeft = (payload) => {
+  chatListRef.value?.loadConversations()
+
+  if (activeConversation.value?.id === payload.conversationId) {
+    if (payload.leftUserId === currentUser.value?.id) {
+      activeConversation.value = null
+      return
+    }
+
+    activeConversation.value = {
+      ...activeConversation.value,
+      otherParticipants: (activeConversation.value.otherParticipants || []).filter(
+        (participant) => participant.id !== payload.leftUserId
+      ),
+    }
+  }
+}
+
+const handleMessageInUnknownConversation = (payload) => {
+  const convId = payload.conversationId
+  const knownConversations = chatListRef.value?.conversations || []
+  const isKnown = knownConversations.some(c => c.id === convId)
+  if (!isKnown) {
+    chatListRef.value?.loadConversations()
+  }
 }
 </script>
 
@@ -188,7 +214,6 @@ const closeConversation = () => {
 .chat-page {
   flex: 1;
   width: 100%;
-  /* We use height: 100% since we're disabling parent scroll */
   height: 100%;
   background: linear-gradient(135deg, #0f0c29 0%, #302b63 45%, #24243e 100%);
   display: flex;
@@ -201,13 +226,16 @@ const closeConversation = () => {
 .chat-container {
   width: 100%;
   display: flex;
-  flex: 1 1 auto;
+  flex: 1;
+  min-height: 0;
 }
 
 /* ─── Desktop View ───────────────────────────────────────── */
 .desktop-chat {
   display: flex;
   width: 100%;
+  height: 100%;
+  min-height: 0;
 }
 
 .chat-sidebar {
@@ -247,6 +275,7 @@ const closeConversation = () => {
   flex-direction: column;
   position: relative;
   background: rgba(0, 0, 0, 0.1);
+  min-height: 0;
 }
 
 .window-header {
@@ -296,6 +325,9 @@ const closeConversation = () => {
 .mobile-chat {
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .chat-list-view {
@@ -324,7 +356,8 @@ const closeConversation = () => {
 .chat-active-view {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
 }
 
 .chat-header {
