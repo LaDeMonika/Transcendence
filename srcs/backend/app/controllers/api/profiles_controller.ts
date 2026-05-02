@@ -226,7 +226,7 @@ export default class ProfilesController {
         })
     }
 
-    async leaderboard({ request, response }:HttpContext) {
+    async leaderboard({ response }:HttpContext) {
         try {
             const leaderboard = await db
                 .from('users')
