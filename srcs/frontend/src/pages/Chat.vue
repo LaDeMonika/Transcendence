@@ -104,7 +104,7 @@ import ChatMembersModal from "@/components/chat/ChatMembersModal.vue";
 import ChatList from "@/components/chat/ChatList.vue";
 import MessageForm from "@/components/chat/MessageForm.vue";
 import MessageList from "@/components/chat/MessageList.vue";
-import { connectSocket, disconnectSocket, sendWs } from '@/services/chatSocket.js'
+import { connectSocket, disconnectSocket, sendWs, onWs, offWs } from '@/services/chatSocket.js'
 import { chatService } from '@/services/chat.js'
 
 const showCreateModal = ref(false)
@@ -122,11 +122,18 @@ onMounted(async () => {
   connectSocket()
   currentUser.value = await chatService.getMe()
   window.addEventListener('resize', updateIsMobile)
+
+  onWs('chat:conversation:created', handleNewConversation)
+  onWs('chat:conversation:left', handleConversationLeft)
+  onWs('chat:message:created', handleMessageInUnknownConversation)
 })
 
 onUnmounted(() => {
   disconnectSocket()
   window.removeEventListener('resize', updateIsMobile)
+
+  offWs('chat:conversation:created', handleNewConversation)
+  offWs('chat:conversation:left', handleConversationLeft)
 })
 
 const activeConversation = ref(null)
@@ -170,8 +177,35 @@ const leaveConversation = async () => {
   }
 }
 
-const closeConversation = () => {
-  activeConversation.value = null
+const handleNewConversation = (payload) => {
+  chatListRef.value?.loadConversations()
+}
+
+const handleConversationLeft = (payload) => {
+  chatListRef.value?.loadConversations()
+
+  if (activeConversation.value?.id === payload.conversationId) {
+    if (payload.leftUserId === currentUser.value?.id) {
+      activeConversation.value = null
+      return
+    }
+
+    activeConversation.value = {
+      ...activeConversation.value,
+      otherParticipants: (activeConversation.value.otherParticipants || []).filter(
+        (participant) => participant.id !== payload.leftUserId
+      ),
+    }
+  }
+}
+
+const handleMessageInUnknownConversation = (payload) => {
+  const convId = payload.conversationId
+  const knownConversations = chatListRef.value?.conversations || []
+  const isKnown = knownConversations.some(c => c.id === convId)
+  if (!isKnown) {
+    chatListRef.value?.loadConversations()
+  }
 }
 </script>
 

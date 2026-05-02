@@ -47,7 +47,7 @@ chatService.getMe().then((u) => { currentUser.value = u }).catch(() => {})
 const senderMap = computed(() => {
   const map = {}
   for (const p of props.conversation?.otherParticipants ?? []) {
-    map[p.id] = p.email
+    map[p.id] = p.userName
   }
   return map
 })

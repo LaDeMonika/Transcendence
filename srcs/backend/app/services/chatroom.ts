@@ -2,6 +2,7 @@
 import type { WebSocketContext } from 'adonisjs-websocket'
 
 type ConversationId = number
+type UserId = number
 type WsConn = WebSocketContext['ws'] // websocket connection object, has .id and .send() method 
 
 export class ChatRooms {
@@ -11,6 +12,21 @@ export class ChatRooms {
 
   // every socket ID -> set of conversation IDs
   private memberships = new Map<WsConn, Set<ConversationId>>()
+
+  // user ID -> set of sockets
+  private userSockets = new Map<UserId, Set<WsConn>>()
+
+  addUser(userId: UserId, ws: WsConn) {
+    if (!this.userSockets.has(userId)) this.userSockets.set(userId, new Set())
+    this.userSockets.get(userId)!.add(ws)
+  }
+
+  removeUser(ws: WsConn) {
+    for (const [userId, sockets] of this.userSockets) {
+      sockets.delete(ws)
+      if (sockets.size === 0) this.userSockets.delete(userId)
+    }
+  }
 
   join(conversationId: number, ws: WsConn) {
     if (!this.rooms.has(conversationId)) this.rooms.set(conversationId, new Set())
@@ -37,6 +53,7 @@ export class ChatRooms {
     }
 
     this.memberships.delete(ws)
+    this.removeUser(ws)
   }
 
   broadcastToConversation(conversationId: number, payload: unknown) {
@@ -50,6 +67,21 @@ export class ChatRooms {
         ws.send(data)
       } catch {
         room.delete(ws)
+      }
+    }
+  }
+
+  broadcastToUser(userId: UserId, payload: unknown) {
+    const sockets = this.userSockets.get(userId)
+    if (!sockets) return
+
+    const data = JSON.stringify(payload)
+
+    for (const ws of sockets) {
+      try {
+        ws.send(data)
+      } catch {
+        sockets.delete(ws)
       }
     }
   }
