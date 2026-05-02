@@ -49,8 +49,24 @@ export default class UserController {
     // DELETE /api/user
     public async destroy({ auth }: HttpContext) {
         const user = await auth.authenticate() as User
-        await user.delete()
-        return { message: 'User deleted successfully' }
+        const trx = await db.transaction()
+
+        try {
+            await trx
+                .from('friends')
+                .where('user_id', user.id)
+                .orWhere('friend_id', user.id)
+                .delete()
+
+            user.useTransaction(trx)
+            await user.delete()
+
+            await trx.commit()
+            return { message: 'User deleted successfully' }
+        } catch (error) {
+            await trx.rollback()
+            throw error
+        }
     }
 
     // GET /api/user/:id/stats
