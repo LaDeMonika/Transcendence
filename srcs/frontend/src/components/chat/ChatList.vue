@@ -18,7 +18,7 @@
         </div>
         <div class="item-content">
           <div class="item-name">
-            {{ conv.otherParticipants?.map(p => p.userName).join(', ') || 'Group Chat #' + conv.id }}
+            {{ conv.otherParticipants?.map(p => p.userName).join(', ') || currentUser?.userName }}
           </div>
           <div class="item-status">Active conversation</div>
         </div>
@@ -34,7 +34,8 @@ import { chatService } from '@/services/chat.js'
 import { showError } from '@/services/notifications.js'
 
 const props = defineProps({
-  selectedId: { type: [Number, String], default: null }
+  selectedId: { type: [Number, String], default: null },
+  currentUser: { type: Object, default: null }
 })
 
 const emit = defineEmits(['select'])

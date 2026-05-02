@@ -12,7 +12,7 @@
             </button>
           </div>
           <div class="list-wrapper">
-            <ChatList ref="chatListRef" :selected-id="activeConversation?.id" @select="openConversation" />
+            <ChatList ref="chatListRef" :selected-id="activeConversation?.id" :current-user="currentUser" @select="openConversation" />
           </div>
         </div>
 
@@ -47,7 +47,7 @@
             </button>
           </div>
           <div class="sidebar-content">
-            <ChatList ref="chatListRef" :selected-id="activeConversation?.id" @select="openConversation" />
+            <ChatList ref="chatListRef" :selected-id="activeConversation?.id" :current-user="currentUser" @select="openConversation" />
           </div>
         </div>
 
